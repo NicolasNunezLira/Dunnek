@@ -7,7 +7,7 @@ namespace ProceduralMeshes {
 
 		void Setup(
 			Mesh.MeshData meshData,
-			//Bounds bounds,
+			Bounds bounds,
 			int vertexCount,
 			int indexCount
 		);

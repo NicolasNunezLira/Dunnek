@@ -12,6 +12,8 @@ namespace ProceduralMeshes.Generators {
 
 		public int JobLength => 1;
 
+		public Bounds Bounds => new Bounds(new Vector3(0.5f, 0.5f), new Vector3(1f, 1f));
+
 		public void Execute<S> (int i, S streams) where S : struct, IMeshStreams {
 			var vertex = new Vertex();
 			vertex.normal.z = -1f;

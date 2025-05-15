@@ -3,6 +3,7 @@ using UnityEngine;
 namespace ProceduralMeshes {
 
 	public interface IMeshGenerator {
+        Bounds Bounds {get;}
         int VertexCount {get; }
 
         int IndexCount {get;}
