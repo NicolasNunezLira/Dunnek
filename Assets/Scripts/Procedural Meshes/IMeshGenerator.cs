@@ -10,6 +10,8 @@ namespace ProceduralMeshes {
 
         int JobLength {get;}
 
+        int Resolution {get; set;}
+
 		void Execute<S> (int i, S streams) where S : struct, IMeshStreams;
 	}
 }

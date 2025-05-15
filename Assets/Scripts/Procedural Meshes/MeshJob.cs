@@ -17,9 +17,10 @@ namespace ProceduralMeshes {
 		    public void Execute (int i) => generator.Execute(i, streams);
 
             public static JobHandle ScheduleParallel (
-                Mesh mesh, Mesh.MeshData meshData, JobHandle dependency
+                Mesh mesh, Mesh.MeshData meshData, int resolution, JobHandle dependency
             ) {
                 var job = new MeshJob<G, S>();
+                job.generator.Resolution = resolution;
                 job.streams.Setup(
                     meshData, 
                     mesh.bounds = job.generator.Bounds,

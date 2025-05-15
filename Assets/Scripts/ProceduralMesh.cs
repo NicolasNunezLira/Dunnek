@@ -13,9 +13,19 @@ public class ProceduralMesh : MonoBehaviour {
 		mesh = new Mesh {
 			name = "Procedural Mesh"
 		};
-		GenerateMesh();
+		// GenerateMesh();
 		GetComponent<MeshFilter>().mesh = mesh;
 	}
+
+    void OnValidate() => enabled = true;
+
+    void Update()
+    {
+		GenerateMesh();
+		enabled = false;
+    }
+
+    [SerializeField, Range(1, 10)] int resolution = 1;
 	
 	void GenerateMesh () {
 		Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
@@ -23,7 +33,7 @@ public class ProceduralMesh : MonoBehaviour {
 
 		// MeshJob<SquareGrid, SingleStream>.ScheduleParallel(
 		MeshJob<SquareGrid, MultiStream>.ScheduleParallel(
-			mesh, meshData, default
+			mesh, meshData, resolution, default
 		).Complete();
 
 		Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh);
