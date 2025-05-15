@@ -165,7 +165,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b28c895f723c6954da6c74e69dce2051, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 3
+  meshType: 1
+  resolution: 50
 --- !u!23 &230410521
 MeshRenderer:
   m_ObjectHideFlags: 0
