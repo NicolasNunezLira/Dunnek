@@ -119,6 +119,65 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &370844735
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 370844737}
+  - component: {fileID: 370844736}
+  m_Layer: 0
+  m_Name: Werner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &370844736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370844735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5442314f750179948acc411d5c25cd33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tilePrefab: {fileID: 2521235290032918285, guid: dbd35b86fb619ef48b37dd7cadac50cb, type: 3}
+  width: 128
+  height: 128
+  tileSize: 1
+  depositeHeight: 0.2
+  erosionHeight: 0.1
+  grainsPerStep: 200
+  windDirection: {x: 1, y: 0}
+  scale1: 0.05
+  amplitude1: 10
+  scale2: 0.05
+  amplitude2: 2
+  scale3: 0.15
+  amplitude3: 1
+  updateInterval: 0.1
+--- !u!4 &370844737
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 370844735}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &494623532
 GameObject:
   m_ObjectHideFlags: 0
@@ -467,7 +526,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &917177144
 Transform:
   m_ObjectHideFlags: 0
@@ -477,7 +536,7 @@ Transform:
   m_GameObject: {fileID: 917177142}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.0827, y: -1.32133, z: 3.65154}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -499,12 +558,14 @@ MonoBehaviour:
   width: 100
   height: 100
   tileSize: 1
-  reposeAngle: 0.65
-  grainsPerStep: 20000
+  interval: 0.05
+  nextTime: 0
+  reposeAngle: 0.3
+  grainsPerStep: 100
   noiseScale: 0.1
-  noiseAmplitude: 2
-  depositeHeight: 0.5
-  windDirection: {x: 1, y: 1}
+  noiseAmplitude: 10
+  depositeHeight: 0.2
+  windDirection: {x: 1, y: 0}
 --- !u!1 &1050202012
 GameObject:
   m_ObjectHideFlags: 0
@@ -555,6 +616,64 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2088577251
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2088577253}
+  - component: {fileID: 2088577252}
+  m_Layer: 0
+  m_Name: DuneGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &2088577252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2088577251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc5d82db9a9e4949b01ef5b555ca53f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tilePrefab: {fileID: 2521235290032918285, guid: dbd35b86fb619ef48b37dd7cadac50cb, type: 3}
+  width: 100
+  height: 100
+  tileSize: 1
+  depositeHeight: 0.1
+  erosionHeight: 0.1
+  grainsPerStep: 50
+  windDirection: {x: 1, y: 0}
+  scale1: 0.05
+  amplitude1: 10
+  scale2: 0.05
+  amplitude2: 2
+  scale3: 0.15
+  amplitude3: 1
+--- !u!4 &2088577253
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2088577251}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -564,3 +683,5 @@ SceneRoots:
   - {fileID: 1050202014}
   - {fileID: 494623534}
   - {fileID: 917177144}
+  - {fileID: 2088577253}
+  - {fileID: 370844737}
