@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using Unity.Mathematics;
 
 namespace DunefieldModel
 {
@@ -19,23 +20,29 @@ namespace DunefieldModel
         public float pNoSand = 0.4f;
         public IFindSlope FindSlope;
         protected int mWidth, mLength;
-        protected Random rnd = new Random(123);
+        protected System.Random rnd = new System.Random(123);
         protected bool openEnded = false;
         public const float SHADOW_SLOPE = 0.803847577f;  //  3 * tan(15 degrees)
 
+        public float depositeHeight = 1f;
+        public float erosionHeight = 1f;
 
-        public Model(IFindSlope SlopeFinder, int WidthAcross, int LengthDownwind)
+        public float slopeThreshold = 2f; // slope threshold for deposition
+
+
+        public Model(IFindSlope SlopeFinder, float[,] Elev, int WidthAcross, int LengthDownwind)
         {
             FindSlope = SlopeFinder;
+            this.Elev = Elev;
             this.WidthAcross = (int)Math.Pow(2, (int)Math.Log(WidthAcross, 2));
             this.LengthDownwind = (int)Math.Pow(2, (int)Math.Log(LengthDownwind, 2));
             mWidth = this.WidthAcross - 1;
             mLength = this.LengthDownwind - 1;
-            Elev = new float[WidthAcross, LengthDownwind];
-            Array.Clear(Elev, 0, LengthDownwind * WidthAcross);
+            //Elev = new float[WidthAcross, LengthDownwind];
+            //Array.Clear(Elev, 0, LengthDownwind * WidthAcross);
             Shadow = new float[WidthAcross, LengthDownwind];
             Array.Clear(Shadow, 0, LengthDownwind * WidthAcross);
-            FindSlope.Init(ref Elev, WidthAcross, LengthDownwind);
+            FindSlope.Init(ref this.Elev, WidthAcross, LengthDownwind);
             FindSlope.SetOpenEnded(openEnded);
         }
 
@@ -233,6 +240,12 @@ namespace DunefieldModel
                 w = wSteep;
                 x = xSteep;
             }
+            /*
+            Elev[w, x] -= erosionHeight;
+            if (Elev[w, x] < 0)
+                Elev[w, x] = 0;
+            float h = Elev[w, x];
+            */
             float h = --Elev[w, x];
             float hs;
             if (openEnded && (x == 0))
@@ -279,6 +292,10 @@ namespace DunefieldModel
                 w = wSteep;
                 x = xSteep;
             }
+            /*
+            Elev[w, x] += depositeHeight;
+            float h = Elev[w, x];
+            */
             float h = ++Elev[w, x];
             float hs;
             if (openEnded && (x == 0))
@@ -326,7 +343,6 @@ namespace DunefieldModel
                         if (rnd.NextDouble() < (Elev[w, x] > 0 ? pSand : pNoSand))
                         {
                             depositGrain(w, x);
-                            Debug.WriteLine("Depositing grain at " + w + ", " + x);
                             break;
                         }
                         i = HopLength;

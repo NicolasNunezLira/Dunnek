@@ -149,20 +149,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 2521235290032918285, guid: dbd35b86fb619ef48b37dd7cadac50cb, type: 3}
-  width: 128
-  height: 128
+  width: 32
+  height: 32
   tileSize: 1
-  depositeHeight: 0.2
-  erosionHeight: 0.1
+  depositeHeight: 1
+  erosionHeight: 1
+  slope: 2
   grainsPerStep: 200
-  windDirection: {x: 1, y: 0}
   scale1: 0.05
   amplitude1: 10
   scale2: 0.05
   amplitude2: 2
   scale3: 0.15
   amplitude3: 1
-  updateInterval: 0.1
 --- !u!4 &370844737
 Transform:
   m_ObjectHideFlags: 0
@@ -554,18 +553,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a85895b25d24044da78fab4dbcd6bdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilePrefab: {fileID: 2521235290032918285, guid: dbd35b86fb619ef48b37dd7cadac50cb, type: 3}
-  width: 100
-  height: 100
-  tileSize: 1
-  interval: 0.05
-  nextTime: 0
-  reposeAngle: 0.3
-  grainsPerStep: 100
-  noiseScale: 0.1
-  noiseAmplitude: 10
-  depositeHeight: 0.2
-  windDirection: {x: 1, y: 0}
 --- !u!1 &1050202012
 GameObject:
   m_ObjectHideFlags: 0

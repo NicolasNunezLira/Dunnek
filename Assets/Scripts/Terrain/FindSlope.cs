@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -21,6 +22,8 @@ namespace DunefieldModel {
     public float[,] Elev;
     public int mWidth;
     public int mLength;
+
+    public float slope;
     public bool OpenEnded = false;
 
     public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind) {
@@ -88,6 +91,8 @@ namespace DunefieldModel {
     public int mWidth;
     public int mLength;
     public bool OpenEnded = false;
+
+    public float slope;
     protected Random rnd = new Random(123);
 
     public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind) {
@@ -159,8 +164,11 @@ namespace DunefieldModel {
     public int mWidth;
     public int mLength;
     public bool OpenEnded = false;
+    
+    public float slope;
 
-    public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind) {
+    public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind)
+    {
       this.Elev = Elev;
       mWidth = WidthAcross - 1;
       mLength = LenghtDownwind - 1;
@@ -178,7 +186,9 @@ namespace DunefieldModel {
       wSteep = wCenter; xSteep = xCenter;
       xUp = xDown = 0;
       float h = Elev[wCenter, xCenter];  // first check Von Neumann neighbours
-      if ((!OpenEnded || (xCenter > 0)) && ((Elev[wCenter, xUp = (xCenter - 1) & mLength] - h) >= 2)) {
+      Debug.WriteLine((Elev[wCenter, xUp = (xCenter - 1) & mLength] - h) >= 2);
+      if ((!OpenEnded || (xCenter > 0)) && ((Elev[wCenter, xUp = (xCenter - 1) & mLength] - h) >= 2))
+      {
         xSteep = xUp; return 2;
       }
       if ((Elev[wRight = (wCenter + 1) & mWidth, xCenter] - h) >= 2) {
@@ -218,7 +228,9 @@ namespace DunefieldModel {
       wSteep = wCenter; xSteep = xCenter;
       xUp = xDown = 0;
       float h = Elev[wCenter, xCenter];
-      if ((!OpenEnded || (xCenter != mLength)) && ((h - Elev[wCenter, xDown = (xCenter + 1) & mLength]) >= 2)) {
+      Debug.WriteLine((h - Elev[wCenter, xDown = (xCenter + 1) & mLength]));
+      if ((!OpenEnded || (xCenter != mLength)) && ((h - Elev[wCenter, xDown = (xCenter + 1) & mLength]) >= 2))
+      {
         xSteep = xDown; return 2;
       }
       if ((h - Elev[wRight = (wCenter + 1) & mWidth, xCenter]) >= 2) {
@@ -260,6 +272,8 @@ namespace DunefieldModel {
     public float[,] Elev;
     public int mWidth;
     public int mLength;
+
+    public float slope;
     public bool OpenEnded = false;
     protected Random rnd = new Random(123);
 
@@ -370,6 +384,8 @@ namespace DunefieldModel {
     public float[,] Elev;
     public int mWidth;
     public int mLength;
+
+    public float slope;
     public bool OpenEnded = false;
 
     public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind) {
@@ -448,6 +464,8 @@ namespace DunefieldModel {
     public int mWidth;
     public int mLength;
     public bool OpenEnded = false;
+
+    public float slope;
     protected Random rnd = new Random(123);
 
     public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind) {
