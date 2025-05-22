@@ -28,7 +28,7 @@ public class WernerModelTest : MonoBehaviour
     private DuneCell[,] duneGrid;
     //private bool[,] isShadowed;
     private Model duneModel;
-    private FindSlopeMooreDeterministic slopeFinder;
+    private FindSlopeVonNeumannDeterministic slopeFinder;
 
     void Start()
     {
@@ -41,8 +41,9 @@ public class WernerModelTest : MonoBehaviour
                 Elev[x, z] = duneGrid[x, z].height;
             }
         }
-        slopeFinder = new FindSlopeMooreDeterministic();
-        duneModel = new Model(slopeFinder, Elev, width, height);
+        slopeFinder = new FindSlopeVonNeumannDeterministic();
+        duneModel = new Model(slopeFinder, Elev, width, height, slope);
+        duneModel.shadowInit();
 
 
         //InvokeRepeating(nameof(Update), 0f, updateInterval);
@@ -67,32 +68,11 @@ public class WernerModelTest : MonoBehaviour
                 duneGrid[x, z].UpdateVisual(tileSize);
             }
         }
-
-        /*
-        duneModel.shadowInit();
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int z = 0; z < height; z++)
-            {
-                duneGrid[x, z].shadow = duneModel.Shadow[x, z];
-                
-                if (duneGrid[x, z].shadow > 0)
-                {
-                    Debug.Log($"Sombra en {x} {z} = {duneModel.Shadow[x, z]}");
-                }
-                
-            }
-        }
-        */
-
-
-
     }
 
     void Update()
     {
-        duneModel.Tick();
+        duneModel.Tick(grainsPerStep, erosionHeight, depositeHeight);
 
         for (int x = 0; x < width; x++)
         {

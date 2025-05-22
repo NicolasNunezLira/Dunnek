@@ -29,11 +29,16 @@ namespace DunefieldModel
 
         public float slopeThreshold = 2f; // slope threshold for deposition
 
+        public int grainsPerStep;
 
-        public Model(IFindSlope SlopeFinder, float[,] Elev, int WidthAcross, int LengthDownwind)
+        public float slope;
+
+
+        public Model(IFindSlope SlopeFinder, float[,] Elev, int WidthAcross, int LengthDownwind, float slope)
         {
             FindSlope = SlopeFinder;
             this.Elev = Elev;
+            this.slope = slope;
             this.WidthAcross = (int)Math.Pow(2, (int)Math.Log(WidthAcross, 2));
             this.LengthDownwind = (int)Math.Pow(2, (int)Math.Log(LengthDownwind, 2));
             mWidth = this.WidthAcross - 1;
@@ -42,7 +47,7 @@ namespace DunefieldModel
             //Array.Clear(Elev, 0, LengthDownwind * WidthAcross);
             Shadow = new float[WidthAcross, LengthDownwind];
             Array.Clear(Shadow, 0, LengthDownwind * WidthAcross);
-            FindSlope.Init(ref this.Elev, WidthAcross, LengthDownwind);
+            FindSlope.Init(ref this.Elev, WidthAcross, LengthDownwind, this.slope);
             FindSlope.SetOpenEnded(openEnded);
         }
 
@@ -230,7 +235,7 @@ namespace DunefieldModel
             return errors;
         }
 
-        public virtual void erodeGrain(int w, int x)
+        public virtual void erodeGrain(int w, int x, float erosionHeight = 1f)
         {
             int wSteep, xSteep;
             while (FindSlope.Upslope(w, x, out wSteep, out xSteep) >= 2)
@@ -240,13 +245,13 @@ namespace DunefieldModel
                 w = wSteep;
                 x = xSteep;
             }
-            /*
+            ///*
             Elev[w, x] -= erosionHeight;
             if (Elev[w, x] < 0)
                 Elev[w, x] = 0;
             float h = Elev[w, x];
-            */
-            float h = --Elev[w, x];
+            //*/
+            //float h = --Elev[w, x];
             float hs;
             if (openEnded && (x == 0))
                 hs = h;
@@ -282,7 +287,7 @@ namespace DunefieldModel
             }
         }
 
-        public virtual void depositGrain(int w, int x)
+        public virtual void depositGrain(int w, int x, float depositeHeight = 1f)
         {
             int xSteep, wSteep;
             while (FindSlope.Downslope(w, x, out wSteep, out xSteep) >= 2)
@@ -292,11 +297,11 @@ namespace DunefieldModel
                 w = wSteep;
                 x = xSteep;
             }
-            /*
+            ///*
             Elev[w, x] += depositeHeight;
             float h = Elev[w, x];
-            */
-            float h = ++Elev[w, x];
+            //*/
+            //float h = ++Elev[w, x];
             float hs;
             if (openEnded && (x == 0))
                 hs = h;
@@ -315,15 +320,17 @@ namespace DunefieldModel
             }
         }
 
-        public virtual void Tick()
+        public virtual void Tick(int grainsPerStep, float erosionHeight = 1f, float depositeHeight = 1f)
         {
-            for (int subticks = LengthDownwind * WidthAcross; subticks > 0; subticks--)
+            //for (int subticks = LengthDownwind * WidthAcross; subticks > 0; subticks--)
+            //Debug.WriteLine($"grainsPerStep: {grainsPerStep}");
+            for (int subticks = grainsPerStep; subticks > 0; subticks--)
             {
                 int x = rnd.Next(0, LengthDownwind);
                 int w = rnd.Next(0, WidthAcross);
                 if (Elev[w, x] == 0) continue;
                 if (Shadow[w, x] > 0) continue;
-                erodeGrain(w, x);
+                erodeGrain(w, x, erosionHeight);
                 int i = HopLength;
                 while (true)
                 {
@@ -335,14 +342,14 @@ namespace DunefieldModel
                     }
                     if (Shadow[w, x] > 0)
                     {
-                        depositGrain(w, x);
+                        depositGrain(w, x, depositeHeight);
                         break;
                     }
                     if (--i <= 0)
                     {
                         if (rnd.NextDouble() < (Elev[w, x] > 0 ? pSand : pNoSand))
                         {
-                            depositGrain(w, x);
+                            depositGrain(w, x, depositeHeight);
                             break;
                         }
                         i = HopLength;

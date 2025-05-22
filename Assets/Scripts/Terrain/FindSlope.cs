@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using ue=UnityEngine;
 
 namespace DunefieldModel {
 
@@ -11,7 +12,7 @@ namespace DunefieldModel {
   // anomolies beyond that, we can use >= or <=.
 
   public interface IFindSlope {
-    void Init(ref float[,] Elev, int WidthAcross, int LengthDownwind);
+    void Init(ref float[,] Elev, int WidthAcross, int LengthDownwind, float slope);
     void SetOpenEnded(bool NewState);
     int Upslope(int w, int x, out int wSteep, out int xSteep);
     int Downslope(int w, int x, out int wSteep, out int xSteep);
@@ -26,8 +27,9 @@ namespace DunefieldModel {
     public float slope;
     public bool OpenEnded = false;
 
-    public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind) {
+    public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind, float slope) {
       this.Elev = Elev;
+      this.slope = slope;
       mWidth = WidthAcross - 1;
       mLength = LenghtDownwind - 1;
     }
@@ -43,16 +45,17 @@ namespace DunefieldModel {
       int wLeft, wRight, xUp, xDown;
       wSteep = wCenter; xSteep = xCenter;
       float h = Elev[wCenter, xCenter];
-      if ((!OpenEnded || (xCenter > 0)) && ((Elev[wCenter, xUp = (xCenter - 1) & mLength] - h) >= 2)) {
+      if ((!OpenEnded || (xCenter > 0)) && ((Elev[wCenter, xUp = (xCenter - 1) & mLength] - h) >= slope))
+      {
         xSteep = xUp; return 2;
       }
-      if ((Elev[wRight = (wCenter + 1) & mWidth, xCenter] - h) >= 2) {
+      if ((Elev[wRight = (wCenter + 1) & mWidth, xCenter] - h) >= slope) {
         wSteep = wRight; return 2;
       }
-      if ((Elev[wLeft = (wCenter - 1) & mWidth, xCenter] - h) >= 2) {
+      if ((Elev[wLeft = (wCenter - 1) & mWidth, xCenter] - h) >= slope) {
         wSteep = wLeft; return 2;
       }
-      if ((!OpenEnded || (xCenter != mLength)) && ((Elev[wCenter, xDown = (xCenter + 1) & mLength] - h) >= 2)) {
+      if ((!OpenEnded || (xCenter != mLength)) && ((Elev[wCenter, xDown = (xCenter + 1) & mLength] - h) >= slope)) {
         xSteep = xDown; return 2;
       }
       return 0;
@@ -65,16 +68,17 @@ namespace DunefieldModel {
       int wLeft, wRight, xUp, xDown;
       wSteep = wCenter; xSteep = xCenter;
       float h = Elev[wCenter, xCenter];
-      if ((!OpenEnded || (xCenter != mLength)) && ((h - Elev[wCenter, xDown = (xCenter + 1) & mLength]) >= 2)) {
+      if ((!OpenEnded || (xCenter != mLength)) && ((h - Elev[wCenter, xDown = (xCenter + 1) & mLength]) >= slope))
+      {
         xSteep = xDown; return 2;
       }
-      if ((h - Elev[wRight = (wCenter + 1) & mWidth, xCenter]) >= 2) {
+      if ((h - Elev[wRight = (wCenter + 1) & mWidth, xCenter]) >= slope) {
         wSteep = wRight; return 2;
       }
-      if ((h - Elev[wLeft = (wCenter - 1) & mWidth, xCenter]) >= 2) {
+      if ((h - Elev[wLeft = (wCenter - 1) & mWidth, xCenter]) >= slope) {
         wSteep = wLeft; return 2;
       }
-      if ((!OpenEnded || (xCenter > 0)) && ((h - Elev[wCenter, xUp = (xCenter - 1) & mLength]) >= 2)) {
+      if ((!OpenEnded || (xCenter > 0)) && ((h - Elev[wCenter, xUp = (xCenter - 1) & mLength]) >= slope)) {
         xSteep = xUp; return 2;
       }
       return 0;
@@ -82,11 +86,13 @@ namespace DunefieldModel {
   }
   #endregion
 
+  /*
   #region Von Neumann Stochastic
   //    X
   //  X   X
   //    X
-  public class FindSlopeVonNeumannStochastic : IFindSlope {
+  public class FindSlopeVonNeumannStochastic : IFindSlope
+  {
     public float[,] Elev;
     public int mWidth;
     public int mLength;
@@ -95,17 +101,20 @@ namespace DunefieldModel {
     public float slope;
     protected Random rnd = new Random(123);
 
-    public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind) {
+    public void Init(ref float[,] Elev, int WidthAcross, int LenghtDownwind)
+    {
       this.Elev = Elev;
       mWidth = WidthAcross - 1;
       mLength = LenghtDownwind - 1;
     }
 
-    public void SetOpenEnded(bool NewState) {
+    public void SetOpenEnded(bool NewState)
+    {
       OpenEnded = NewState;
     }
 
-    public int Upslope(int wCenter, int xCenter, out int wSteep, out int xSteep) {
+    public int Upslope(int wCenter, int xCenter, out int wSteep, out int xSteep)
+    {
       int[] rises = new int[4];
       int wLeft, wRight, xUp, xDown, nRises;
       wSteep = wCenter; xSteep = xCenter;
@@ -121,16 +130,18 @@ namespace DunefieldModel {
         rises[nRises++] = 3;
       if (nRises == 0)
         return 0;
-      switch (rises[rnd.Next(0, nRises)]) {
-        case 0: xSteep = xUp;    return 2;
+      switch (rises[rnd.Next(0, nRises)])
+      {
+        case 0: xSteep = xUp; return 2;
         case 1: wSteep = wRight; return 2;
-        case 2: xSteep = xDown;  return 2;
-        case 3: wSteep = wLeft;  return 2;
+        case 2: xSteep = xDown; return 2;
+        case 3: wSteep = wLeft; return 2;
       }
       return 0;
     }
 
-    public int Downslope(int wCenter, int xCenter, out int wSteep, out int xSteep) {
+    public int Downslope(int wCenter, int xCenter, out int wSteep, out int xSteep)
+    {
       int[] drops = new int[4];
       int wLeft, wRight, xUp, xDown, nDrops;
       wSteep = wCenter; xSteep = xCenter;
@@ -146,11 +157,12 @@ namespace DunefieldModel {
         drops[nDrops++] = 3;
       if (nDrops == 0)
         return 0;
-      switch (drops[rnd.Next(0, nDrops)]) {
-        case 0: xSteep = xUp;    return 2;
+      switch (drops[rnd.Next(0, nDrops)])
+      {
+        case 0: xSteep = xUp; return 2;
         case 1: wSteep = wRight; return 2;
-        case 2: xSteep = xDown;  return 2;
-        case 3: wSteep = wLeft;  return 2;
+        case 2: xSteep = xDown; return 2;
+        case 3: wSteep = wLeft; return 2;
       }
       return 0;
     }
@@ -602,5 +614,6 @@ namespace DunefieldModel {
     }
   }
   #endregion
+  */
 
 }

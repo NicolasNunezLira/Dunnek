@@ -149,13 +149,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 2521235290032918285, guid: dbd35b86fb619ef48b37dd7cadac50cb, type: 3}
-  width: 32
-  height: 32
+  width: 128
+  height: 128
   tileSize: 1
-  depositeHeight: 1
-  erosionHeight: 1
-  slope: 2
-  grainsPerStep: 200
+  depositeHeight: 0.1
+  erosionHeight: 0.1
+  slope: 0.2
+  grainsPerStep: 8192
   scale1: 0.05
   amplitude1: 10
   scale2: 0.05
