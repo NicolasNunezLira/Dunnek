@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using Unity.Mathematics;
+using ue=UnityEngine;
 
 namespace DunefieldModel_8D
 {
@@ -191,7 +192,7 @@ namespace DunefieldModel_8D
 
         public void shadowInit()
         {
-            shadowCheck(false, dx, dy);
+            shadowCheck(true, dx, dy);
         }
         protected int shadowCheck(bool ReportErrors, int dx, int dy)
         {

@@ -48,8 +48,8 @@ public class WernerModelTest_8D : MonoBehaviour
         }
         slopeFinder = new FindSlopeMooreDeterministic();
         duneModel = new Model8D(slopeFinder, Elev, width, height, slope, dx, dy);
-        duneModel.SetOpenEnded(true);
-        duneModel.UsesSandProbabilities();
+        //duneModel.SetOpenEnded(true);
+        //duneModel.UsesSandProbabilities();
         duneModel.shadowInit();
 
 
