@@ -54,7 +54,7 @@ public class DualMesh : MonoBehaviour
 
     private GameObject terrainGO, sandGO;
 
-    private ModelDualMesh duneModel;
+    private ModelDM duneModel;
     private FindSlopeMooreDeterministic slopeFinder;
 
     void Start()
@@ -73,16 +73,16 @@ public class DualMesh : MonoBehaviour
         float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.5f;  // puedes ajustar el "+ 0.5f"
         terrainGO.transform.position = new Vector3(0f, -offset, 0f);
 
-        Debug.Log("Min terrain:" + GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
-        Debug.Log("Min Sand:" + sandMinY);
+        //Debug.Log("Min terrain:" + GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
+        //Debug.Log("Min Sand:" + sandMinY);
 
         // Initialize the dune model
         sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
         terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
         slopeFinder = new FindSlopeMooreDeterministic();
-        duneModel = new ModelDualMesh(slopeFinder, sandElev, ref terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y);
+        duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y);
         duneModel.shadowInit();
-        duneModel.UsesSandProbabilities();
+        //duneModel.UsesSandProbabilities();
     }
 
     void Update()

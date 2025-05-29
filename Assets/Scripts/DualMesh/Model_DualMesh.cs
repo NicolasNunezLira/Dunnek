@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using Unity.Collections;
 using Unity.Mathematics;
 using ue=UnityEngine;
 
@@ -11,8 +12,10 @@ namespace DunefieldModel_DualMesh
 {
     public class ModelDualMesh
     {
-        public float[,] Elev, terrainElev;
-        public float[,] Shadow;
+        public float[,] sandElev, terrainElev, Elev;
+        public float[,] terrainShadow, Shadow;
+
+        public bool[,] isErodable;
         public int Width = 0;    // across wind
         public int Length = 0;
         public int HopLength = 1;
@@ -39,12 +42,33 @@ namespace DunefieldModel_DualMesh
 
         private float[,] fixedShadow = null;
 
+        private float offSet;
 
-        public ModelDualMesh(IFindSlope SlopeFinder, float[,] Elev, ref float[,] terrainElev, int Width, int Length, float slope, int dx, int dy)
+
+        public ModelDualMesh(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int Width, int Length, float slope, int dx, int dy)
         {
             FindSlope = SlopeFinder;
-            this.Elev = Elev;
+            this.sandElev = sandElev;
             this.terrainElev = terrainElev;
+            // Búsqueda del offset y vertices erosionables iniciales
+            offSet = 0;
+            for (int x = 0; x < sandElev.GetLength(0); x++)
+            {
+                for (int y = 0; y < sandElev.GetLength(1); y++)
+                {
+                    float h = sandElev[x, y] - terrainElev[x, y];
+                    isErodable[x, y] = h >= 0;
+                    if (isErodable[x,y]) { offSet = Math.Min(offSet, sandElev[x,y]); };
+                }
+            }
+            // áltura de arena sobre el offset
+            for (int x = 0; x < sandElev.GetLength(0); x++)
+            {
+                for (int y = 0; y < sandElev.GetLength(1); y++)
+                {
+                    Elev[x, y] = isErodable[x, y] ? sandElev[x, y] : terrainElev[x,y];
+                }
+            }
             this.slope = slope;
             this.dx = dx;
             this.dy = dy;
@@ -124,6 +148,7 @@ namespace DunefieldModel_DualMesh
             return sum;
         }
 
+        /*
         public float[] Profile(int WidthPosition)
         {
             float[] prof = new float[Length];
@@ -131,82 +156,64 @@ namespace DunefieldModel_DualMesh
                 prof[x] = Elev[WidthPosition, x];
             return prof;
         }
+        */
 
         #region Sombras
         public void shadowInit()
         {
-            shadowCheck(true, dx, dy);
+            shadowCheck(false, dx, dy);
         }
 
-        private float[,] ComputeTaperedShadow(float[,] baseHeightMap, int dx, int dy)
+        protected void computeFixedTerrainShadow(int dx, int dy)
         {
-            int height = baseHeightMap.GetLength(0);
-            int width = baseHeightMap.GetLength(1);
-            float[,] shadow = new float[height, width];
-
-            // Dirección ortogonal al viento (para estrechar lateralmente)
-            int orthX = -dy;
-            int orthY = dx;
+            int height = terrainElev.GetLength(0);
+            int width = terrainElev.GetLength(1);
+            terrainShadow = new float[height, width];
+                    
 
             for (int w = 0; w < height; w++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float h = baseHeightMap[w, x];
-                    if (h <= 0) continue;
+                    float h = (terrainElev[w, x] >= sandElev[w, x]) ? terrainElev[w, x] : 0f;
 
-                    // Posición inicial de la sombra
+                    if (h <= 0) continue; // No proyecta sombra si no hay obstáculo
+
+                    float hs = h;
                     int wNext = w + dy;
                     int xNext = x + dx;
 
-                    float hs = h;
-                    int spread = 0;
-
-                    while (IsInside(wNext, xNext, height, width) && hs >= baseHeightMap[wNext, xNext])
+                    while (IsInside(wNext, xNext, height, width))
                     {
-                        // Cada paso, estrecha el ancho de la sombra lateralmente
-                        int lateralRange = ue.Mathf.Max(1, 3 - spread / 8); // se va achicando cada ~8 pasos
-
-                        for (int offset = -lateralRange; offset <= lateralRange; offset++)
-                        {
-                            int wLateral = wNext + offset * orthY;
-                            int xLateral = xNext + offset * orthX;
-
-                            if (IsInside(wLateral, xLateral, height, width))
-                            {
-                                // Registrar sombra con altura descendiente
-                                shadow[wLateral, xLateral] = ue.Mathf.Max(shadow[wLateral, xLateral], hs);
-                            }
-                        }
+                        // Si la sombra proyectada aún está sobre la arena, se guarda
+                        if (hs > sandElev[wNext, xNext])
+                            terrainShadow[wNext, xNext] = Math.Max(terrainShadow[wNext, xNext], hs);
+                        else
+                            break; // La sombra "choca" con la arena
 
                         hs -= SHADOW_SLOPE;
-                        spread++;
+
+                        // Cortar si se baja del terreno
+                        if (hs <= 0)
+                            break;
+
                         wNext += dy;
                         xNext += dx;
                     }
                 }
             }
 
-            // Evitar ambigüedad si sombra iguala altura
-            for (int w = 0; w < height; w++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    if (shadow[w, x] == baseHeightMap[w, x])
-                        shadow[w, x] = 0;
-                }
-            }
-
-            return shadow;
+            //return Shadow;
         }
+
 
 
         protected int shadowCheck(bool ReportErrors, int dx, int dy)
         {
-            if (fixedShadow == null)
+            if (terrainShadow == null)
             {
-                fixedShadow = ComputeTaperedShadow(terrainElev, dx, dy); // solo 1 vez
-                Shadow = (float[,])fixedShadow.Clone(); // Inicializar sombra activa
+                computeFixedTerrainShadow(dx, dy); // solo 1 vez
+                Shadow = (float[,])terrainShadow.Clone(); // Inicializar sombra activa
                 if (ReportErrors)
                     Console.WriteLine("Fixed shadow computed.");
                 return 1;
@@ -241,13 +248,14 @@ namespace DunefieldModel_DualMesh
             int width = Elev.GetLength(1);
 
             // Dirección ortogonal para expansión lateral opcional
+            
             int orthX = -dy;
             int orthY = dx;
-
+            
             int w = startW;
             int x = startX;
 
-            float sourceHeight = ue.Mathf.Max(Elev[w, x], terrainElev[w, x]); // la mayor de ambas
+            float sourceHeight = ue.Mathf.Max(sandElev[w, x], terrainElev[w, x]); // la mayor de ambas
 
             float hs = sourceHeight;
             int spread = 0;
@@ -395,14 +403,14 @@ namespace DunefieldModel_DualMesh
                 x = xSteep;
             }
 
-            // ⚠️ Evitar erosión si hay obstáculo del terreno fijo
-            if (terrainElev[w, x] >= Elev[w, x]) return;
+            // Evitar erosión si hay obstáculo del terreno fijo
+            if (terrainElev[w, x] >= sandElev[w, x]) return;
 
             // Erosión
-            Elev[w, x] -= erosionHeight;
-            if (Elev[w, x] < 0) Elev[w, x] = 0;
+            sandElev[w, x] -= erosionHeight;
+            if (sandElev[w, x] < terrainElev[w,x]) sandElev[w, x] = terrainElev[w,x];
 
-            float h = Elev[w, x];
+            float h = sandElev[w, x];
             float hs;
 
             int wPrev = w - dy;
@@ -421,13 +429,14 @@ namespace DunefieldModel_DualMesh
 
             while (true)
             {
-                h = Elev[wNext, xNext];
+                h = sandElev[wNext, xNext];
 
-                // ⚠️ Detener sombra si hay obstáculo por terreno fijo
-                if (hs < h || terrainElev[wNext, xNext] > Elev[wNext, xNext])
+                // 
+                // Detener sombra si hay obstáculo por terreno fijo
+                if (hs < h || terrainElev[wNext, xNext] > sandElev[wNext, xNext])
                     break;
 
-                Shadow[wNext, xNext] = (hs == h) ? 0 : hs;
+                Shadow[wNext, xNext] = (hs <= h) ? 0 : hs;
                 hs -= SHADOW_SLOPE;
 
                 wNext += dy;
@@ -448,7 +457,7 @@ namespace DunefieldModel_DualMesh
 
                 hs = h - SHADOW_SLOPE;
 
-                // ⚠️ Verificar si ya no se puede proyectar más
+                // Verificar si ya no se puede proyectar más
                 if (Shadow[wNext, xNext] > hs || terrainElev[wNext, xNext] > Elev[wNext, xNext])
                     break;
 
@@ -526,7 +535,7 @@ namespace DunefieldModel_DualMesh
                     (wSteep == mWidth && w == 0) || (wSteep == 0 && w == mWidth)))
                     break;
 
-                // ⚠️ No continuar si el terreno fijo está más alto
+                // No continuar si el terreno fijo está más alto
                 if (terrainElev[wSteep, xSteep] >= Elev[wSteep, xSteep])
                     break;
 
@@ -534,7 +543,7 @@ namespace DunefieldModel_DualMesh
                 x = xSteep;
             }
 
-            // ⚠️ Evitar depósito si hay terreno fijo encima
+            // Evitar depósito si hay terreno fijo encima
             if (terrainElev[w, x] > Elev[w, x] + depositeHeight)
                 return;
 
@@ -553,7 +562,7 @@ namespace DunefieldModel_DualMesh
 
             while (hs >= (h = Elev[w, x]))
             {
-                // ⚠️ Detener sombra si hay obstáculo
+                // Detener sombra si hay obstáculo
                 if (terrainElev[w, x] > Elev[w, x])
                     break;
 
@@ -620,7 +629,7 @@ namespace DunefieldModel_DualMesh
             //shadowCheck(true, dx, dy);
         }
         */
-        public virtual void Tick(int grainsPerStep, int dx, int dy, float erosionHeight = 1f, float depositeHeight = 1f)
+        public virtual void Tick(int grainsPerStep, int dx, int dy, float erosionHeight, float depositeHeight)
         {
             for (int subticks = grainsPerStep; subticks > 0; subticks--)
             {
