@@ -60,54 +60,47 @@ public class DualMesh : MonoBehaviour
     void Start()
     {
         // Creación del terreno
-        terrainGO = CreateMeshObject("TerrainMesh", terrainMaterial, GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3));
+        terrainGO = CreateMeshObject("TerrainMesh", terrainMaterial,
+            GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3));
         terrainGO.transform.parent = this.transform;
 
-        sandGO = CreateMeshObject("SandMesh", sandMaterial, GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3));
+        sandGO = CreateMeshObject("SandMesh", sandMaterial,
+            GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3));
         sandGO.transform.parent = this.transform;
 
         float terrainMinY = GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
         float terrainMaxY = GetMaxYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
         float sandMinY = GetMinYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
+        float sandMaxY = GetMaxYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
 
-        float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.5f;  // puedes ajustar el "+ 0.5f"
+        float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.005f*(terrainMaxY - terrainMinY);  // puedes ajustar el "+ 0.5f"
         terrainGO.transform.position = new Vector3(0f, -offset, 0f);
 
-        //Debug.Log("Min terrain:" + GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
-        //Debug.Log("Min Sand:" + sandMinY);
+        Debug.Log("Min terrain:" + terrainMinY);
+        Debug.Log("Max terrain:" + terrainMaxY);
+        Debug.Log("Min Sand:" + sandMinY);
+        Debug.Log("Max Sand:" + sandMaxY);
 
         // Initialize the dune model
         sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
         terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
         slopeFinder = new FindSlopeMooreDeterministic();
-        duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y);
+        duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+            heightVariation, heightVariation);
         duneModel.shadowInit();
         //duneModel.UsesSandProbabilities();
     }
 
+    
     void Update()
     {
         duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
         //Elev = SmoothHeights(Elev, 4, 4);
 
-        Mesh mesh = sandGO.GetComponent<MeshFilter>().mesh;
-        Vector3[] vertices = mesh.vertices;
-        Vector3[] vertices2 = new Vector3[(int)vertices.Length];
-
-        for (int y = 0; y <= resolution; y++)
-        {
-            for (int x = 0; x <= resolution; x++)
-            {
-                int index = y * resolution + x;
-                float h = sandElev[x, y];
-
-                vertices2[index] = new Vector3(vertices[index].x, h, vertices[index].z);
-            }
-        }
-
-        mesh.vertices = vertices2;
-        mesh.RecalculateNormals();
+        //Mesh mesh = sandGO.GetComponent<MeshFilter>().mesh;
+        ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
     }
+    
 
     // Funciones 
 
@@ -118,16 +111,16 @@ public class DualMesh : MonoBehaviour
         Vector3[] vertices = new Vector3[(resolution + 1) * (resolution + 1)];
         Vector2[] uv = new Vector2[vertices.Length];
         int[] triangles = new int[resolution * resolution * 6];
-        float[,] Elev = new float[resolution + 1, resolution + 1];
+        //float[,] Elev = new float[resolution + 1, resolution + 1];
 
         for (int i = 0, z = 0; z <= resolution; z++)
         {
             for (int x = 0; x <= resolution; x++, i++)
             {
                 float xPos = (float)x / resolution * size;
-                float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);// / resolution * size;
+                float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);/// resolution * size;
                 float zPos = (float)z / resolution * size;
-                Elev[x, z] = yPos;
+                //Elev[x, z] = yPos;
                 vertices[i] = new Vector3(xPos, yPos, zPos);
                 uv[i] = new Vector2((float)x / resolution,
                     (float)z / resolution);
