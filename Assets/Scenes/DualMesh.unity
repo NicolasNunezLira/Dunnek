@@ -181,9 +181,9 @@ MonoBehaviour:
   sandAmplitude2: 0.7
   sandScale3: 0.1
   sandAmplitude3: 0.3
-  heightVariation: 1e-10
-  slope: 0.2
-  windDirection: {x: 1, y: 0}
+  heightVariation: 0.01
+  slope: 0.02
+  windDirection: {x: 2, y: 1}
   grainsPerStep: 5000
 --- !u!23 &164671254
 MeshRenderer:

@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Text;
 using Unity.Collections;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using ue=UnityEngine;
 
 namespace DunefieldModel_DualMesh
@@ -13,10 +14,9 @@ namespace DunefieldModel_DualMesh
     public class ModelDM
     {
         #region Variables
-        public float[,] sandElev, terrainElev, surfaceElev;
+        public float[,] sandElev, terrainElev;
         public float[,] Shadow;
 
-        public bool[,] isErodable;
         public int Width = 0;    // across wind
         public int Length = 0;
         public int HopLength = 1;
@@ -25,29 +25,27 @@ namespace DunefieldModel_DualMesh
         public float pNoSand = 0.4f;
         public IFindSlope FindSlope;
         protected int mWidth, mLength;
-        protected System.Random rnd = new System.Random(123);
+        protected System.Random rnd = new System.Random(42);
         protected bool openEnded = false;
-        public const float SHADOW_SLOPE = 10;  //  3 * tan(15 degrees) \approx 0.803847577f
+        public const float SHADOW_SLOPE =  0.803847577f;  //  3 * tan(15 degrees) \approx 0.803847577f
 
-        public float depositeHeight;
-        public float erosionHeight;
+        public float depositeHeight = .1f;
+        public float erosionHeight = .1f;
 
-        public float slopeThreshold = 2f; // slope threshold for deposition
+        public float slopeThreshold = .2f; // slope threshold for deposition
 
         public int grainsPerStep;
 
         public float slope;
 
 
-        public int dx, dy;
+        public int dx, dz;
 
-        private float[,] fixedShadow = null;
-
-        //private float offSet;
+        private float erosionH, depositeH, aux;
         #endregion
 
         #region Init model
-        public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int Width, int Length, float slope, int dx, int dy,
+        public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int Width, int Length, float slope, int dx, int dz,
             float depositeHeight, float erosionHeight)
         {
             FindSlope = SlopeFinder;
@@ -55,62 +53,64 @@ namespace DunefieldModel_DualMesh
             this.terrainElev = terrainElev;
             this.depositeHeight = depositeHeight;
             this.erosionHeight = erosionHeight;
-            // Búsqueda del offset y vertices erosionables iniciales
-            //offSet = 0;
-            surfaceElev = new float[Width, Length];
-            isErodable = new bool[Width, Length];
-            for (int x = 0; x < sandElev.GetLength(0); x++)
-            {
-                for (int y = 0; y < sandElev.GetLength(1); y++)
-                {
-                    //float h = sandElev[x, y] - terrainElev[x, y];
-                    isErodable[x, y] = sandElev[x,y] > terrainElev[x,y];
-                    //if (isErodable[x, y]) { offSet = Math.Min(offSet, sandElev[x, y]); };
-                    surfaceElev[x, y] = Math.Max(sandElev[x, y], terrainElev[x, y]);
-                }
-            }
             this.slope = slope;
             this.dx = dx;
-            this.dy = dy;
-            this.Width = (int)Math.Pow(2, (int)Math.Log(Width, 2));
-            this.Length = (int)Math.Pow(2, (int)Math.Log(Length, 2));
+            this.dz = dz;
+            this.Width = Width;
+            this.Length = Length;
             mWidth = this.Width - 1;
             mLength = this.Length - 1;
             Shadow = new float[Width, Length];
             Array.Clear(Shadow, 0, Length * Width);
             shadowInit();
-            FindSlope.Init(ref surfaceElev, Width, Length, this.slope);
+            FindSlope.Init(ref sandElev, ref terrainElev, this.Width, this.Length, this.slope);
             FindSlope.SetOpenEnded(openEnded);
         }
         #endregion
 
+        public virtual bool UsesHopLength()
+        {
+            return true;  // does this model use the user-provided value of hop length?
+        }
+
+        public virtual bool UsesSandProbabilities()
+        {
+            return true;  // does this model use the user-provided values of sand depositing probabilities?
+        }
+
+        public void SetOpenEnded(bool NewState)
+        {  // 'true' means dunefield is open-ended (no wrapping)
+            openEnded = NewState;
+            FindSlope.SetOpenEnded(openEnded);
+        }
+
         #region Shadows
         public void shadowInit()
         {
-            shadowCheck(false, dx, dy);
+            shadowCheck(false, dx, dz);
         }
         protected int shadowCheck(bool ReportErrors, int dx, int dy)
         {
             float[,] newShadow = new float[Shadow.GetLength(0), Shadow.GetLength(1)];
             Array.Clear(newShadow, 0, newShadow.Length);
 
-            int height = surfaceElev.GetLength(0);
-            int width = surfaceElev.GetLength(1);
+            int height = sandElev.GetLength(0);
+            int width = sandElev.GetLength(1);
             int errors = 0;
 
             for (int w = 0; w < height; w++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float h = surfaceElev[w, x];
-                    if (h == 0) continue;
+                    float h = Math.Max(sandElev[w, x], terrainElev[w, x]);
+                    if (h <= 0) continue;
 
                     int wNext = w + dy;
                     int xNext = x + dx;
 
                     float hs = h;
 
-                    while (IsInside(wNext, xNext, height, width) && hs >= surfaceElev[wNext, xNext])
+                    while (IsInside(wNext, xNext, height, width) && hs >= Math.Max(sandElev[wNext, xNext], terrainElev[wNext, xNext]))
                     {
                         newShadow[wNext, xNext] = hs;
                         hs -= SHADOW_SLOPE;
@@ -125,7 +125,7 @@ namespace DunefieldModel_DualMesh
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (newShadow[w, x] <= surfaceElev[w, x])
+                    if (newShadow[w, x] <= Math.Max(sandElev[w, x], terrainElev[w, x]))
                         newShadow[w, x] = 0;
                 }
             }
@@ -152,31 +152,26 @@ namespace DunefieldModel_DualMesh
         #endregion
 
         #region Erode Grain
-        public virtual void erodeGrain(int w, int x, int dx, int dy, float erosionHeight)
+        public virtual float erodeGrain(int w, int x, int dx, int dy, float erosionHeight)
         {
             int wSteep, xSteep;
 
-            while (FindSlope.Upslope(w, x, out wSteep, out xSteep) >= 2)
+            while (FindSlope.Upslope(w, x, dx, dy, out wSteep, out xSteep) >= 2)
             {
                 // Si se sale del dominio en campo abierto
                 if (openEnded && IsOutside(wSteep, xSteep))
-                    return;
+                    return 0f;
 
                 w = wSteep;
                 x = xSteep;
             }
 
-            if (!isErodable[w, x]) return;
+            if (terrainElev[w,x] >= sandElev[w,x]) return 0f;
 
+
+            erosionH = Math.Min(erosionHeight, sandElev[w, x] - terrainElev[w, x]);
             // Erosión
-            sandElev[w, x] -= erosionHeight;
-            surfaceElev[w, x] -= erosionHeight;
-            if (sandElev[w, x] < terrainElev[w, x])
-            {
-                //sandElev[w, x] = terrainElev[w, x];
-                surfaceElev[w, x] = terrainElev[w, x];
-                isErodable[w, x] = false;
-            }
+            sandElev[w, x] -= erosionH;
 
             float h = sandElev[w, x];
             float hs;
@@ -189,7 +184,7 @@ namespace DunefieldModel_DualMesh
             else
             {
                 (wPrev, xPrev) = WrapCoords(wPrev, xPrev);
-                hs = Math.Max(h, Math.Max(surfaceElev[wPrev, xPrev], Shadow[wPrev, xPrev]) - SHADOW_SLOPE);
+                hs = Math.Max(h, Math.Max(Math.Max(sandElev[wPrev, xPrev], terrainElev[wPrev, xPrev]), Shadow[wPrev, xPrev]) - SHADOW_SLOPE);
             }
 
             int wNext = w;
@@ -197,7 +192,7 @@ namespace DunefieldModel_DualMesh
 
             while (true)
             {
-                h = surfaceElev[wNext, xNext];
+                h = Math.Max(sandElev[wNext, xNext], terrainElev[wNext, xNext]);
                 if (hs < h) break;
 
                 Shadow[wNext, xNext] = (hs == h) ? 0 : hs;
@@ -205,7 +200,7 @@ namespace DunefieldModel_DualMesh
 
                 wNext += dy;
                 xNext += dx;
-                if (openEnded && IsOutside(wNext, xNext)) return;
+                if (openEnded && IsOutside(wNext, xNext)) return 0f;
 
                 (wNext, xNext) = WrapCoords(wNext, xNext);
             }
@@ -215,7 +210,7 @@ namespace DunefieldModel_DualMesh
                 Shadow[wNext, xNext] = 0;
                 wNext += dy;
                 xNext += dx;
-                if (openEnded && IsOutside(wNext, xNext)) return;
+                if (openEnded && IsOutside(wNext, xNext)) return 0f;
 
                 (wNext, xNext) = WrapCoords(wNext, xNext);
 
@@ -224,7 +219,7 @@ namespace DunefieldModel_DualMesh
                 {
                     while (true)
                     {
-                        h = surfaceElev[wNext, xNext];
+                        h = Math.Max(terrainElev[wNext, xNext], sandElev[wNext, xNext]);
                         if (hs < h) break;
 
                         Shadow[wNext, xNext] = (hs == h) ? 0 : hs;
@@ -232,12 +227,14 @@ namespace DunefieldModel_DualMesh
 
                         wNext += dy;
                         xNext += dx;
-                        if (openEnded && IsOutside(wNext, xNext)) return;
+                        if (openEnded && IsOutside(wNext, xNext)) return 0f;
 
                         (wNext, xNext) = WrapCoords(wNext, xNext);
                     }
                 }
             }
+
+            return erosionH;
         }
 
         #endregion
@@ -247,25 +244,31 @@ namespace DunefieldModel_DualMesh
 
         public virtual void depositGrain(int w, int x, int dx, int dy, float depositeHeight)
         {
-            int wSteep, xSteep;
+            int wLow, xLow;
 
-            while (FindSlope.Downslope(w, x, out wSteep, out xSteep) >= slopeThreshold)
+            while (FindSlope.Downslope(w, x, dx, dy, out wLow, out xLow) >= 2)
             {
                 if (openEnded &&
-                    ((xSteep == mLength && x == 0) || (xSteep == 0 && x == mLength) ||
-                    (wSteep == mWidth && w == 0) || (wSteep == 0 && w == mWidth)))
+                    ((xLow == mLength && x == 0) || (xLow == 0 && x == mLength) ||
+                    (wLow == mWidth && w == 0) || (wLow == 0 && w == mWidth)))
                     break;
 
-                w = wSteep;
-                x = xSteep;
+                w = wLow;
+                x = xLow;
             }
 
-            surfaceElev[w, x] += depositeHeight;
-            sandElev[w,x] +=depositeHeight;
-            //sandElev[w, x] = depositeHeight + (isErodable[w, x] ? sandElev[w, x] : terrainElev[w, x]);
-            isErodable[w, x] = true;
+            if (terrainElev[w, x] >= sandElev[w, x] + depositeHeight) return;
+            if (terrainElev[w, x] >= sandElev[w, x])
+            {
+                sandElev[w, x] = terrainElev[w, x] + depositeHeight;
+            }
+            else
+            {
+                sandElev[w, x] += depositeHeight;
+            }
+            
 
-            float h = surfaceElev[w, x];
+            float h = Math.Max(sandElev[w, x], terrainElev[w, x]);
             float hs;
 
             if (openEnded && (x == 0 || w == 0))
@@ -274,10 +277,10 @@ namespace DunefieldModel_DualMesh
             {
                 int ws = (w - dy + Width) % Width;
                 int xs = (x - dx + Length) % Length;
-                hs = Math.Max(h, Math.Max(surfaceElev[ws, xs], Shadow[ws, xs]) - SHADOW_SLOPE);
+                hs = Math.Max(h, Math.Max(Math.Max(terrainElev[ws, xs], sandElev[ws, xs]), Shadow[ws, xs]) - SHADOW_SLOPE);
             }
 
-            while (hs >= (h = surfaceElev[w, x]))
+            while (hs >= (h = Math.Max(sandElev[w, x], terrainElev[w,x])))
             {
                 Shadow[w, x] = (hs == h) ? 0 : hs;
                 hs -= SHADOW_SLOPE;
@@ -298,45 +301,49 @@ namespace DunefieldModel_DualMesh
 
         public virtual void Tick(int grainsPerStep, int dx, int dy, float erosionHeight, float depositeHeight, bool verbose = false)
         {
-            int count = 0;
-            for (int i = 0; i < isErodable.GetLength(0); i++)
+            if (verbose)
             {
-                for (int j = 0; j < isErodable.GetLength(1); j++)
+                int count1 = 0;
+                int count2 = 0;
+                int count3 = 0;
+                for (int i = 0; i < sandElev.GetLength(0); i++)
                 {
-                    if (isErodable[i, j]) count++;
+                    for (int j = 0; j < sandElev.GetLength(1); j++)
+                    {
+                        if ((sandElev[i, j] - terrainElev[i, j]) > 0) count1++;
+                        if (Shadow[i, j] <= 0) count2++;
+                        if ((sandElev[i, j] - terrainElev[i, j] > 0) && Shadow[i, j] <= 0) count3++;
+                    }
                 }
+                ue.Debug.Log("Cantidad de nodos erosionables:" + count1);
+                ue.Debug.Log("Cantidad de nodos sin sombra:" + count2);
+                ue.Debug.Log("Cantidad de nodos erosionables sin sombra:" + count3);
             }
-            ue.Debug.Log("Cantidad de nodos erosionables:" + count);
 
-            count = 0;
+            int count = 0;
             for (int subticks = grainsPerStep; subticks > 0; subticks--)
             {
                 int x = rnd.Next(0, Length);
                 int w = rnd.Next(0, Width);
 
-                if (surfaceElev[w, x] == 0)
+                if (Math.Max(sandElev[w,x], terrainElev[w,x]) <= 0)
                 {
                     if (verbose) { ue.Debug.Log("Grano (" + w + "," + x + ") sin altura."); }
                     ;
                     continue;
                 }
-                if (Shadow[w, x] > 0)
+                if (Shadow[w, x] > 0 || terrainElev[w, x] >= sandElev[w, x])
                 {
-                    if (verbose) { ue.Debug.Log("Grano (" + w + "," + x + ") en sombra."); }
+                    if (verbose) { ue.Debug.Log("Grano (" + w + "," + x + ") en sombra o terreno elevado."); }
                     ;
                     continue;
                 }
-                /*
-                if (!isErodable[w, x])
-                {
-                    if (verbose) { ue.Debug.Log("Grano (" + w + "," + x + ") no erosionable."); }
-                    ;
-                    continue;
-                }
-                */
+
+
 
                 if (verbose) { ue.Debug.Log("Grano a erosionar en (" + w + "," + x + ")."); }
-                erodeGrain(w, x, dx, dy, erosionHeight);
+                aux = erodeGrain(w, x, dx, dy, erosionHeight);
+                depositeH = (aux > 0) ? aux : depositeHeight;
                 
                 count++;
 
@@ -355,15 +362,15 @@ namespace DunefieldModel_DualMesh
                     if (Shadow[wCurr, xCurr] > 0)
                     {
                         if (verbose) { ue.Debug.Log("Grano a depositar en (" + wCurr + "," + xCurr + ")."); }
-                        depositGrain(wCurr, xCurr, dx, dy, depositeHeight);
+                        depositGrain(wCurr, xCurr, dx, dy, depositeH);
                         break;
                     }
 
                     if (--i <= 0)
                     {
-                        if (rnd.NextDouble() < (surfaceElev[wCurr, xCurr] > terrainElev[wCurr, xCurr] ? pSand : pNoSand))
+                        if (rnd.NextDouble() < (sandElev[wCurr, xCurr] > terrainElev[wCurr, xCurr] ? pSand : pNoSand))
                         {
-                            depositGrain(wCurr, xCurr, dx, dy, depositeHeight);
+                            depositGrain(wCurr, xCurr, dx, dy, depositeH);
                             if (verbose) { ue.Debug.Log("Grano a depositar en (" + wCurr + "," + xCurr + ")."); }
                             break;
                         }

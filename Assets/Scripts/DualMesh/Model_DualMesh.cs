@@ -80,7 +80,7 @@ namespace DunefieldModel_DualMesh
             //Array.Clear(Elev, 0, Length * Width);
             Shadow = new float[Width, Length];
             Array.Clear(Shadow, 0, Length * Width);
-            FindSlope.Init(ref this.Elev, Width, Length, this.slope);
+            FindSlope.Init(ref sandElev, ref terrainElev, Width, Length, this.slope);
             FindSlope.SetOpenEnded(openEnded);
         }
 
@@ -394,7 +394,7 @@ namespace DunefieldModel_DualMesh
         {
             int wSteep, xSteep;
 
-            while (FindSlope.Upslope(w, x, out wSteep, out xSteep) >= 2)
+            while (FindSlope.Upslope(w, x, dx, dy, out wSteep, out xSteep) >= 2)
             {
                 if (openEnded && IsOutside(wSteep, xSteep))
                     return;
@@ -526,21 +526,21 @@ namespace DunefieldModel_DualMesh
         */
         public virtual void depositGrain(int w, int x, int dx, int dy, float depositeHeight = 1f)
         {
-            int wSteep, xSteep;
+            int wLow, xLow;
 
-            while (FindSlope.Downslope(w, x, out wSteep, out xSteep) >= slopeThreshold)
+            while (FindSlope.Downslope(w, x, dx, dy, out wLow, out xLow) >= slopeThreshold)
             {
                 if (openEnded &&
-                    ((xSteep == mLength && x == 0) || (xSteep == 0 && x == mLength) ||
-                    (wSteep == mWidth && w == 0) || (wSteep == 0 && w == mWidth)))
+                    ((xLow == mLength && x == 0) || (xLow == 0 && x == mLength) ||
+                    (wLow == mWidth && w == 0) || (wLow == 0 && w == mWidth)))
                     break;
 
                 // No continuar si el terreno fijo está más alto
-                if (terrainElev[wSteep, xSteep] >= Elev[wSteep, xSteep])
+                if (terrainElev[wLow, xLow] >= Elev[wLow, xLow])
                     break;
 
-                w = wSteep;
-                x = xSteep;
+                w = wLow;
+                x = xLow;
             }
 
             // Evitar depósito si hay terreno fijo encima

@@ -50,7 +50,7 @@ public class DualMesh : MonoBehaviour
     [Tooltip("The number of grains per step.")]
     public int grainsPerStep = 5000;
 
-    private Mesh terrainMesh, sandMesh;
+    //private Mesh terrainMesh, sandMesh;
 
     private GameObject terrainGO, sandGO;
 
@@ -73,11 +73,21 @@ public class DualMesh : MonoBehaviour
         float sandMinY = GetMinYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
         float sandMaxY = GetMaxYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
 
-        float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.005f*(terrainMaxY - terrainMinY);  // puedes ajustar el "+ 0.5f"
-        terrainGO.transform.position = new Vector3(0f, -offset, 0f);
-
-        Debug.Log("Min terrain:" + terrainMinY);
-        Debug.Log("Max terrain:" + terrainMaxY);
+        
+        float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.005f * (terrainMaxY - terrainMinY);  // puedes ajustar el "+ 0.5f"
+        //terrainGO.transform.position = new Vector3(0f, -offset, 0f);
+        Mesh terrainMesh = terrainGO.GetComponent<MeshFilter>().mesh;
+        Vector3[] vertices = terrainMesh.vertices;
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            vertices[i].y -= offset;
+        }
+        terrainMesh.vertices = vertices;
+        terrainMesh.RecalculateNormals();
+        terrainMesh.RecalculateBounds();
+        
+        Debug.Log("Min terrain:" + GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
+        Debug.Log("Max terrain:" + GetMaxYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
         Debug.Log("Min Sand:" + sandMinY);
         Debug.Log("Max Sand:" + sandMaxY);
 
@@ -87,8 +97,9 @@ public class DualMesh : MonoBehaviour
         slopeFinder = new FindSlopeMooreDeterministic();
         duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
             heightVariation, heightVariation);
-        duneModel.shadowInit();
+        //duneModel.shadowInit();
         //duneModel.UsesSandProbabilities();
+        //duneModel.SetOpenEnded(true);
     }
 
     
@@ -142,6 +153,7 @@ public class DualMesh : MonoBehaviour
         mesh.uv = uv;
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
 
         //GetComponent<MeshFilter>().mesh = mesh;
         return mesh;
@@ -227,7 +239,6 @@ public class DualMesh : MonoBehaviour
 
         mesh.vertices = vertices;
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
     }
-
-
 }
