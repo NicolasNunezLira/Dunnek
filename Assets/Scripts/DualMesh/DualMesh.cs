@@ -45,12 +45,17 @@ public class DualMesh : MonoBehaviour
 
     [Tooltip("The slope of the terrain.")]
     public float slope = 0.2f;
+
+    [Tooltip("The hop length for the simulation.")]
+    public int hopLength = 1;
+
+    [Tooltip("Shadow slope for the simulation.")]
+    public float shadowSlope = 0.803847577f; // 3 * tan(15 degrees) ~ 0.803847577f
+
     [Tooltip("The direction of the wind.")]
     public Vector2 windDirection = new Vector2(1, 0);
     [Tooltip("The number of grains per step.")]
     public int grainsPerStep = 5000;
-
-    //private Mesh terrainMesh, sandMesh;
 
     private GameObject terrainGO, sandGO;
 
@@ -68,14 +73,14 @@ public class DualMesh : MonoBehaviour
             GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3));
         sandGO.transform.parent = this.transform;
 
+        // Adjust the terrain mesh to be above the sand mesh
+        // This assumes the terrain mesh is higher than the sand mesh
         float terrainMinY = GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
         float terrainMaxY = GetMaxYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
         float sandMinY = GetMinYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
-        float sandMaxY = GetMaxYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
+        //float sandMaxY = GetMaxYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
 
-        
-        float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.005f * (terrainMaxY - terrainMinY);  // puedes ajustar el "+ 0.5f"
-        //terrainGO.transform.position = new Vector3(0f, -offset, 0f);
+        float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.005f * (terrainMaxY - terrainMinY);
         Mesh terrainMesh = terrainGO.GetComponent<MeshFilter>().mesh;
         Vector3[] vertices = terrainMesh.vertices;
         for (int i = 0; i < vertices.Length; i++)
@@ -86,18 +91,20 @@ public class DualMesh : MonoBehaviour
         terrainMesh.RecalculateNormals();
         terrainMesh.RecalculateBounds();
         
+        /*
         Debug.Log("Min terrain:" + GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
         Debug.Log("Max terrain:" + GetMaxYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
         Debug.Log("Min Sand:" + sandMinY);
         Debug.Log("Max Sand:" + sandMaxY);
+        */
 
         // Initialize the dune model
         sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
         terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
         slopeFinder = new FindSlopeMooreDeterministic();
         duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
-            heightVariation, heightVariation);
-        //duneModel.shadowInit();
+            heightVariation, heightVariation, hopLength, shadowSlope);
+        //duneModel.ShadowInit();
         //duneModel.UsesSandProbabilities();
         //duneModel.SetOpenEnded(true);
     }
@@ -105,10 +112,13 @@ public class DualMesh : MonoBehaviour
     
     void Update()
     {
+        // Cálculo de la avalancha
+        duneModel.AvalancheInit();
+
+        // Update del modelo de dunas
         duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
         //Elev = SmoothHeights(Elev, 4, 4);
 
-        //Mesh mesh = sandGO.GetComponent<MeshFilter>().mesh;
         ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
     }
     
@@ -155,7 +165,6 @@ public class DualMesh : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
-        //GetComponent<MeshFilter>().mesh = mesh;
         return mesh;
     }
 

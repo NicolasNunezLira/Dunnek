@@ -176,15 +176,17 @@ MonoBehaviour:
   terrainAmplitude3: 2
   sandMaterial: {fileID: 2100000, guid: d973757631d287749a34cc58a9a04b87, type: 2}
   sandScale1: 0.02
-  sandAmplitude1: 1.5
+  sandAmplitude1: 3
   sandScale2: 0.06
-  sandAmplitude2: 0.7
+  sandAmplitude2: 1
   sandScale3: 0.1
   sandAmplitude3: 0.3
-  heightVariation: 0.01
-  slope: 0.02
-  windDirection: {x: 2, y: 1}
-  grainsPerStep: 5000
+  heightVariation: 0.1
+  slope: 0.4
+  hopLength: 5
+  shadowSlope: 0.80384755
+  windDirection: {x: 1, y: 0}
+  grainsPerStep: 500
 --- !u!23 &164671254
 MeshRenderer:
   m_ObjectHideFlags: 0
