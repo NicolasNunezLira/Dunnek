@@ -63,8 +63,7 @@ namespace DunefieldModel_DualMesh
 
                 // Erosión del grano
                 if (verbose) { ue.Debug.Log("Grano a erosionar en (" + x + "," + z + ")."); }
-                aux = ErodeGrain(x, z, dx, dz, erosionHeight);
-                depositeH = (aux > 0) ? aux : depositeHeight; // Si se erosionó menos que la máxima altura de erosión, usar ese valor para la deposición
+                depositeH = ErodeGrain(x, z, dx, dz, erosionHeight);
 
                 count++;
 
@@ -85,7 +84,7 @@ namespace DunefieldModel_DualMesh
                         break;
 
                     // Si el grano está en sombra, depositar y salir del ciclo
-                    if (Shadow[xCurr, zCurr] > 0)
+                    if (Shadow[xCurr, zCurr] > 0 && sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr])
                     {
                         if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
                         DepositGrain(xCurr, zCurr, dx, dz, depositeH);
@@ -98,6 +97,11 @@ namespace DunefieldModel_DualMesh
                         // Verificar si el grano debe depositarse basado en la altura de arena y terreno
                         if (rnd.NextDouble() < (sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr] ? pSand : pNoSand))
                         {
+                            if (sandElev[xCurr, zCurr] <= terrainElev[xCurr, zCurr] &&
+                                terrainElev[xCurr, zCurr] >= sandElev[x, z])
+                                continue;
+
+                            
                             DepositGrain(xCurr, zCurr, dx, dz, depositeH);
                             if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
                             break;

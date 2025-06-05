@@ -43,7 +43,8 @@ namespace DunefieldModel_DualMesh
                     int xNext = x + dx;
                     int zNext = z + dz;
 
-                    float hs = h - shadowSlope;
+                    //float hs = h - shadowSlope;
+                    float hs = h;
 
                     while (IsInside(xNext, zNext) && hs >= Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]))
                     {
@@ -95,21 +96,10 @@ namespace DunefieldModel_DualMesh
             /// <param name="dx">Componente x del viento.</param>
             /// <param name="dz">Componente z del viento.</param>
             /// <returns>void</returns>
-
-            // Proyección de la sombra de viento
-            float hs = Math.Max(sandElev[x, z], terrainElev[x, z]) - shadowSlope;
-            int xNext = x + dx;
-            int zNext = z + dz;
-            while (IsInside(xNext, zNext) && hs >= Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]))
-            {
-                Shadow[xNext, zNext] = hs;
-                hs -= shadowSlope;
-                xNext += dx;
-                zNext += dz;
-            }
-
+            
             // Actualizar la sombra en la posición inicial
             float h = Math.Max(sandElev[x, z], terrainElev[x, z]);
+            float hs;
             
             int xPrev = x - dx;
             int zPrev = z - dz;
@@ -121,6 +111,59 @@ namespace DunefieldModel_DualMesh
                 (xPrev, zPrev) = WrapCoords(xPrev, zPrev);
                 hs = Math.Max(h, Math.Max(Math.Max(sandElev[xPrev, zPrev], terrainElev[xPrev, zPrev]), Shadow[xPrev, zPrev]) - shadowSlope);
             }
+
+            int xNext = x;
+            int zNext = z;
+
+            while (true)
+            {
+                h = Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]);
+                if (hs < h) break;
+
+                Shadow[xNext, zNext] = (hs == h) ? 0 : hs;
+                hs -= shadowSlope;
+
+                xNext += dx;
+                zNext += dz;
+
+                if (openEnded && IsOutside(xNext, zNext)) return;
+
+                (xNext, zNext) = WrapCoords(xNext, zNext);
+            }
+
+            while (Shadow[xNext, zNext] > 0)
+            {
+                Shadow[xNext, zNext] = 0;
+                
+                xNext += dx;
+                zNext += dz;
+
+                if (openEnded && IsOutside(xNext, zNext)) return;
+
+                (xNext, zNext) = WrapCoords(xNext, zNext);
+
+                hs = h - shadowSlope;
+                if (Shadow[xNext, zNext] > hs)
+                {
+                    while (true)
+                    {
+                        h = Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]);
+                        if (hs < h) break;
+
+                        Shadow[xNext, zNext] = (hs == h) ? 0 : hs;
+                        hs -= shadowSlope;
+
+                        xNext += dx;
+                        zNext += dz;
+
+                        if (openEnded && IsOutside(xNext, zNext)) return;
+
+                        (xNext, zNext) = WrapCoords(xNext, zNext);
+                    }
+                }
+            }
+
+            
         }
         #endregion
     }

@@ -45,7 +45,7 @@ namespace DunefieldModel_DualMesh
             else
             {
                 sandElev[x, z] -= avalancheHeight;
-                sandElev[xAvalanche, zAvalanche] += (sandElev[xAvalanche, zAvalanche] > terrainElev[xAvalanche, zAvalanche]) ? 0 : (terrainElev[xAvalanche, zAvalanche] - sandElev[xAvalanche, zAvalanche]) + avalancheHeight;
+                sandElev[xAvalanche, zAvalanche] += (sandElev[xAvalanche, zAvalanche] > terrainElev[xAvalanche, zAvalanche]) ? 0 : terrainElev[xAvalanche, zAvalanche] - sandElev[xAvalanche, zAvalanche] + avalancheHeight;
             }
         }
         #endregion

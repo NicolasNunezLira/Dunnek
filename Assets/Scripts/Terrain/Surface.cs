@@ -6,9 +6,9 @@ using UnityEngine;
 public class ProceduralPlane : MonoBehaviour
 {
     [Header("Plane Settings")]
-    [Range(31, 255)]
+    [Range(0, 255)]
     [Tooltip("The number of subdivisions along each axis.")]
-    public int resolution = 127;
+    public int resolution = 2;
 
     [Header("Mesh Settings")]
     [Tooltip("The size of the plane in world units.")]

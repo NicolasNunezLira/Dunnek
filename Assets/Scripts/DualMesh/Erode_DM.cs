@@ -37,10 +37,9 @@ namespace DunefieldModel_DualMesh
             erosionH = Math.Min(erosionHeight, sandElev[x, z] - terrainElev[x, z]);
 
             // Erosión
-            float eps = (Math.Abs(terrainElev[x, z] - sandElev[x, z]) < 1e-6f) ? 1.1f : 1f;
-            sandElev[x, z] -= erosionH * eps;
+            sandElev[x, z] -= erosionH;
 
-            
+            /*
             float h = sandElev[x, z];
             float hs;
 
@@ -102,8 +101,9 @@ namespace DunefieldModel_DualMesh
                     }
                 }
             }
+            */
             
-            //UpdateShadow(x, z, dx, dz);
+            UpdateShadow(x, z, dx, dz);
             return erosionH;
         }
         #endregion

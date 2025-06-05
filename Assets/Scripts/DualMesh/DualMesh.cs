@@ -125,7 +125,7 @@ public class DualMesh : MonoBehaviour
 
     // Funciones 
 
-    Mesh GenerateMesh(float scale1, float amplitude1, float scale2, float amplitude2, float scale3, float amplitude3)
+    Mesh GenerateMesh(float scale1, float amplitude1, float scale2, float amplitude2, float scale3, float amplitude3, bool onlySand = false)
     {
         // Generate the terrain mesh
         Mesh mesh = new Mesh();
@@ -140,8 +140,15 @@ public class DualMesh : MonoBehaviour
             {
                 float xPos = (float)x / resolution * size;
                 float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);/// resolution * size;
+                /*if (onlySand && z>50 && z < 70 && x >100 && x <120)
+                {
+                    yPos = 32;
+                }
+                if (!onlySand && z>150 && z < 270 && x >100 && x <220)
+                {
+                    yPos = 32;
+                }*/
                 float zPos = (float)z / resolution * size;
-                //Elev[x, z] = yPos;
                 vertices[i] = new Vector3(xPos, yPos, zPos);
                 uv[i] = new Vector2((float)x / resolution,
                     (float)z / resolution);
