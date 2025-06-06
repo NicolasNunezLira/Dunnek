@@ -46,10 +46,13 @@ namespace DunefieldModel_DualMesh
                     //float hs = h - shadowSlope;
                     float hs = h;
 
+                    float randomSlope = shadowSlope *
+                        ((terrainElev[x, z] >= sandElev[x, z]) ? 1 : (1f + (float)UnityEngine.Random.Range(-.1f, .1f))); // Añadir un poco de aleatoriedad a la pendiente
+
                     while (IsInside(xNext, zNext) && hs >= Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]))
                     {
                         newShadow[xNext, zNext] = hs;
-                        hs -= shadowSlope;
+                        hs -= randomSlope;
                         xNext += dx;
                         zNext += dz;
                     }

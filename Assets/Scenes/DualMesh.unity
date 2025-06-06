@@ -183,10 +183,11 @@ MonoBehaviour:
   sandAmplitude3: 0.3
   heightVariation: 0.08
   slope: 0.15
+  avalancheSlope: 0.5
   hopLength: 3
-  shadowSlope: 0.8
-  windDirection: {x: 1, y: 0}
-  grainsPerStep: 5000
+  shadowSlope: 0.02
+  windDirection: {x: 1, y: 1}
+  grainsPerStep: 500
 --- !u!23 &164671254
 MeshRenderer:
   m_ObjectHideFlags: 0

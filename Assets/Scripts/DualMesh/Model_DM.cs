@@ -34,7 +34,7 @@ namespace DunefieldModel_DualMesh
 
         public int grainsPerStep;
 
-        public float slope;
+        public float slope, avalancheSlope;
 
 
         public int dx, dz;
@@ -44,7 +44,7 @@ namespace DunefieldModel_DualMesh
 
         #region Init model
         public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int xResolution, int zResolution, float slope, int dx, int dz,
-            float depositeHeight, float erosionHeight, int hopLength, float shadowSlope)
+            float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope)
         {
             FindSlope = SlopeFinder;
             this.sandElev = sandElev;
@@ -54,6 +54,7 @@ namespace DunefieldModel_DualMesh
             this.HopLength = hopLength;
             this.shadowSlope = shadowSlope;
             this.slope = slope;
+            this.avalancheSlope = avalancheSlope;
             this.dx = dx;
             this.dz = dz;
             this.xResolution = xResolution;

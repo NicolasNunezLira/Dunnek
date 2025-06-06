@@ -5,7 +5,7 @@ using DunefieldModel_DualMesh;
 public class DualMesh : MonoBehaviour
 {
     [Header("Plane Settings")]
-    [Range(31, 255)]
+    [Range(31, 511)]
     [Tooltip("The number of subdivisions along each axis.")]
     public int resolution = 127;
 
@@ -46,6 +46,9 @@ public class DualMesh : MonoBehaviour
     [Tooltip("The slope of the terrain.")]
     public float slope = 0.2f;
 
+    [Tooltip("The slope for avalanches.")]
+    public float avalancheSlope = .5f;
+
     [Tooltip("The hop length for the simulation.")]
     public int hopLength = 1;
 
@@ -66,7 +69,8 @@ public class DualMesh : MonoBehaviour
     {
         // Creación del terreno
         terrainGO = CreateMeshObject("TerrainMesh", terrainMaterial,
-            GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3));
+            GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3, false));
+
         terrainGO.transform.parent = this.transform;
 
         sandGO = CreateMeshObject("SandMesh", sandMaterial,
@@ -90,38 +94,37 @@ public class DualMesh : MonoBehaviour
         terrainMesh.vertices = vertices;
         terrainMesh.RecalculateNormals();
         terrainMesh.RecalculateBounds();
-        
-        /*
-        Debug.Log("Min terrain:" + GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
-        Debug.Log("Max terrain:" + GetMaxYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh));
-        Debug.Log("Min Sand:" + sandMinY);
-        Debug.Log("Max Sand:" + sandMaxY);
-        */
+
+        RegularizeMesh(sandGO.GetComponent<MeshFilter>().mesh, terrainGO.GetComponent<MeshFilter>().mesh);
 
         // Initialize the dune model
         sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
         terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
         slopeFinder = new FindSlopeMooreDeterministic();
         duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
-            heightVariation, heightVariation, hopLength, shadowSlope);
-        //duneModel.ShadowInit();
-        //duneModel.UsesSandProbabilities();
-        //duneModel.SetOpenEnded(true);
+            heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope);
     }
 
-    
+    int frameCount = 0;
     void Update()
     {
-        // Cálculo de la avalancha
-        duneModel.AvalancheInit();
+        if (frameCount < 60)
+        {
+            // Cálculo de la avalancha
+            duneModel.AvalancheInit();
+        }
+        else
+        {
 
-        // Update del modelo de dunas
-        duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
-        //Elev = SmoothHeights(Elev, 4, 4);
+            // Update del modelo de dunas
+            duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
 
-        ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
+
+            ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
+        }
+        frameCount++;
     }
-    
+
 
     // Funciones 
 
@@ -140,14 +143,16 @@ public class DualMesh : MonoBehaviour
             {
                 float xPos = (float)x / resolution * size;
                 float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);/// resolution * size;
-                /*if (onlySand && z>50 && z < 70 && x >100 && x <120)
+                if (onlySand && z > 50 && z < 70 && x > 100 && x < 120)
                 {
                     yPos = 32;
                 }
-                if (!onlySand && z>150 && z < 270 && x >100 && x <220)
+
+
+                /*if (!onlySand && z > 150 && z < 270 && x > 100 && x < 220)
                 {
                     yPos = 32;
-                }*/
+                } */
                 float zPos = (float)z / resolution * size;
                 vertices[i] = new Vector3(xPos, yPos, zPos);
                 uv[i] = new Vector2((float)x / resolution,
@@ -160,8 +165,11 @@ public class DualMesh : MonoBehaviour
             for (int x = 0; x < resolution; x++, ti += 6, vi++)
             {
                 triangles[ti] = vi;
-                triangles[ti + 3] = triangles[ti + 2] = vi + 1;
-                triangles[ti + 4] = triangles[ti + 1] = vi + resolution + 1;
+                triangles[ti + 1] = vi + resolution + 1;
+                triangles[ti + 2] = vi + 1;
+
+                triangles[ti + 3] = vi + 1;
+                triangles[ti + 4] = vi + resolution + 1;
                 triangles[ti + 5] = vi + resolution + 2;
             }
         }
@@ -256,5 +264,24 @@ public class DualMesh : MonoBehaviour
         mesh.vertices = vertices;
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
+    }
+    
+    void RegularizeMesh(Mesh sandMesh, Mesh terrainMesh)
+    {
+        // Regularize the sand mesh to match the terrain mesh
+        Vector3[] sandVertices = sandMesh.vertices;
+        Vector3[] terrainVertices = terrainMesh.vertices;
+
+        for (int i = 0; i < sandVertices.Length; i++)
+        {
+            if (sandVertices[i].y < terrainVertices[i].y)
+            {
+                sandVertices[i].y = terrainVertices[i].y * (1f - 0.05f);
+            }
+        }
+
+        sandMesh.vertices = sandVertices;
+        sandMesh.RecalculateNormals();
+        sandMesh.RecalculateBounds();
     }
 }

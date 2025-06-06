@@ -18,7 +18,7 @@ namespace DunefieldModel_DualMesh
     void SetOpenEnded(bool NewState);
     int Upslope(int x, int z, int dxWind, int dzWind, out int xSteep, out int zSteep);
     int Downslope(int x, int z, int dxWind, int dyWind, out int xLow, out int zLow);
-    int AvalancheSlope(int x, int z, out int xLow, out int zLow);
+    int AvalancheSlope(int x, int z, out int xLow, out int zLow, float avalancheSlope);
   }
 
   public class FindSlopeMooreDeterministic : IFindSlope
@@ -28,7 +28,7 @@ namespace DunefieldModel_DualMesh
     public int xDOF, zDOF; // xDOF = xResolution - 1, zDOF = zResolution - 1
     public bool OpenEnded = false;
 
-    public float slope;
+    public float slope, avalancheSlope;
 
     public void Init(ref float[,] sandElev, ref float[,] terrainElev, int xResolution, int zResolution, float slope)
     {
@@ -131,7 +131,7 @@ namespace DunefieldModel_DualMesh
         return (xLow != xCenter || zLow != zCenter) ? 2 : 0;
     }
 
-    public int AvalancheSlope(int xCenter, int zCenter, out int xLow, out int zLow)
+    public int AvalancheSlope(int xCenter, int zCenter, out int xLow, out int zLow, float avalancheSlope)
     {
       /// <summary>
       /// Encuentra la pendiente de avalancha desde la posición (x, z).
@@ -145,7 +145,7 @@ namespace DunefieldModel_DualMesh
         xLow = xCenter;
         zLow = zCenter;
 
-        if (terrainElev[xCenter, zCenter] >= sandElev[xCenter, zCenter] + slope)
+        if (terrainElev[xCenter, zCenter] >= sandElev[xCenter, zCenter] + avalancheSlope)
         return 0; // No se puede transportar desde aquí
 
         float h = Math.Max(sandElev[xCenter, zCenter], terrainElev[xCenter, zCenter]);
@@ -164,7 +164,7 @@ namespace DunefieldModel_DualMesh
             float delta = hi - h;  // queremos que sea negativo
             float minDelta = float.NegativeInfinity;
 
-            if (delta <= -slope)
+            if (delta <= -avalancheSlope)
             {
                 if (delta < minDelta || (Math.Abs(delta - minDelta) < 1e-6))
                 {
