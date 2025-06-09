@@ -40,6 +40,10 @@ namespace DunefieldModel_DualMesh
         public int dx, dz;
 
         private float erosionH, depositeH, aux;
+        
+        // Guarda celdas con pendiente crítica y la dirección del posible colapso
+        public Dictionary<(int, int), ue.Vector2Int> criticalSlopes;
+
         #endregion
 
         #region Init model
@@ -64,8 +68,8 @@ namespace DunefieldModel_DualMesh
             Shadow = new float[xResolution, zResolution];
             Array.Clear(Shadow, 0, zResolution * xResolution);
             ShadowInit();
-            FindSlope.Init(ref sandElev, ref terrainElev, this.xDOF, this.zResolution, this.slope);
-            FindSlope.SetOpenEnded(openEnded);   
+            FindSlope.Init(ref sandElev, ref terrainElev, this.xResolution, this.zResolution, this.slope);
+            FindSlope.SetOpenEnded(openEnded);
         }
         #endregion
 

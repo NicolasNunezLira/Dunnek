@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ue = UnityEngine;
 
 namespace DunefieldModel_DualMesh
@@ -12,12 +13,12 @@ namespace DunefieldModel_DualMesh
             {
                 for (int z = 0; z < sandElev.GetLength(1); z++)
                 {
-                    Avalanche(x, z, erosionHeight);
+                    Avalanche(x, z);
                 }
             }
         }
 
-        public virtual void Avalanche(int x, int z, float avalancheHeight, int iter = 3)
+        public virtual void Avalanche(int x, int z, int iter = 3)
         {
             /// <summary>
             /// Simula la avalancha alrededor de la posición (x, z).
@@ -27,6 +28,10 @@ namespace DunefieldModel_DualMesh
 
             while (iter-- > 0)
             {
+                if (terrainElev[x, z] >= sandElev[x, z])
+                {
+                    return;
+                }
                 int xAvalanche = -1;
                 int zAvalanche = -1;
                 while (FindSlope.AvalancheSlope(x, z, out int xLow, out int zLow, avalancheSlope) >= 2)
@@ -39,17 +44,73 @@ namespace DunefieldModel_DualMesh
                     zAvalanche = zLow;
                 }
 
-                if (xAvalanche < 0 && zAvalanche < 0)
+                if (xAvalanche < 0 || zAvalanche < 0)
                 {
                     // No hay pendiente de avalancha, no se erosiona
                     break;
                 }
                 else
                 {
-                    sandElev[x, z] -= avalancheHeight;
-                    sandElev[xAvalanche, zAvalanche] += (sandElev[xAvalanche, zAvalanche] > terrainElev[xAvalanche, zAvalanche]) ? 0 : terrainElev[xAvalanche, zAvalanche] - sandElev[xAvalanche, zAvalanche] + avalancheHeight;
+                    float diff = Math.Abs(Math.Max(sandElev[xAvalanche, zAvalanche], terrainElev[xAvalanche, zAvalanche]) - sandElev[x, z]) / 2f;
+                    sandElev[x, z] -= diff;
+                    sandElev[xAvalanche, zAvalanche] += (sandElev[xAvalanche, zAvalanche] > terrainElev[xAvalanche, zAvalanche]) ? 0 : terrainElev[xAvalanche, zAvalanche] - sandElev[xAvalanche, zAvalanche] + diff;
                     x = xAvalanche;
                     z = zAvalanche;
+                }
+            }
+        }
+
+        public virtual void AvalancheObjects(float criticalSlopeThreshold)
+        {
+            var keys = criticalSlopes.Keys.ToList();
+
+            foreach (var key in keys)
+            {
+                int x = key.Item1;
+                int z = key.Item2;
+                ue.Vector2Int dir = criticalSlopes[key];
+
+                int xn = x + dir.x;
+                int zn = z + dir.y;
+
+                float diff = sandElev[x, z] - sandElev[xn, zn];
+
+                if (diff > slopeThreshold)
+                {
+                    // Mover una pequeña cantidad de arena
+                    float amount = diff * 0.25f;
+
+                    sandElev[x, z] -= amount;
+                    sandElev[xn, zn] += amount;
+
+                    // Marcar vecinas como críticas si exceden el umbral ahora
+                    MarkNeighborsAsCritical(xn, zn, criticalSlopeThreshold);
+                }
+                else
+                {
+                    // Ya no está inestable, remover
+                    criticalSlopes.Remove(key);
+                }
+            }
+        }
+
+        void MarkNeighborsAsCritical(int x, int z, float criticalSlopeThreshold)
+        {
+            ue.Vector2Int[] directions = {
+                new(1, 0), new(-1, 0), new(0, 1), new(0, -1), new(1, 1), new(-1, -1), new(1, -1), new(-1, 1)
+            };
+
+            foreach (var dir in directions)
+            {
+                int xn = x + dir.x;
+                int zn = z + dir.y;
+
+                if (!IsInside(xn, zn)) continue;
+
+                float slope = sandElev[xn, zn] - sandElev[x, z];
+                if (slope > criticalSlopeThreshold)
+                {
+                    criticalSlopes[(xn, zn)] = -dir;
                 }
             }
         }

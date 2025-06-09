@@ -18,17 +18,17 @@ namespace DunefieldModel_DualMesh
             return 0;
         }
 
-        private bool IsInside(int x, int z)
+        public bool IsInside(int x, int z)
         {
             return x >= 0 && x < xResolution && z >= 0 && z < zResolution;
         }
 
-        private bool IsOutside(int x, int z)
+        public bool IsOutside(int x, int z)
         {
             return x < 0 || x >= xResolution || z < 0 || z >= zResolution;
         }
 
-        private (int, int) WrapCoords(int x, int z)
+        public (int, int) WrapCoords(int x, int z)
         {
             x = (x + xResolution) % xResolution;
             z = (z + zResolution) % zResolution;

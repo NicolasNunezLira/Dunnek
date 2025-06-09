@@ -64,7 +64,7 @@ namespace DunefieldModel_DualMesh
                     return;
             }
             */
-            Avalanche(x, z, erosionHeight);
+            Avalanche(x, z, 5);
             UpdateShadow(x, z, dx, dz);
             
             
