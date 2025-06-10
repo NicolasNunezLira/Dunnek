@@ -1,49 +1,78 @@
 using System;
-using System.Linq;
-using ue = UnityEngine;
+using Unity.Collections;
 
 namespace DunefieldModel_DualMeshJobs
 {
     public partial class ModelDMJ
     {
         #region Avalanche
-        public void AvalancheInit()
+        /*
+        public static NativeArray<float> AvalancheInit(
+            NativeArray<float> sand,
+            NativeArray<float> terrain,
+            int xResolution,
+            int zResolution,
+            float avalancheSlope,
+            bool openEnded = false,
+            int iter = 3
+        )
         {
             for (int x = 0; x < xResolution; x++)
             {
                 for (int z = 0; z < zResolution; z++)
                 {
-                    Avalanche(x, z);
+                    sand = Avalanche(
+                        x, z,
+                        sand, terrain,
+                        xResolution, zResolution,
+                        avalancheSlope,
+                        openEnded, iter);
                 }
             }
+            return sand;
         }
+        */
 
-        public virtual void Avalanche(int x, int z, int iter = 3)
+        public static void Avalanche(
+            int x, int z,
+            NativeArray<float> sand,
+            NativeArray<float> terrain,
+            int xResolution,
+            int zResolution,
+            float avalancheSlope,
+            bool openEnded,
+            int iter,
+            ref FixedList32Bytes<SandChanges> sandOut
+            )
         {
             /// <summary>
             /// Simula la avalancha alrededor de la posición (x, z).
             /// </summary>
             /// <param name="x">Coordenada X de la posición.</param>
             /// <param name="z">Coordenada Z de la posición.</param>
-            
+
             int index = x + (xResolution * z);
 
             while (iter-- > 0)
             {
-                if (terrainElev[index] >= sandElev[index])
+                if (terrain[index] >= sand[index])
                 {
                     return;
                 }
                 int xAvalanche = -1;
                 int zAvalanche = -1;
-                while (FindSlope.AvalancheSlope(x, z, out int xLow, out int zLow, avalancheSlope) >= 2)
+                while (true)
                 {
+                    FindSlope.SlopeResult result = FindSlope.AvalancheSlope(x, z, sand, terrain, xResolution, avalancheSlope, openEnded);
+
+                    if (!result.isValid) break;
+
                     if (openEnded &&
-                        ((xAvalanche == xDOF && x == 0) || (xAvalanche == 0 && x == xDOF) ||
-                        (zAvalanche == zDOF && z == 0) || (zAvalanche == 0 && z == zDOF)))
+                        ((result.X == xResolution - 1 && x == 0) || (result.X == 0 && x == xResolution - 1) ||
+                        (result.Z == zResolution - 1 && z == 0) || (result.Z == 0 && z == zResolution - 1)))
                         break;
-                    xAvalanche = xLow;
-                    zAvalanche = zLow;
+                    xAvalanche = result.X;
+                    zAvalanche = result.Z;
                 }
 
                 if (xAvalanche < 0 || zAvalanche < 0)
@@ -54,13 +83,22 @@ namespace DunefieldModel_DualMeshJobs
                 else
                 {
                     int indexAvalanche = xAvalanche + (xResolution * zAvalanche);
-                    float diff = Math.Abs(Math.Max(sandElev[indexAvalanche], terrainElev[indexAvalanche]) - sandElev[index]) / 2f;
-                    sandElev[index] -= diff;
-                    sandElev[indexAvalanche] += ((sandElev[indexAvalanche] > terrainElev[indexAvalanche]) ? 0 : terrainElev[indexAvalanche] - sandElev[indexAvalanche]) + diff;
+                    float diff = Math.Abs(Math.Max(sand[indexAvalanche], terrain[indexAvalanche]) - sand[index]) / 2f;
+                    //sand[index] -= diff;
+                    sandOut.Add(new SandChanges { index = index, delta = -diff });
+                    //sand[indexAvalanche] += ((sand[indexAvalanche] > terrain[indexAvalanche]) ? 0 : terrain[indexAvalanche] - sand[indexAvalanche]) + diff;
+                    sandOut.Add(new SandChanges
+                    {
+                        index = indexAvalanche,
+                        delta = ((terrain[index] >= sand[index]) ? terrain[index] + diff : sand[index] + diff) - diff
+                    });
+
                     x = xAvalanche;
                     z = zAvalanche;
+                    index = x + (xResolution * z);
                 }
             }
+            return;
         }
         #endregion
     }

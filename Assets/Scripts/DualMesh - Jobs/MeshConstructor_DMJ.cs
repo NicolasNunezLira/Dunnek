@@ -8,7 +8,7 @@ namespace DunefieldModel_DualMeshJobs
 {
     public partial class DualMeshConstructor
     {
-        public int resolution;
+        public int xResolution, zResolution;
 
         public float size, terrainScale1, terrainScale2, terrainScale3,
             terrainAmplitude1, terrainAmplitude2, terrainAmplitude3,
@@ -22,12 +22,13 @@ namespace DunefieldModel_DualMeshJobs
         public Transform parentTransform;
 
 
-        public DualMeshConstructor(int resolution, float size, float terrainScale1, float terrainScale2, float terrainScale3,
+        public DualMeshConstructor(int xResolution, int zResolution, float size, float terrainScale1, float terrainScale2, float terrainScale3,
             float terrainAmplitude1, float terrainAmplitude2, float terrainAmplitude3,
             float sandScale1, float sandScale2, float sandScale3, float sandAmplitude1, float sandAmplitude2, float sandAmplitude3,
             Material terainMaterial, Material sandMaterial, Transform parentTransform = null)
         {
-            this.resolution = resolution;
+            this.xResolution = xResolution;
+            this.zResolution = zResolution;
             this.size = size;
             this.terrainScale1 = terrainScale1;
             this.terrainScale2 = terrainScale2;
@@ -92,8 +93,8 @@ namespace DunefieldModel_DualMeshJobs
 
             RegularizeMesh(sandGO.GetComponent<MeshFilter>().mesh, terrainGO.GetComponent<MeshFilter>().mesh);
 
-            sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
-            terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
+            sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, xResolution, zResolution);
+            terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, xResolution, zResolution);
 
             //criticalSlopes = InitializeCriticalSlopes(criticalSlopeThreshold);
         }
@@ -102,15 +103,15 @@ namespace DunefieldModel_DualMeshJobs
         {
             // Generate the terrain mesh
             Mesh mesh = new Mesh();
-            Vector3[] vertices = new Vector3[(resolution + 1) * (resolution + 1)];
+            Vector3[] vertices = new Vector3[(xResolution + 1) * (zResolution + 1)];
             Vector2[] uv = new Vector2[vertices.Length];
-            int[] triangles = new int[resolution * resolution * 6];
+            int[] triangles = new int[xResolution * zResolution * 6];
 
-            for (int i = 0, z = 0; z <= resolution; z++)
+            for (int i = 0, z = 0; z <= zResolution; z++)
             {
-                for (int x = 0; x <= resolution; x++, i++)
+                for (int x = 0; x <= zResolution; x++, i++)
                 {
-                    float xPos = (float)x / resolution * size;
+                    float xPos = (float)x / xResolution * size;
                     float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);/// resolution * size;
                     if (onlySand && z > 50 && z < 70 && x > 100 && x < 120)
                     {
@@ -120,24 +121,24 @@ namespace DunefieldModel_DualMeshJobs
                     {
                         yPos = 32;
                     } */
-                    float zPos = (float)z / resolution * size;
+                    float zPos = (float)z / zResolution * size;
                     vertices[i] = new Vector3(xPos, yPos, zPos);
-                    uv[i] = new Vector2((float)x / resolution,
-                        (float)z / resolution);
+                    uv[i] = new Vector2((float)x / xResolution,
+                        (float)z / zResolution);
                 }
             }
 
-            for (int ti = 0, vi = 0, z = 0; z < resolution; z++, vi++)
+            for (int ti = 0, vi = 0, z = 0; z < zResolution; z++, vi++)
             {
-                for (int x = 0; x < resolution; x++, ti += 6, vi++)
+                for (int x = 0; x < xResolution; x++, ti += 6, vi++)
                 {
                     triangles[ti] = vi;
-                    triangles[ti + 1] = vi + resolution + 1;
+                    triangles[ti + 1] = vi + xResolution + 1;
                     triangles[ti + 2] = vi + 1;
 
                     triangles[ti + 3] = vi + 1;
-                    triangles[ti + 4] = vi + resolution + 1;
-                    triangles[ti + 5] = vi + resolution + 2;
+                    triangles[ti + 4] = vi + xResolution + 1;
+                    triangles[ti + 5] = vi + xResolution + 2;
                 }
             }
 
@@ -195,16 +196,16 @@ namespace DunefieldModel_DualMeshJobs
             return minY;
         }
 
-        public NativeArray<float> MeshToHeightMap(Mesh mesh, int resolution)
+        public NativeArray<float> MeshToHeightMap(Mesh mesh, int xResolution, int zResolution)
         {
-            NativeArray<float> heightMap = new NativeArray<float>((resolution + 1) * (resolution + 1), Allocator.Persistent);
+            NativeArray<float> heightMap = new NativeArray<float>((xResolution + 1) * (zResolution + 1), Allocator.Persistent);
             Vector3[] vertices = mesh.vertices;
 
-            for (int z = 0; z <= resolution; z++)
+            for (int z = 0; z <= zResolution; z++)
             {
-                for (int x = 0; x <= resolution; x++)
+                for (int x = 0; x <= xResolution; x++)
                 {
-                    int index = z * (resolution + 1) + x;
+                    int index = z * (xResolution + 1) + x;
                     heightMap[index] = vertices[index].y;
                 }
             }
@@ -212,15 +213,15 @@ namespace DunefieldModel_DualMeshJobs
             return heightMap;
         }
 
-        public void ApplyHeightMapToMesh(Mesh mesh, NativeArray<float> heightMap, int resolution)
+        public void ApplyHeightMapToMesh(Mesh mesh, NativeArray<float> heightMap, int xResolution, int zResolution)
         {
             Vector3[] vertices = mesh.vertices;
 
-            for (int z = 0; z <= resolution; z++)
+            for (int z = 0; z <= zResolution; z++)
             {
-                for (int x = 0; x <= resolution; x++)
+                for (int x = 0; x <= xResolution; x++)
                 {
-                    int index = z * (resolution + 1) + x;
+                    int index = z * (xResolution + 1) + x;
                     Vector3 v = vertices[index];
                     v.y = heightMap[index];
                     vertices[index] = v;

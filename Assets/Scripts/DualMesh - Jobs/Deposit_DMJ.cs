@@ -1,11 +1,27 @@
 using System;
-using ue = UnityEngine;
+using Unity.Collections;
+
 
 namespace DunefieldModel_DualMeshJobs
 {
     public partial class ModelDMJ
     {
-        public virtual void DepositGrain(int x, int z, int dx, int dz, float depositeHeight)
+        public static void DepositGrain(
+            int x, int z,
+            int dx, int dz,
+            float depositeHeight,
+            NativeArray<float> terrain,
+            NativeArray<float> sand,
+            NativeArray<float> shadow,
+            int xResolution,
+            int zResolution,
+            float slope,
+            float shadowSlope,
+            float avalancheSlope,
+            bool openEnded,
+            int iter,
+            ref FixedList32Bytes<SandChanges> sandOut
+        )
         {
             /// <summary>
             /// Deposita un grano de arena en la posición (x, z) considerando viento con dirección (dx, dz).
@@ -17,35 +33,59 @@ namespace DunefieldModel_DualMeshJobs
             /// <param name="depositeHeight">Altura de deposición del grano.</param>
 
             // Buscar el punto más bajo en la dirección del viento
-            while (FindSlope.Downslope(x, z, dx, dz, out int xLow, out int zLow) >= 1)
+            while (true)
             {
+                FindSlope.SlopeResult result = FindSlope.Downslope(
+                    x, z, dx, dz, sand, terrain, xResolution, slope, openEnded);
+
+                if (!result.isValid) break;
+
                 if (openEnded &&
-                    ((xLow == xDOF && x == 0) || (xLow == 0 && x == xDOF) ||
-                    (zLow == zDOF && z == 0) || (zLow == 0 && z == zDOF)))
+                    ((result.X == xResolution - 1 && result.X == 0) ||
+                    (result.X == 0 && result.X == xResolution - 1) ||
+                    (result.Z == zResolution - 1 && result.Z == 0) ||
+                    (result.Z == 0 && result.Z == zResolution - 1)))
                     break;
 
-                x = xLow;
-                z = zLow;
+                x = result.X;
+                z = result.Z;
             }
 
             int index = x + (xResolution * z);
 
 
-            if (terrainElev[index] >= sandElev[index])
+            if (terrain[index] >= sand[index])
             {
                 // Si el terreno es más alto que la arena más la altura de deposición, depositar encima del terreno
-                sandElev[index] = terrainElev[index] + depositeHeight;
+                //sand[index] = terrain[index] + depositeHeight;
+                sandOut.Add(new SandChanges { index = index, delta = terrain[index] - sand[index] + depositeHeight });
             }
             else
             {
-                sandElev[index] += depositeHeight;
+                //sand[index] += depositeHeight;
+                sandOut.Add(new SandChanges { index = index, delta = depositeHeight });
             }
 
-            
-            Avalanche(x, z, 5);
-            UpdateShadow(x, z, dx, dz);
-            
-            
+
+            Avalanche(
+                x, z,
+                sand, terrain,
+                xResolution, zResolution,
+                avalancheSlope,
+                openEnded, iter,
+                ref sandOut);
+
+            /*
+            shadow = UpdateShadow(
+                x, z,
+                dx, dz,
+                sand, terrain, shadow,
+                xResolution, zResolution,
+                shadowSlope,
+                openEnded);
+            */
+
+            return;
         }
 
     }

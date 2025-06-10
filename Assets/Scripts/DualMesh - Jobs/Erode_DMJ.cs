@@ -12,10 +12,14 @@ namespace DunefieldModel_DualMeshJobs
             float erosionHeight,
             NativeArray<float> terrain,
             NativeArray<float> sand,
+            NativeArray<float> shadow,
             int xResolution,
             int zResolution,
             float slope,
-            bool openEnded
+            float shadowSlope,
+            bool openEnded,
+            ref FixedList32Bytes<SandChanges> sandOut
+            //out FixedList32Bytes<ShadowChanges> shadowOut
         )
         {
             /// <summary>
@@ -29,13 +33,17 @@ namespace DunefieldModel_DualMeshJobs
             /// <param name="erosionHeight">Máxima cantidad de erosión.</param>
             /// <returns>Altura erosionada.</returns>
 
+
+            sandOut = new FixedList32Bytes<SandChanges>();
+            //shadowOut = new FixedList32Bytes<ShadowChanges>();
+
             // Busqueda del punto más alto en la vecindad del grano
             while (true)
             {
                 FindSlope.SlopeResult result = FindSlope.Upslope(x, z, dx, dz, sand, terrain, xResolution, zResolution, slope, false);
                 // Si se sale del dominio en campo abierto
                 if (!result.isValid) break;
-                
+
                 if (openEnded && (result.X < 0 || result.X >= xResolution || result.Z < 0 || result.Z >= zResolution))
                     return 0f;
 
@@ -52,9 +60,19 @@ namespace DunefieldModel_DualMeshJobs
             float erosionH = Math.Min(erosionHeight, sand[index] - terrain[index]);
 
             // Erosión
-            sand[index] -= erosionH;
-            
-            //UpdateShadow(x, z, dx, dz);
+            sandOut.Add(new SandChanges { index = index, delta = -erosionH });
+            //sand[index] -= erosionH;
+
+
+            /*
+            shadow = UpdateShadow(
+                x, z,
+                dx, dz,
+                sand, terrain, shadow,
+                xResolution, zResolution,
+                shadowSlope,
+                openEnded);
+            */
             return erosionH;
         }
         #endregion
