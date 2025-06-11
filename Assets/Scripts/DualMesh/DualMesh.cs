@@ -89,7 +89,7 @@ public class DualMesh : MonoBehaviour
     int frameCount = 0;
     void Update()
     {
-        if (frameCount < 60)
+        if (frameCount < 360)
         {
             // Cálculo de la avalancha
             duneModel.AvalancheInit();
@@ -103,7 +103,7 @@ public class DualMesh : MonoBehaviour
 
             dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
 
-            if (frameCount % 10 == 0) duneModel.AvalancheInit();
+            if (frameCount % 100 == 0) duneModel.AvalancheInit();
         }
         frameCount++;
     }
