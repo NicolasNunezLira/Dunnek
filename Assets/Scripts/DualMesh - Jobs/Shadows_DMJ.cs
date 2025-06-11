@@ -1,29 +1,32 @@
 using System;
 using Unity.Collections;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 using ue = UnityEngine;
+using System.Collections.Generic;
 
 namespace DunefieldModel_DualMeshJobs
 {
     public partial class ModelDMJ
     {
         #region Shadows
-        public static NativeArray<float> ShadowInit(
+        public static void ShadowInit(
             int dx, int dz,
             NativeArray<float> sand,
             NativeArray<float> terrain,
             int xResolution,
             int zResolution,
             NativeArray<float> shadow,
-            float shadowSlope)
+            float shadowSlope,
+            ref List<ShadowChanges> shadowOut
+        )
         {
             /// <summary>
             /// Inicializa la sombra basado en el terreno y la arena inicial.
             ///</summary>
-            NativeArray<float> newShadow = ShadowCheck(false, dx, dz, sand, terrain, xResolution, zResolution, shadow, shadowSlope);
-            return newShadow;
+            ShadowCheck(false, dx, dz, sand, terrain, xResolution, zResolution, shadow, shadowSlope, ref shadowOut);
         }
-        protected static NativeArray<float> ShadowCheck(
+        protected static float ShadowCheck(
             bool ReportErrors,
             int dx, int dz,
             NativeArray<float> sand,
@@ -31,7 +34,9 @@ namespace DunefieldModel_DualMeshJobs
             int xResolution,
             int zResolution,
             NativeArray<float> shadow,
-            float shadowSlope)
+            float shadowSlope,
+            ref List<ShadowChanges> shadowOut
+        )
         {
             /// <summary>
             /// Verifica y actualiza la sombra del modelo de dunas.
@@ -95,6 +100,7 @@ namespace DunefieldModel_DualMeshJobs
                 {
                     int index = x + (xResolution * z);
                     if (newShadow[index] != shadow[index])
+                        shadowOut.Add(new ShadowChanges { index = index, value = newShadow[index] });
                         errors++;
                 }
             }
@@ -103,13 +109,16 @@ namespace DunefieldModel_DualMeshJobs
             {
                 if (ReportErrors)
                     Console.WriteLine("shadowCheck error count: " + errors);
-                NativeArray<float>.Copy(newShadow, shadow);
+                //NativeArray<float>.Copy(newShadow, shadow);
 
             }
 
-            return newShadow;
+            newShadow.Dispose();
+
+            return errors;
         }
 
+        /*
         public static NativeArray<float> UpdateShadow(
             int x, int z,
             int dx, int dz,
@@ -205,8 +214,9 @@ namespace DunefieldModel_DualMeshJobs
 
             return shadow;
 
-            
+
         }
+        */
         #endregion
     }
 }

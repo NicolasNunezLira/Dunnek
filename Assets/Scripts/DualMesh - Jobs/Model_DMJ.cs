@@ -38,13 +38,12 @@ namespace DunefieldModel_DualMeshJobs
 
         // Struct for parallelize
         [WriteOnly] public NativeList<SandChanges>.ParallelWriter sandChanges;
-        [WriteOnly] public NativeList<ShadowChanges>.ParallelWriter shadowChanges;
 
 
         // Surfaces information
-        public NativeArray<float> sand;
-        public NativeArray<float> terrain;
-        public NativeArray<float> shadow;
+        [ReadOnly] public NativeArray<float> sand;
+        [ReadOnly] public NativeArray<float> terrain;
+        [ReadOnly] public NativeArray<float> shadow;
 
         // Resolution of the meshes
         public int xResolution;
@@ -84,32 +83,12 @@ namespace DunefieldModel_DualMeshJobs
         // Options for debug
         public bool verbose;
 
-        /*
-
-        // Initial surfaces properties
-        public float terrainScale1;
-        public float terrainScale2;
-        public float terrainScale3;
-        public float terrainAmplitude1;
-        public float terrainAmplitude2;
-        public float terrainAmplitude3;
-        public float sandScale1;
-        public float sandScale2;
-        public float sandScale3;
-        public float sandAmplitude1;
-        public float sandAmplitude2;
-        public float sandAmplitude3;
-
-        // Materials of the surfaces
-        public Material terrainMaterial;
-        public Material sandMaterial;
-        */
-
         public void Execute(int i)
         {
             int x = randomsX[i];
             int z = randomsZ[i];
             int index = x + (xResolution * z);
+            ue.Debug.Log("(" + x + ", " + z + ") = " + index);
 
             if (Math.Max(sand[index], terrain[index]) <= 0 || // Cell without height
                 shadow[index] > 0 ||                          // Cell in shadow
@@ -121,7 +100,6 @@ namespace DunefieldModel_DualMeshJobs
 
             // Erode process
             float erodeH;
-            FixedList32Bytes<SandChanges> erodeOut = new FixedList32Bytes<SandChanges>();
             //NativeArray<float> newShadow;
             erodeH = ModelDMJ.ErodeGrain(
                 x, z,
@@ -130,15 +108,15 @@ namespace DunefieldModel_DualMeshJobs
                 terrain, sand, shadow,
                 xResolution, zResolution,
                 slope, shadowSlope, openEnded,
-                ref erodeOut
+                sandChanges
             );
 
-            foreach (var change in erodeOut) { sandChanges.AddNoResize(new SandChanges { index = change.index, delta = change.delta }); };
+            //foreach (var change in erodeOut) { sandChanges.AddNoResize(new SandChanges { index = change.index, delta = change.delta }); };
 
             float depositeH = Math.Min(erodeH, depositeHeight);
 
             // Deposition process
-            FixedList32Bytes<SandChanges> depositeOut = new FixedList32Bytes<SandChanges>();
+            //List<SandChanges> depositeOut = new List<SandChanges>();
             ModelDMJ.algorithmDeposit(
                 x, z,
                 dx, dz, HopLength,
@@ -152,24 +130,8 @@ namespace DunefieldModel_DualMeshJobs
                 iter,
                 openEnded,
                 verbose,
-                ref depositeOut
+                sandChanges
             );
-            
-            foreach (var change in depositeOut) { sandChanges.AddNoResize(new SandChanges { index = change.index, delta = change.delta }); };
-            
-            /*
-            sandChanges.AddNoResize(new SandChanges { index = index, delta = -erodeH });
-            sandChanges.AddNoResize(new SandChanges { index = targetIndex, delta = depositeH });
-
-            for (int k = 0; k < shadow.Length; k++)
-            {
-                if (shadow[k] != newShadow[k])
-                {
-                    shadowChanges.AddNoResize(new ShadowChanges { index = k, value = newShadow[k] });
-                }
-            } 
-            */
-
         }
     }
 

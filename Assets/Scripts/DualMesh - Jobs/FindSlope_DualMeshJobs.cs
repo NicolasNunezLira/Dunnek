@@ -18,7 +18,7 @@ namespace DunefieldModel_DualMeshJobs
       public int X;
       public int Z;
 
-      public bool isValid => Code >= 0;
+      public bool isValid => Code > 0;
     }
 
     // -------------------- Upslope --------------------------
@@ -35,6 +35,7 @@ namespace DunefieldModel_DualMeshJobs
       int xDOF = xResolution - 1;
 
       int indexCenter = x + (xResolution * z);
+      UnityEngine.Debug.Log("Center = (" + x + ", " + z + ") = " + indexCenter);
 
       if (terrain[indexCenter] >= sand[indexCenter])
       {

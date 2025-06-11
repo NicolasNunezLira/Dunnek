@@ -7,6 +7,7 @@ using Unity.Jobs;
 using UnityEditor;
 using UnityEditor.EditorTools;
 using DunefieldModel;
+using System.Linq;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class DualMeshJob : MonoBehaviour
@@ -81,10 +82,11 @@ public class DualMeshJob : MonoBehaviour
     private GameObject terrainGO, sandGO;
 
     private NativeList<SandChanges> sandChanges;
-    private NativeList<ShadowChanges> shadowChanges;
+    private List<ShadowChanges> shadowChanges;
     private NativeArray<Unity.Mathematics.Random> rngArray;
 
     private DualMeshConstructor dualMeshConstructor;
+    
 
     void Start()
     {
@@ -93,6 +95,7 @@ public class DualMeshJob : MonoBehaviour
             sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, this.transform);
 
         dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrain, out sand);
+        sandGO.GetComponent<MeshFilter>().mesh.MarkDynamic();
 
         // Initialize the shadow
         if (!shadow.IsCreated)
@@ -105,16 +108,23 @@ public class DualMeshJob : MonoBehaviour
             shadow[i] = 0;
         }
 
-        shadow = ModelDMJ.ShadowInit(
+        shadowChanges = new List<ShadowChanges>();
+        ModelDMJ.ShadowInit(
             (int)windDirection.x, (int)windDirection.y,
             sand, terrain,
             xResolution, zResolution,
-            shadow, shadowSlope
+            shadow, shadowSlope, ref shadowChanges
         );
+
+        ApplyShadowChanges(ref shadow, shadowChanges);
+        shadowChanges.Clear();
+
+
 
         // Initialize the list for parallel changes
         sandChanges = new NativeList<SandChanges>(Allocator.Persistent);
-        shadowChanges = new NativeList<ShadowChanges>(Allocator.Persistent);
+        sandChanges.Capacity = grainsPerStep * 3;
+        //shadowChanges = new NativeList<ShadowChanges>(Allocator.Persistent);
 
         // Initialize randoms
         rngArray = new NativeArray<Unity.Mathematics.Random>(10000, Allocator.Persistent);
@@ -129,42 +139,34 @@ public class DualMeshJob : MonoBehaviour
 
     void Update()
     {
-        // 1. Generar índices aleatorios de la malla
-        int xTotalNodes = xResolution + 1;
-        int zTotalNodes = zResolution + 1;
-
         NativeArray<int> randomsX = new NativeArray<int>(grainsPerStep, Allocator.TempJob);
         NativeArray<int> randomsZ = new NativeArray<int>(grainsPerStep, Allocator.TempJob);
 
         // Llenar randomIndices con valores únicos aleatorios entre 0 y totalNodes-1
-        HashSet<int> xUsed = new HashSet<int>();
-        HashSet<int> zUsed = new HashSet<int>();
+        HashSet<(int, int)> usedPairs = new HashSet<(int, int)>();
         System.Random rnd = new System.Random();
 
         int filled = 0;
         while (filled < grainsPerStep)
         {
-            int x = rnd.Next(0, xTotalNodes);
-            int z = rnd.Next(0, zTotalNodes);
-            if (!xUsed.Contains(x))
+            int x = rnd.Next(0, xResolution);
+            int z = rnd.Next(0, zResolution);
+
+            if (!usedPairs.Contains((x,z)))
             {
-                xUsed.Add(x);
+                usedPairs.Add((x,z));
                 randomsX[filled] = x;
-            }
-            if (!zUsed.Contains(z))
-            {
-                zUsed.Add(z);
                 randomsZ[filled] = z;
+                filled++;
             }
-            filled++;
         }
 
+        
         var sandJob = new DuneFieldSimulation
         {
             randomsX = randomsX,
             randomsZ = randomsZ,
             sandChanges = sandChanges.AsParallelWriter(),
-            shadowChanges = shadowChanges.AsParallelWriter(),
             sand = sand,
             terrain = terrain,
             shadow = shadow,
@@ -191,25 +193,31 @@ public class DualMeshJob : MonoBehaviour
         JobHandle handle = sandJob.Schedule(grainsPerStep, 64);
         handle.Complete();
 
-        
-        randomsX.Dispose();
-        randomsZ.Dispose();
-        
 
-        foreach (var change in sandChanges)
-        {
-            sand[change.index] += change.delta;
-        }
-        foreach (var change in shadowChanges)
-        {
-            shadow[change.index] = change.value;
-        }
+        //randomsX.Dispose();
+        //randomsZ.Dispose();
+
+
+        // Aplicar cambios de la arena erosionada
+        ApplySandChanges(ref sand, sandChanges);
+        sandChanges.Clear();
 
         dualMeshConstructor.ApplyHeightMapToMesh(
             sandGO.GetComponent<MeshFilter>().mesh,
             sand,
             xResolution, zResolution
         );
+
+        // Actualizar sombra
+        shadowChanges = new List<ShadowChanges>();
+        ModelDMJ.ShadowInit(
+            (int)windDirection.x, (int)windDirection.y,
+            sand, terrain,
+            xResolution, zResolution,
+            shadow, shadowSlope, ref shadowChanges
+        );
+        ApplyShadowChanges(ref shadow, shadowChanges);
+        shadowChanges.Clear();
     }
 
     void OnDestroy()
@@ -217,6 +225,29 @@ public class DualMeshJob : MonoBehaviour
         sand.Dispose();
         terrain.Dispose();
         shadow.Dispose();
+        sandChanges.Dispose();
+        rngArray.Dispose();
+    }
+
+    private void ApplyShadowChanges(ref NativeArray<float> shadow, List<ShadowChanges> shadowChanges)
+    {
+        foreach (ShadowChanges change in shadowChanges)
+        {
+            shadow[change.index] = change.value;
+        }
+    }
+
+    private void ApplySandChanges(ref NativeArray<float> sand, NativeList<SandChanges> sandChanges)
+    {
+        foreach (SandChanges change in sandChanges)
+        {
+            if (change.index < 0 || change.index >= sand.Length)
+            {
+                Debug.LogWarning($"Invalid index: {change.index}. Array length: {sand.Length}");
+                continue; // evitar crash
+            }
+            sand[change.index] += change.delta;
+        }
     }
 
 }

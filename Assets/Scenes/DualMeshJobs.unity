@@ -337,13 +337,16 @@ MonoBehaviour:
   sandScale3: 0.1
   sandAmplitude3: 0.3
   heightVariation: 0.08
+  pSand: 0.6
+  pNoSand: 0.4
   slope: 0.2
   avalancheSlope: 0.5
-  criticalSlopeThreshold: 2
+  criticalSlopeThreshold: 1.5
+  iter: 3
   hopLength: 1
   shadowSlope: 0.80384755
   windDirection: {x: 1, y: 0}
-  grainsPerStep: 500
+  grainsPerStep: 100
 --- !u!23 &805175939
 MeshRenderer:
   m_ObjectHideFlags: 0

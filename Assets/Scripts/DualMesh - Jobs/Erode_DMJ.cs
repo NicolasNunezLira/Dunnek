@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 
 namespace DunefieldModel_DualMeshJobs
@@ -18,7 +19,7 @@ namespace DunefieldModel_DualMeshJobs
             float slope,
             float shadowSlope,
             bool openEnded,
-            ref FixedList32Bytes<SandChanges> sandOut
+            NativeList<SandChanges>.ParallelWriter sandChanges
             //out FixedList32Bytes<ShadowChanges> shadowOut
         )
         {
@@ -31,10 +32,7 @@ namespace DunefieldModel_DualMeshJobs
             /// <param name="dx">Componente x de la dirección del viento.</param>
             /// <param name="dz">Componente z de la dirección del viento.</param>
             /// <param name="erosionHeight">Máxima cantidad de erosión.</param>
-            /// <returns>Altura erosionada.</returns>
 
-
-            sandOut = new FixedList32Bytes<SandChanges>();
             //shadowOut = new FixedList32Bytes<ShadowChanges>();
 
             // Busqueda del punto más alto en la vecindad del grano
@@ -60,7 +58,7 @@ namespace DunefieldModel_DualMeshJobs
             float erosionH = Math.Min(erosionHeight, sand[index] - terrain[index]);
 
             // Erosión
-            sandOut.Add(new SandChanges { index = index, delta = -erosionH });
+            if (index >= 0 && index <= sand.Length) sandChanges.AddNoResize(new SandChanges { index = index, delta = -erosionH });
             //sand[index] -= erosionH;
 
 

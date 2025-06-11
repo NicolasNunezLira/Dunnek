@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using System.Collections.Generic;
 
 namespace DunefieldModel_DualMeshJobs
 {
@@ -42,7 +43,7 @@ namespace DunefieldModel_DualMeshJobs
             float avalancheSlope,
             bool openEnded,
             int iter,
-            ref FixedList32Bytes<SandChanges> sandOut
+            NativeList<SandChanges>.ParallelWriter sandChanges
             )
         {
             /// <summary>
@@ -84,14 +85,18 @@ namespace DunefieldModel_DualMeshJobs
                 {
                     int indexAvalanche = xAvalanche + (xResolution * zAvalanche);
                     float diff = Math.Abs(Math.Max(sand[indexAvalanche], terrain[indexAvalanche]) - sand[index]) / 2f;
-                    //sand[index] -= diff;
-                    sandOut.Add(new SandChanges { index = index, delta = -diff });
-                    //sand[indexAvalanche] += ((sand[indexAvalanche] > terrain[indexAvalanche]) ? 0 : terrain[indexAvalanche] - sand[indexAvalanche]) + diff;
-                    sandOut.Add(new SandChanges
+                    if (index >= 0 && index <= sand.Length)
                     {
-                        index = indexAvalanche,
-                        delta = ((terrain[index] >= sand[index]) ? terrain[index] + diff : sand[index] + diff) - diff
-                    });
+                        //sand[index] -= diff;
+                        sandChanges.AddNoResize(new SandChanges { index = index, delta = -diff });
+
+                        //sand[indexAvalanche] += ((sand[indexAvalanche] > terrain[indexAvalanche]) ? 0 : terrain[indexAvalanche] - sand[indexAvalanche]) + diff;
+                        sandChanges.AddNoResize(new SandChanges
+                        {
+                            index = indexAvalanche,
+                            delta = ((terrain[indexAvalanche] >= sand[indexAvalanche]) ? terrain[indexAvalanche] + diff : sand[indexAvalanche] + diff) - diff
+                        });
+                    }
 
                     x = xAvalanche;
                     z = zAvalanche;

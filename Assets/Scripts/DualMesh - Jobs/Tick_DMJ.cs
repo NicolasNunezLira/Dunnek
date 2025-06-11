@@ -1,7 +1,7 @@
 using System;
 using Unity.Collections;
 using UnityEngine;
-using Unity.Mathematics;
+using System.Collections.Generic;
 
 namespace DunefieldModel_DualMeshJobs
 {
@@ -27,11 +27,11 @@ namespace DunefieldModel_DualMeshJobs
             int iter,
             bool openEnded,
             bool verbose,
-            ref FixedList32Bytes<SandChanges> depositeOut
+            NativeList<SandChanges>.ParallelWriter sandChanges
         )
         {
             // Deposición del grano
-            int i = HopLength;
+            int hop = HopLength;
             int xCurr = x;
             int zCurr = z;
             int index = xCurr + (xResolution * zCurr);
@@ -40,7 +40,7 @@ namespace DunefieldModel_DualMeshJobs
 
             // Conteo de celdas de terreno en las posibles deposiciones del grano
             int countTerrain = 0;
-            for (int j = 1; j <= i; j++)
+            for (int j = 1; j <= hop; j++)
             {
                 (int xAUx, int zAux) = WrapCoords(xCurr + j * dx, zCurr + j * dz, xResolution, zResolution);
                 if (xAUx != xCurr || zAux != zCurr)
@@ -85,7 +85,7 @@ namespace DunefieldModel_DualMeshJobs
                         terrain, sand, shadow,
                         xResolution, zResolution,
                         slope, shadowSlope, avalancheSlope,
-                        openEnded, iter, ref depositeOut);
+                        openEnded, iter, sandChanges);
                     targetX = xCurr;
                     targetZ = zCurr;
                     break;
@@ -100,7 +100,7 @@ namespace DunefieldModel_DualMeshJobs
                 }
 
 
-                if (countTerrain >= i - 1)
+                if (countTerrain >= hop - 1)
                 {
                     // Direcciones laterales (perpendiculares al viento)
                     FixedList32Bytes<int> dxLateral = new FixedList32Bytes<int> { -dz, dz };
@@ -121,7 +121,7 @@ namespace DunefieldModel_DualMeshJobs
                                 terrain, sand, shadow,
                                 xResolution, zResolution,
                                 slope, shadowSlope, avalancheSlope,
-                                openEnded, iter, ref depositeOut);
+                                openEnded, iter, sandChanges);
                             targetX = lx;
                             targetZ = lz;
                             if (verbose) Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
@@ -136,7 +136,7 @@ namespace DunefieldModel_DualMeshJobs
                         terrain, sand, shadow,
                         xResolution, zResolution,
                         slope, shadowSlope, avalancheSlope,
-                        openEnded, iter, ref depositeOut);
+                        openEnded, iter, sandChanges);
                     targetX = xCurr;
                     targetZ = zCurr;
                     //if (verbose) { Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
@@ -145,7 +145,7 @@ namespace DunefieldModel_DualMeshJobs
                 countTerrain -= (terrain[indexCurr] >= sand[indexCurr]) ? 1 : 0;
 
                 // Si el grano no está en sombra, verificar si se debe depositar
-                if (--i <= 0)
+                if (--hop <= 0)
                 {// Si el terreno es más alto que la arena, reiniciar posición
 
 
@@ -159,18 +159,18 @@ namespace DunefieldModel_DualMeshJobs
                             terrain, sand, shadow,
                             xResolution, zResolution,
                             slope, shadowSlope, avalancheSlope,
-                            openEnded, iter, ref depositeOut);
+                            openEnded, iter, sandChanges);
                         targetX = xCurr;
                         targetZ = zCurr;
                         //if (verbose) { Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
                         break;
                     }
-                    i = HopLength;
+                    hop = HopLength;
                 }
 
                 // 
             }
-            depositeOut.Add(new SandChanges { index = targetX + (xResolution * targetZ), delta = depositeH });
+            if (index >= 0 && index <= sand.Length) sandChanges.AddNoResize(new SandChanges { index = targetX + (xResolution * targetZ), delta = depositeH });
             return;
         }
         #endregion

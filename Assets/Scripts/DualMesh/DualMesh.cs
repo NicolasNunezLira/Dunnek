@@ -79,6 +79,7 @@ public class DualMesh : MonoBehaviour
             sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, criticalSlopes, criticalSlopeThreshold, this.transform);
 
         dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev);
+        sandGO.GetComponent<MeshFilter>().mesh.MarkDynamic();
 
         // Initialize the sand mesh to be above the terrain mesh
         duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,

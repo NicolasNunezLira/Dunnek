@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using System.Collections.Generic;
 
 
 namespace DunefieldModel_DualMeshJobs
@@ -20,7 +21,7 @@ namespace DunefieldModel_DualMeshJobs
             float avalancheSlope,
             bool openEnded,
             int iter,
-            ref FixedList32Bytes<SandChanges> sandOut
+            NativeList<SandChanges>.ParallelWriter sandChanges
         )
         {
             /// <summary>
@@ -58,12 +59,12 @@ namespace DunefieldModel_DualMeshJobs
             {
                 // Si el terreno es más alto que la arena más la altura de deposición, depositar encima del terreno
                 //sand[index] = terrain[index] + depositeHeight;
-                sandOut.Add(new SandChanges { index = index, delta = terrain[index] - sand[index] + depositeHeight });
+                if (index >= 0 && index <= sand.Length) sandChanges.AddNoResize(new SandChanges { index = index, delta = terrain[index] - sand[index] + depositeHeight });
             }
             else
             {
                 //sand[index] += depositeHeight;
-                sandOut.Add(new SandChanges { index = index, delta = depositeHeight });
+                if (index >= 0 && index <= sand.Length) sandChanges.AddNoResize(new SandChanges { index = index, delta = depositeHeight });
             }
 
 
@@ -73,7 +74,7 @@ namespace DunefieldModel_DualMeshJobs
                 xResolution, zResolution,
                 avalancheSlope,
                 openEnded, iter,
-                ref sandOut);
+                sandChanges);
 
             /*
             shadow = UpdateShadow(
