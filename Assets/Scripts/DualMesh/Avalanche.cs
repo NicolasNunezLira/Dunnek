@@ -4,6 +4,7 @@ using ue = UnityEngine;
 
 namespace DunefieldModel_DualMesh
 {
+    /*
     public partial class ModelDM
     {
         #region Avalanche
@@ -116,4 +117,5 @@ namespace DunefieldModel_DualMesh
         }
         #endregion
     }
+    */
 }

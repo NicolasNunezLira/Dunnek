@@ -117,12 +117,12 @@ namespace DunefieldModel_DualMesh
                     {
                         yPos = 32;
                     }
-                    /*
-                    if (!onlySand && z > 150 && z < 270 && x > 100 && x < 220)
+                    
+                    if (!onlySand && z > 150 - 40 && z < 270 - 40 && x > 100 && x < 220)
                     {
-                        yPos = 32;
+                        yPos = 15;
                     }
-                    */
+                    
                     float zPos = (float)z / resolution * size;
                     vertices[i] = new Vector3(xPos, yPos, zPos);
                     uv[i] = new Vector2((float)x / resolution,
