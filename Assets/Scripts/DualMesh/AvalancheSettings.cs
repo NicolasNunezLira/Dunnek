@@ -11,6 +11,10 @@ namespace DunefieldModel_DualMesh
         private Queue<Vector2Int> criticalCellsQueue;
         private HashSet<Vector2Int> criticalCellsSet;
 
+        // Cola de celdas activas
+        private Queue<Vector2Int> avalancheQueue;
+        private HashSet<Vector2Int> inQueue;
+
         //private int avalancheChecksPerFrame = 500; // o ajustable públicamente
 
         public void RunAvalancheStep()
@@ -399,12 +403,12 @@ namespace DunefieldModel_DualMesh
 
             int startX = rnd.Next(1, width - 1);
             int startZ = rnd.Next(1, height - 1);
-            
+
             //Vector2Int start = SelectMostUnstableCell();
             //int startX = start.x;
             //int startZ = start.y;
 
-            
+
 
             Stack<Vector2Int> toProcess = new Stack<Vector2Int>();
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
@@ -557,10 +561,31 @@ namespace DunefieldModel_DualMesh
             return candidates[index].pos;
         }
         */
-        
+
+
+        /// <summary>
+        /// Inicializa la cola reactiva de avalanchas
+        /// </summary>
+        public void InitAvalancheQueue()
+        {
+            avalancheQueue = new Queue<Vector2Int>();
+            inQueue = new HashSet<Vector2Int>();
+        }
+
+        /// <summary>
+        /// Activa una celda para evaluación de avalancha
+        /// </summary>
+        public void ActivateCell(int x, int z)
+        {
+            Vector2Int cell = new Vector2Int(x, z);
+            if (!inQueue.Contains(cell))
+            {
+                avalancheQueue.Enqueue(cell);
+                inQueue.Add(cell);
+            }
+        }
         public void RunAvalancheStepWithCriticalQueue()
         {
-            //Debug.Log(criticalCellsQueue.Count);
             if (criticalCellsQueue == null || criticalCellsQueue.Count == 0)
                 return;
 
@@ -700,6 +725,124 @@ namespace DunefieldModel_DualMesh
 
             return false;
         }
+
+        public void RunAvalancheStepWithQueues()
+        {
+            if (avalancheQueue == null || avalancheQueue.Count == 0)
+                return;
+
+            var cell = avalancheQueue.Dequeue();
+            inQueue.Remove(cell);
+
+            int x = cell.x;
+            int z = cell.y;
+
+            float h = sandElev[x, z];
+            float b = terrainElev[x, z];
+            float available = h - b;
+            if (available <= minAvalancheAmount) return;
+
+            List<(int dx, int dz, float priority)> neighbors = new();
+
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    if (dx == 0 && dz == 0) continue;
+
+                    int nx = x + dx;
+                    int nz = z + dz;
+                    if (!IsValidCell(nx, nz)) continue;
+
+                    float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                    float heightDiff = h - nh;
+                    float distance = Mathf.Sqrt(dx * dx + dz * dz);
+                    float slope = heightDiff / distance;
+
+                    if (slope > avalancheSlope && heightDiff > minAvalancheAmount)
+                    {
+                        float priority = slope * heightDiff / Mathf.Pow(distance, conicShapeFactor);
+                        neighbors.Add((dx, dz, priority));
+                    }
+                }
+            }
+
+            if (neighbors.Count == 0) return;
+
+            float totalWeight = 0f;
+            foreach (var n in neighbors) totalWeight += n.priority;
+
+            float maxTransfer = available * avalancheTrasnferRate;
+
+            foreach (var (dx, dz, priority) in neighbors)
+            {
+                int nx = x + dx;
+                int nz = z + dz;
+                float proportion = priority / totalWeight;
+                float transfer = maxTransfer * proportion;
+
+                float maxDiff = (sandElev[x, z] - Math.Max(sandElev[nx, nz], terrainElev[nx, nz])) * 0.5f;
+                transfer = Mathf.Min(transfer, maxDiff);
+
+                if (transfer > minAvalancheAmount)
+                {
+                    sandElev[x, z] -= transfer;
+                    sandElev[nx, nz] = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]) + transfer;
+                    ActivateCell(nx, nz); // ⚠️ Propagación local
+                }
+
+            }
+
+            // 🔁 Revisar vecinos del colapsador (x, z) después del colapso
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    //if (dx == 0 && dz == 0) continue;
+
+                    int nx = x + dx;
+                    int nz = z + dz;
+
+                    if (!IsValidCell(nx, nz)) continue;
+
+                    float slope = GetMaxSlopeAt(nx, nz);
+                    if (slope > avalancheSlope)
+                    {
+                        ActivateCell(nx, nz); // Propagación explícita a vecinos
+                    }
+                }
+            }
+        }
+        
+        private float GetMaxSlopeAt(int x, int z)
+        {
+            float h = sandElev[x, z];
+            float b = terrainElev[x, z];
+            if (h <= b + minAvalancheAmount) return 0f;
+
+            float maxSlope = 0f;
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dz = -1; dz <= 1; dz++)
+                {
+                    if (dx == 0 && dz == 0) continue;
+                    int nx = x + dx;
+                    int nz = z + dz;
+                    if (!IsValidCell(nx, nz)) continue;
+
+                    float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                    float heightDiff = h - nh;
+                    float distance = Mathf.Sqrt(dx * dx + dz * dz);
+                    float slope = heightDiff / distance;
+
+                    if (slope > maxSlope)
+                        maxSlope = slope;
+                }
+            }
+            return maxSlope;
+        }
+
+
 
 
     }

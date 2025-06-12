@@ -62,12 +62,12 @@ namespace DunefieldModel_DualMesh
 
             // Creación del terreno
             terrainGO = CreateMeshObject("TerrainMesh", terainMaterial,
-                GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3, false));
+                GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3, true, "terrain"));
             if (parentTransform != null)
                 terrainGO.transform.parent = parentTransform;
 
             sandGO = CreateMeshObject("SandMesh", sandMaterial,
-                GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3));
+                GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3, true, "sand"));
             if (parentTransform != null)
                 sandGO.transform.parent = parentTransform;
             GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3);
@@ -78,7 +78,6 @@ namespace DunefieldModel_DualMesh
             float terrainMinY = GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
             float terrainMaxY = GetMaxYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
             float sandMinY = GetMinYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
-            //float sandMaxY = GetMaxYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
 
             float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.005f * (terrainMaxY - terrainMinY);
             Mesh terrainMesh = terrainGO.GetComponent<MeshFilter>().mesh;
@@ -95,11 +94,9 @@ namespace DunefieldModel_DualMesh
 
             sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
             terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
-
-            //criticalSlopes = InitializeCriticalSlopes(criticalSlopeThreshold);
         }
 
-        Mesh GenerateMesh(float scale1, float amplitude1, float scale2, float amplitude2, float scale3, float amplitude3, bool onlySand = false)
+        Mesh GenerateMesh(float scale1, float amplitude1, float scale2, float amplitude2, float scale3, float amplitude3, bool cube = false, string materialCube = null)
         {
             // Generate the terrain mesh
             Mesh mesh = new Mesh();
@@ -113,14 +110,14 @@ namespace DunefieldModel_DualMesh
                 {
                     float xPos = (float)x / resolution * size;
                     float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);/// resolution * size;
-                    if (onlySand && z > 50 && z < 70 && x > 100 && x < 120)
+                    if (cube && materialCube == "terrain" && z > 150-40 && z < 170-40 && x > 100 && x < 120)
                     {
-                        yPos = 32;
+                        yPos = 25;
                     }
                     
-                    if (!onlySand && z > 150 - 40 && z < 270 - 40 && x > 100 && x < 220)
+                    if (cube && materialCube == "sand" && z > 150 - 40 && z < 270 - 40 && x > 100 && x < 220)
                     {
-                        yPos = 15;
+                        yPos = 5;
                     }
                     
                     float zPos = (float)z / resolution * size;

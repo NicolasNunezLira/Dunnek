@@ -60,7 +60,7 @@ public class DualMesh : MonoBehaviour
     public int grainsPerStep = 5000;
 
     [Tooltip("Settions for avalanches.")]
-    public int avalancheChecksPerFrame = 500;
+    //public int avalancheChecksPerFrame = 500;
     public float avalancheSlope = .5f;
     public float criticalSlopeThreshold = 2f;
     public float maxCellsPerFrame = 50;
@@ -94,8 +94,8 @@ public class DualMesh : MonoBehaviour
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
 
-        //simulationLoop = StartCoroutine(SimulationLoop());
-        duneModel.InitCriticalCells();
+        //duneModel.InitCriticalCells();
+        duneModel.InitAvalancheQueue();
     }
 
     /*
@@ -124,7 +124,7 @@ public class DualMesh : MonoBehaviour
     {
         if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); };
 
-        for (int i = 0; i < Math.Max(100, 5000 - frame / 3); i++) { duneModel.RunAvalancheStepWithCriticalQueue(); };
+        for (int i = 0; i < Math.Max(100, 500 - frame / 3); i++) { duneModel.RunAvalancheStepWithQueues(); };
         
 
         dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);

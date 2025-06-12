@@ -66,6 +66,8 @@ namespace DunefieldModel_DualMesh
             */
             //Avalanche(x, z, 5);
             UpdateShadow(x, z, dx, dz);
+
+            ActivateCell(x, z);
             
             
         }
