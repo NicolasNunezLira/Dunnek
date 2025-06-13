@@ -2,6 +2,8 @@ using UnityEngine;
 using DunefieldModel_DualMesh;
 using System.Collections.Generic;
 using System;
+using System.Xml;
+using Unity.VisualScripting;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class DualMesh : MonoBehaviour
@@ -63,7 +65,7 @@ public class DualMesh : MonoBehaviour
     //public int avalancheChecksPerFrame = 500;
     public float avalancheSlope = .5f;
     public float criticalSlopeThreshold = 2f;
-    public float maxCellsPerFrame = 50;
+    public int maxCellsPerFrame = 50;
     public float avalancheTransferRate = 0.6f;
     public float conicShapeFactor = 0.8f;
     public float minAvalancheAmount = 0.01f;
@@ -77,6 +79,7 @@ public class DualMesh : MonoBehaviour
     private Dictionary<(int, int), Vector2Int> criticalSlopes;
 
     private Coroutine simulationLoop;
+    private int grainsForAvalanche = 0;
 
     void Start()
     {
@@ -95,7 +98,9 @@ public class DualMesh : MonoBehaviour
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
 
         //duneModel.InitCriticalCells();
+        //duneModel.InitCriticalSlopeCells();
         duneModel.InitAvalancheQueue();
+        grainsForAvalanche = duneModel.avalancheQueue.Count;
     }
 
     /*
@@ -122,13 +127,21 @@ public class DualMesh : MonoBehaviour
     int frame = 0;
     void Update()
     {
-        if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); };
 
-        for (int i = 0; i < Math.Max(100, 500 - frame / 3); i++) { duneModel.RunAvalancheStepWithQueues(); };
         
+        if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+
+        for (int i = 0; i < 100; i++)
+        {
+            grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
+        }
+        ;
+
 
         dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
 
         frame++;
+        
+        
     }
 }

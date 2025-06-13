@@ -186,13 +186,12 @@ MonoBehaviour:
   hopLength: 3
   shadowSlope: 0.02
   windDirection: {x: 1, y: 1}
-  grainsPerStep: 500
-  avalancheChecksPerFrame: 500
-  avalancheSlope: 0.5
+  grainsPerStep: 1000
+  avalancheSlope: 0.1
   criticalSlopeThreshold: 2
-  maxCellsPerFrame: 500
-  avalancheTransferRate: 0.5
-  conicShapeFactor: 2
+  maxCellsPerFrame: 100
+  avalancheTransferRate: 0.7
+  conicShapeFactor: 1
   minAvalancheAmount: 1.5
 --- !u!23 &164671254
 MeshRenderer:

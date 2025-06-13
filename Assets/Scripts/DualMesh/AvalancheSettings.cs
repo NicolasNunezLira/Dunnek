@@ -12,7 +12,7 @@ namespace DunefieldModel_DualMesh
         private HashSet<Vector2Int> criticalCellsSet;
 
         // Cola de celdas activas
-        private Queue<Vector2Int> avalancheQueue;
+        public Queue<Vector2Int> avalancheQueue;
         private HashSet<Vector2Int> inQueue;
 
         //private int avalancheChecksPerFrame = 500; // o ajustable públicamente
@@ -568,8 +568,22 @@ namespace DunefieldModel_DualMesh
         /// </summary>
         public void InitAvalancheQueue()
         {
-            avalancheQueue = new Queue<Vector2Int>();
-            inQueue = new HashSet<Vector2Int>();
+            if (avalancheQueue == null) avalancheQueue = new Queue<Vector2Int>();
+            if (inQueue == null) inQueue = new HashSet<Vector2Int>();
+
+            int width = sandElev.GetLength(0);
+            int height = sandElev.GetLength(1);
+
+            for (int x = 1; x < width - 1; x++)
+            {
+                for (int z = 1; z < height - 1; z++)
+                {
+                    if (CellIsCritical(x, z))
+                    {
+                        ActivateCell(x, z);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -674,10 +688,12 @@ namespace DunefieldModel_DualMesh
             }
         }
 
-        public void InitCriticalCells()
+        public void InitCriticalSlopeCells()
         {
-            criticalCellsQueue = new Queue<Vector2Int>();
-            criticalCellsSet = new HashSet<Vector2Int>();
+            if (avalancheQueue == null) avalancheQueue = new Queue<Vector2Int>();
+            if (inQueue == null) inQueue = new HashSet<Vector2Int>();
+
+            List<(Vector2Int pos, float slope)> critical = new();
 
             int width = sandElev.GetLength(0);
             int height = sandElev.GetLength(1);
@@ -686,14 +702,27 @@ namespace DunefieldModel_DualMesh
             {
                 for (int z = 1; z < height - 1; z++)
                 {
-                    if (CellIsCritical(x, z))
+                    float maxSlope = GetMaxSlopeAt(x, z);
+                    if (maxSlope > 2.5 * avalancheSlope)
                     {
-                        var cell = new Vector2Int(x, z);
-                        criticalCellsQueue.Enqueue(cell);
-                        criticalCellsSet.Add(cell);
+                        critical.Add((new Vector2Int(x, z), maxSlope));
                     }
                 }
             }
+
+            // Ordenar por pendiente de mayor a menor
+            critical.Sort((a, b) => b.slope.CompareTo(a.slope));
+
+            foreach (var (pos, _) in critical)
+            {
+                if (!inQueue.Contains(pos))
+                {
+                    avalancheQueue.Enqueue(pos);
+                    inQueue.Add(pos);
+                }
+            }
+
+            //Debug.Log($"Celdas críticas iniciales activadas: {critical.Count}");
         }
         private bool CellIsCritical(int x, int z)
         {
@@ -715,7 +744,7 @@ namespace DunefieldModel_DualMesh
 
                     float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
                     float heightDiff = h - nh;
-                    float distance = Mathf.Sqrt(dx * dx + dz * dz);
+                    float distance = size * Mathf.Sqrt(dx * dx / (xResolution * xResolution) + dz * dz / (zResolution * zResolution));
 
                     float slope = heightDiff / distance;
                     if (slope > avalancheSlope)
@@ -788,12 +817,12 @@ namespace DunefieldModel_DualMesh
                 {
                     sandElev[x, z] -= transfer;
                     sandElev[nx, nz] = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]) + transfer;
-                    ActivateCell(nx, nz); // ⚠️ Propagación local
+                    ActivateCell(nx, nz); // Propagación local
                 }
 
             }
 
-            // 🔁 Revisar vecinos del colapsador (x, z) después del colapso
+            // Revisar vecinos del colapsador (x, z) después del colapso
             for (int dx = -1; dx <= 1; dx++)
             {
                 for (int dz = -1; dz <= 1; dz++)
@@ -813,7 +842,106 @@ namespace DunefieldModel_DualMesh
                 }
             }
         }
-        
+
+
+        public int RunAvalancheBurst(int maxStepsPerCall = 50, bool verbose = false)
+        {
+
+            if (verbose) Debug.Log($"Granos avalanchados por paso: {avalancheQueue.Count}/{maxStepsPerCall}");
+            if (avalancheQueue == null || avalancheQueue.Count == 0)
+                return 0;
+
+            Stack<Vector2Int> localStack = new Stack<Vector2Int>();
+
+            var root = avalancheQueue.Dequeue();
+            inQueue.Remove(root);
+            localStack.Push(root);
+
+            int steps = 0;
+
+            while (localStack.Count > 0 && steps < maxStepsPerCall)
+            {
+                var cell = localStack.Pop();
+                steps++;
+
+                int x = cell.x;
+                int z = cell.y;
+
+                float h = sandElev[x, z];
+                float b = terrainElev[x, z];
+                float available = h - b;
+                if (available <= minAvalancheAmount) continue;
+
+                List<(int dx, int dz, float priority)> neighbors = new();
+
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    for (int dz = -1; dz <= 1; dz++)
+                    {
+                        if (dx == 0 && dz == 0) continue;
+
+                        int nx = x + dx;
+                        int nz = z + dz;
+                        if (!IsValidCell(nx, nz)) continue;
+
+                        float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                        float heightDiff = h - nh;
+                        float distance = size * Mathf.Sqrt(dx * dx / (xResolution * xResolution) + dz * dz / (zResolution * zResolution));
+                        float slope = heightDiff / distance;
+
+                        if (slope > avalancheSlope && heightDiff > minAvalancheAmount)
+                        {
+                            float priority = slope * heightDiff / Mathf.Pow(distance, conicShapeFactor);
+                            neighbors.Add((dx, dz, priority));
+                        }
+                    }
+                }
+
+                if (neighbors.Count == 0) continue;
+
+                float totalWeight = 0f;
+                foreach (var n in neighbors) totalWeight += n.priority;
+
+                float maxTransfer = available * avalancheTrasnferRate;
+
+                foreach (var (dx, dz, priority) in neighbors)
+                {
+                    int nx = x + dx;
+                    int nz = z + dz;
+                    float proportion = priority / totalWeight;
+                    float transfer = maxTransfer * proportion;
+
+                    float maxDiff = (sandElev[x, z] - Math.Max(sandElev[nx, nz], terrainElev[nx, nz])) * 0.5f;
+                    transfer = Mathf.Min(transfer, maxDiff);
+
+                    if (transfer > minAvalancheAmount)
+                    {
+                        sandElev[x, z] -= transfer;
+                        sandElev[nx, nz] = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]) + transfer;
+
+                        Vector2Int neighbor = new Vector2Int(nx, nz);
+                        if (!inQueue.Contains(neighbor))
+                        {
+                            avalancheQueue.Enqueue(neighbor);
+                            inQueue.Add(neighbor);
+                        }
+
+                        localStack.Push(neighbor); // 💡 propagación rápida en bloque
+                    }
+                }
+
+                // Reinsertar el colapsador si sigue inestable
+                float slopeNow = GetMaxSlopeAt(x, z);
+                if (slopeNow > avalancheSlope)
+                    localStack.Push(cell);
+
+                if  (steps % 40 == 0)
+                    localStack.Reverse();
+            }
+
+            return avalancheQueue.Count;
+        }
+
         private float GetMaxSlopeAt(int x, int z)
         {
             float h = sandElev[x, z];
@@ -832,7 +960,7 @@ namespace DunefieldModel_DualMesh
 
                     float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
                     float heightDiff = h - nh;
-                    float distance = Mathf.Sqrt(dx * dx + dz * dz);
+                    float distance = size * Mathf.Sqrt(dx * dx / (xResolution * xResolution) + dz * dz / (zResolution * zResolution));
                     float slope = heightDiff / distance;
 
                     if (slope > maxSlope)

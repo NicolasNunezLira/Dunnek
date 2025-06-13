@@ -15,7 +15,7 @@ namespace DunefieldModel_DualMesh
             ///</summary>
             ShadowCheck(false, dx, dz);
         }
-        /*protected int ShadowCheck(bool ReportErrors, int dx, int dz)
+        protected int ShadowCheck(bool ReportErrors, int dx, int dz)
         {
             /// <summary>
             /// Verifica y actualiza la sombra del modelo de dunas.
@@ -89,7 +89,9 @@ namespace DunefieldModel_DualMesh
 
             return errors;
         }
-        */
+
+
+        /*
         protected int ShadowCheck(bool ReportErrors, int dx, int dz)
         {
             /// <summary>
@@ -188,8 +190,8 @@ namespace DunefieldModel_DualMesh
 
             return errors;
         }
+*/
 
-        /*
         public void UpdateShadow(int x, int z, int dx, int dz)
         {
             /// <summary>
@@ -266,65 +268,67 @@ namespace DunefieldModel_DualMesh
                     }
                 }
             }
-            */
 
-        public void UpdateShadow(int x, int z, int dx, int dz)
-        {
-            /// <summary>
-            /// Proyecta sombra cónica desde (x, z) en dirección del viento (dx, dz), usando altura local.
-            /// </summary>
-
-            float h = Math.Max(sandElev[x, z], terrainElev[x, z]);
-            float hs;
-
-            int xPrev = x - dx;
-            int zPrev = z - dz;
-
-            if (openEnded && IsOutside(xPrev, zPrev))
+            /*
+            public void UpdateShadow(int x, int z, int dx, int dz)
             {
-                hs = h;
-            }
-            else
-            {
-                (xPrev, zPrev) = WrapCoords(xPrev, zPrev);
-                hs = Math.Max(h, Math.Max(Math.Max(sandElev[xPrev, zPrev], terrainElev[xPrev, zPrev]), Shadow[xPrev, zPrev]) - shadowSlope);
-            }
+                /// <summary>
+                /// Proyecta sombra cónica desde (x, z) en dirección del viento (dx, dz), usando altura local.
+                /// </summary>
 
-            Vector2 windDir = new Vector2(dx, dz).normalized;
-            Vector2 perp = new Vector2(-windDir.y, windDir.x);
-            int maxSteps = 20;
-            float baseRadius = 3f;
-            float endRadius = 0.5f;
-            float currentHs = hs;
+                float h = Math.Max(sandElev[x, z], terrainElev[x, z]);
+                float hs;
 
-            for (int step = 0; step < maxSteps && currentHs > 0; step++)
-            {
-                Vector2 basePos = new Vector2(x, z) + windDir * step;
+                int xPrev = x - dx;
+                int zPrev = z - dz;
 
-                float t = step / (float)maxSteps;
-                int radius = Mathf.CeilToInt(Mathf.Lerp(baseRadius, endRadius, t));
-
-                for (int i = -radius; i <= radius; i++)
+                if (openEnded && IsOutside(xPrev, zPrev))
                 {
-                    Vector2 offset = basePos + perp * i;
-                    int xi = Mathf.RoundToInt(offset.x);
-                    int zi = Mathf.RoundToInt(offset.y);
-
-                    if (openEnded && IsOutside(xi, zi)) continue;
-                    (xi, zi) = WrapCoords(xi, zi);
-
-                    float localH = Math.Max(sandElev[xi, zi], terrainElev[xi, zi]);
-                    if (currentHs < localH) continue;
-
-                    Shadow[xi, zi] = (currentHs == localH) ? 0 : Math.Max(Shadow[xi, zi], currentHs);
+                    hs = h;
+                }
+                else
+                {
+                    (xPrev, zPrev) = WrapCoords(xPrev, zPrev);
+                    hs = Math.Max(h, Math.Max(Math.Max(sandElev[xPrev, zPrev], terrainElev[xPrev, zPrev]), Shadow[xPrev, zPrev]) - shadowSlope);
                 }
 
-                currentHs -= shadowSlope;
-            }
-        }
+                Vector2 windDir = new Vector2(dx, dz).normalized;
+                Vector2 perp = new Vector2(-windDir.y, windDir.x);
+                int maxSteps = 20;
+                float baseRadius = 3f;
+                float endRadius = 0.5f;
+                float currentHs = hs;
 
+                for (int step = 0; step < maxSteps && currentHs > 0; step++)
+                {
+                    Vector2 basePos = new Vector2(x, z) + windDir * step;
+
+                    float t = step / (float)maxSteps;
+                    int radius = Mathf.CeilToInt(Mathf.Lerp(baseRadius, endRadius, t));
+
+                    for (int i = -radius; i <= radius; i++)
+                    {
+                        Vector2 offset = basePos + perp * i;
+                        int xi = Mathf.RoundToInt(offset.x);
+                        int zi = Mathf.RoundToInt(offset.y);
+
+                        if (openEnded && IsOutside(xi, zi)) continue;
+                        (xi, zi) = WrapCoords(xi, zi);
+
+                        float localH = Math.Max(sandElev[xi, zi], terrainElev[xi, zi]);
+                        if (currentHs < localH) continue;
+
+                        Shadow[xi, zi] = (currentHs == localH) ? 0 : Math.Max(Shadow[xi, zi], currentHs);
+                    }
+
+                    currentHs -= shadowSlope;
+                }
+            }
+    */
 
 
         }
         #endregion
     }
+}
+
