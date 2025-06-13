@@ -97,33 +97,10 @@ public class DualMesh : MonoBehaviour
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
 
-        //duneModel.InitCriticalCells();
-        //duneModel.InitCriticalSlopeCells();
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
     }
 
-    /*
-    System.Collections.IEnumerator SimulationLoop()
-    {
-        while (true)
-        {
-            duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
-
-            duneModel.AvalancheInit();
-
-            //if (duneModel.GetAvalancheStatus().isProcessing)
-            {
-                yield return StartCoroutine(duneModel.GetAvalancheCoroutine());
-            }
-
-            dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
-
-            //yield return new WaitForSeconds(0.2f);
-    
-        }
-    }
-    */
     int frame = 0;
     void Update()
     {

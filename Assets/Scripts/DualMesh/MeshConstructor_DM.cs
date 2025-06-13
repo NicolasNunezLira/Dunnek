@@ -62,12 +62,12 @@ namespace DunefieldModel_DualMesh
 
             // Creación del terreno
             terrainGO = CreateMeshObject("TerrainMesh", terainMaterial,
-                GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3, true, "terrain"));
+                GenerateMesh(terrainScale1, terrainAmplitude1, terrainScale2, terrainAmplitude2, terrainScale3, terrainAmplitude3, false, "terrain"));
             if (parentTransform != null)
                 terrainGO.transform.parent = parentTransform;
 
             sandGO = CreateMeshObject("SandMesh", sandMaterial,
-                GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3, true, "sand"));
+                GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3, false, "sand"));
             if (parentTransform != null)
                 sandGO.transform.parent = parentTransform;
             GenerateMesh(sandScale1, sandAmplitude1, sandScale2, sandAmplitude2, sandScale3, sandAmplitude3);
