@@ -320,14 +320,19 @@ namespace DunefieldModel_DualMesh
 
                     for (int j = 0; j < 2; j++)
                     {
-                        int lx = (xCurr + dxLateral[j] + xResolution) % xResolution;
-                        int lz = (zCurr + dzLateral[j] + zResolution) % zResolution;
-
-                        if (Math.Max(terrainElev[lx, lz], sandElev[lx, lz]) < Math.Max(terrainElev[xCurr, zCurr], sandElev[xCurr, zCurr]) - slopeThreshold)
+                        int k = 1;
+                        while (k <= i)
                         {
-                            DepositGrain(lx, lz, dxLateral[j], dzLateral[j], depositeH);
-                            if (verbose) ue.Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
-                            break;
+                            int lx = (xCurr + dxLateral[j] * k + xResolution) % xResolution;
+                            int lz = (zCurr + dzLateral[j] * k + zResolution) % zResolution;
+
+                            if (Math.Max(terrainElev[lx, lz], sandElev[lx, lz]) < Math.Max(terrainElev[xCurr, zCurr], sandElev[xCurr, zCurr]) - slopeThreshold)
+                            {
+                                DepositGrain(lx, lz, dxLateral[j], dzLateral[j], depositeH);
+                                if (verbose) ue.Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
+                                break;
+                            }
+                            k++;
                         }
                     }
 

@@ -64,8 +64,10 @@ namespace DunefieldModel_DualMesh
                     return;
             }
             */
-            Avalanche(x, z, 5);
+            //Avalanche(x, z, 5);
             UpdateShadow(x, z, dx, dz);
+
+            ActivateCell(x, z);
             
             
         }

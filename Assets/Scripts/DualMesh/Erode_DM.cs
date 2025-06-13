@@ -104,6 +104,8 @@ namespace DunefieldModel_DualMesh
             */
             
             UpdateShadow(x, z, dx, dz);
+
+            ActivateCell(x, z);
             return erosionH;
         }
         #endregion

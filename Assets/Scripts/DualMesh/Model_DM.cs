@@ -40,17 +40,24 @@ namespace DunefieldModel_DualMesh
         public int dx, dz;
 
         private float erosionH, depositeH, aux;
-        
-        // Guarda celdas con pendiente crítica y la dirección del posible colapso
-        public Dictionary<(int, int), ue.Vector2Int> criticalSlopes;
+
+        public bool verbose;
+
+        public float maxCellsPerFrame, conicShapeFactor, avalancheTrasnferRate, minAvalancheAmount, size;
 
         #endregion
 
         #region Init model
-        public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int xResolution, int zResolution, float slope, int dx, int dz,
-            float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope)
+        public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, float size, int xResolution, int zResolution, float slope, int dx, int dz,
+            float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope, float maxCellsPerFrame,
+            float conicShapeFactor, float avalancheTrasnferRate, float minAvalancheAmount, bool verbose = false)
         {
             FindSlope = SlopeFinder;
+            this.size = size;
+            this.maxCellsPerFrame = maxCellsPerFrame;
+            this.avalancheTrasnferRate = avalancheTrasnferRate;
+            this.minAvalancheAmount = minAvalancheAmount;
+            this.conicShapeFactor = conicShapeFactor;
             this.sandElev = sandElev;
             this.terrainElev = terrainElev;
             this.depositeHeight = depositeHeight;
@@ -63,6 +70,7 @@ namespace DunefieldModel_DualMesh
             this.dz = dz;
             this.xResolution = xResolution;
             this.zResolution = zResolution;
+            this.verbose = verbose;
             xDOF = this.xResolution - 1;
             zDOF = this.zResolution - 1;
             Shadow = new float[xResolution, zResolution];

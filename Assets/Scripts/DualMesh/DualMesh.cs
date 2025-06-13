@@ -1,6 +1,9 @@
 using UnityEngine;
 using DunefieldModel_DualMesh;
 using System.Collections.Generic;
+using System;
+using System.Xml;
+using Unity.VisualScripting;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class DualMesh : MonoBehaviour
@@ -47,10 +50,6 @@ public class DualMesh : MonoBehaviour
     [Tooltip("The slope of the terrain.")]
     public float slope = 0.2f;
 
-    [Tooltip("The slope for avalanches.")]
-    public float avalancheSlope = .5f;
-    public float criticalSlopeThreshold = 2f;
-
     [Tooltip("The hop length for the simulation.")]
     public int hopLength = 1;
 
@@ -62,6 +61,15 @@ public class DualMesh : MonoBehaviour
     [Tooltip("The number of grains per step.")]
     public int grainsPerStep = 5000;
 
+    [Tooltip("Settions for avalanches.")]
+    //public int avalancheChecksPerFrame = 500;
+    public float avalancheSlope = .5f;
+    public float criticalSlopeThreshold = 2f;
+    public int maxCellsPerFrame = 50;
+    public float avalancheTransferRate = 0.6f;
+    public float conicShapeFactor = 0.8f;
+    public float minAvalancheAmount = 0.01f;
+
     private GameObject terrainGO, sandGO;
 
     private ModelDM duneModel;
@@ -69,6 +77,9 @@ public class DualMesh : MonoBehaviour
 
     private DualMeshConstructor dualMeshConstructor;
     private Dictionary<(int, int), Vector2Int> criticalSlopes;
+
+    private Coroutine simulationLoop;
+    private int grainsForAvalanche = 0;
 
     void Start()
     {
@@ -82,29 +93,32 @@ public class DualMesh : MonoBehaviour
         sandGO.GetComponent<MeshFilter>().mesh.MarkDynamic();
 
         // Initialize the sand mesh to be above the terrain mesh
-        duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
-            heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope);
+        duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+            heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
+            conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
+
+        duneModel.InitAvalancheQueue();
+        grainsForAvalanche = duneModel.avalancheQueue.Count;
     }
 
-    int frameCount = 0;
+    int frame = 0;
     void Update()
     {
-        if (frameCount < 360)
+
+        
+        if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+
+        for (int i = 0; i < 100; i++)
         {
-            // Cálculo de la avalancha
-            duneModel.AvalancheInit();
+            grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
         }
-        else
-        {
-
-            // Update del modelo de dunas
-            duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
+        ;
 
 
-            dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
+        dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
 
-            if (frameCount % 100 == 0) duneModel.AvalancheInit();
-        }
-        frameCount++;
+        frame++;
+        
+        
     }
 }
