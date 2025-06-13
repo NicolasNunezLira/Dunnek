@@ -90,10 +90,13 @@ namespace DunefieldModel_DualMesh
             terrainMesh.RecalculateNormals();
             terrainMesh.RecalculateBounds();
 
+
             RegularizeMesh(sandGO.GetComponent<MeshFilter>().mesh, terrainGO.GetComponent<MeshFilter>().mesh);
 
             sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
             terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
+
+            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
         }
 
         Mesh GenerateMesh(float scale1, float amplitude1, float scale2, float amplitude2, float scale3, float amplitude3, bool cube = false, string materialCube = null)
@@ -156,9 +159,14 @@ namespace DunefieldModel_DualMesh
             obj.AddComponent<MeshFilter>();
             obj.AddComponent<MeshRenderer>();
 
-            //Mesh mesh = GenerateMesh(heightMap);
             obj.GetComponent<MeshFilter>().mesh = mesh;
             obj.GetComponent<MeshRenderer>().material = material;
+
+            var meshCollider = obj.AddComponent<MeshCollider>();
+            meshCollider.sharedMesh = mesh;
+            meshCollider.convex = false;
+
+            obj.layer = LayerMask.NameToLayer("Terrain");
 
             return obj;
         }
