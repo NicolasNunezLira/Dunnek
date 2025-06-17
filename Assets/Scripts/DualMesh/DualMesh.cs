@@ -72,7 +72,9 @@ public class DualMesh : MonoBehaviour
     public float minAvalancheAmount = 0.01f;
 
     [Header("Builds prefab")]
+    
     public GameObject buildPrefabGO;
+    public enum BuildMode {Raise, Dig};
 
     // ====================================================================
 
@@ -90,6 +92,8 @@ public class DualMesh : MonoBehaviour
     private BuildSystem builder;
     private GameObject buildPreviewGO;
 
+    private BuildMode currentBuildMode = BuildMode.Raise;
+
     void Start()
     {
         slopeFinder = new FindSlopeMooreDeterministic();
@@ -99,7 +103,6 @@ public class DualMesh : MonoBehaviour
             sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, criticalSlopes, criticalSlopeThreshold, this.transform);
 
         dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev);
-        sandGO.GetComponent<MeshFilter>().mesh.MarkDynamic();
 
         // Initialize the sand mesh to be above the terrain mesh
         duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
@@ -112,7 +115,7 @@ public class DualMesh : MonoBehaviour
         // Initialize buildSystem
         buildPreviewGO = Instantiate(buildPrefabGO);
         buildPreviewGO.SetActive(false);
-        builder = new BuildSystem(duneModel, buildPreviewGO);
+        builder = new BuildSystem(duneModel, dualMeshConstructor, buildPreviewGO, currentBuildMode);
     }
 
     void Update()
@@ -126,32 +129,40 @@ public class DualMesh : MonoBehaviour
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
         }
 
+        if (Input.GetKeyDown(KeyCode.Tab) && inBuildMode)
+        {
+            currentBuildMode = currentBuildMode == BuildMode.Raise ? BuildMode.Dig : BuildMode.Raise;
+            builder.currentBuildMode = currentBuildMode;
+            builder.UpdateBuildPreviewVisual();
+        }
+
         if (inBuildMode)
-        {
-            builder.HandleBuildPreview();
-
-            if (Input.GetMouseButtonDown(0))
             {
-                builder.ConfirmBuild();
-                constructed = true;
-                inBuildMode = !inBuildMode;
-            }        
-        }
-        else
-        {
+                builder.HandleBuildPreview();
 
-            if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
-
-            for (int i = 0; i < 100; i++)
-            {
-                grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
+                if (Input.GetMouseButtonDown(0))
+                {
+                    builder.ConfirmBuild();
+                    constructed = true;
+                    inBuildMode = !inBuildMode;
+                }
             }
-            ;
-        }
+            else
+            {
+
+                if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+
+                for (int i = 0; i < 100; i++)
+                {
+                    grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
+                }
+                ;
+            }
 
         if (constructed)
         {
             dualMeshConstructor.ApplyHeightMapToMesh(terrainGO.GetComponent<MeshFilter>().mesh, terrainElev);
+            constructed = false;
         }
 
 

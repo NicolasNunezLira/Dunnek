@@ -96,7 +96,11 @@ namespace DunefieldModel_DualMesh
             sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
             terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
 
+            sandGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
+
+            sandGO.GetComponent<MeshFilter>().mesh.MarkDynamic();
+            terrainGO.GetComponent<MeshFilter>().mesh.MarkDynamic();
         }
 
         Mesh GenerateMesh(float scale1, float amplitude1, float scale2, float amplitude2, float scale3, float amplitude3, bool cube = false, string materialCube = null)
@@ -113,16 +117,16 @@ namespace DunefieldModel_DualMesh
                 {
                     float xPos = (float)x / resolution * size;
                     float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);/// resolution * size;
-                    if (cube && materialCube == "terrain" && z > 150-40 && z < 170-40 && x > 100 && x < 120)
+                    if (cube && materialCube == "terrain" && z > 150 - 40 && z < 170 - 40 && x > 100 && x < 120)
                     {
                         yPos = 25;
                     }
-                    
+
                     if (cube && materialCube == "sand" && z > 150 - 40 && z < 270 - 40 && x > 100 && x < 220)
                     {
                         yPos = 5;
                     }
-                    
+
                     float zPos = (float)z / resolution * size;
                     vertices[i] = new Vector3(xPos, yPos, zPos);
                     uv[i] = new Vector2((float)x / resolution,
@@ -290,7 +294,7 @@ namespace DunefieldModel_DualMesh
 
                     foreach (var dir in directions)
                     {
-                        
+
                         int xn = x + dir.x;
                         int zn = z + dir.y;
 
@@ -313,11 +317,14 @@ namespace DunefieldModel_DualMesh
 
             return criticalSlopes;
         }
-        
+
         public bool IsOutside(int x, int z)
         {
             return x < 0 || x >= sandElev.GetLength(0) || z < 0 || z >= sandElev.GetLength(1);
         }
+        
+        public int WorldToIndex(float worldCoord) => Mathf.FloorToInt(worldCoord * resolution / size);
+
 
     }
 }
