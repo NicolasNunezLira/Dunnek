@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5354862a98581c4b98a89307dab78fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 255
+  resolution: 511
   size: 50
   terrainMaterial: {fileID: 2100000, guid: c9df7fed0d2882e4daa9486dee9bbf3e, type: 2}
   terrainScale1: 0.003
@@ -194,6 +194,7 @@ MonoBehaviour:
   conicShapeFactor: 1
   minAvalancheAmount: 1.5
   buildPrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
+  housePrefabGO: {fileID: 1659259488616942273, guid: 7dbdf52221356974aa796fc70b50dad0, type: 3}
 --- !u!23 &164671254
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1417,10 +1418,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 20
-  zoomSpeed: 100
+  zoomSpeed: 400
   rotationSpeed: 5
-  minZoom: 10
-  maxZoom: 80
+  minZoom: 1
+  maxZoom: 100
 --- !u!33 &285757673750222148
 MeshFilter:
   m_ObjectHideFlags: 0

@@ -74,7 +74,9 @@ public class DualMesh : MonoBehaviour
     [Header("Builds prefab")]
     
     public GameObject buildPrefabGO;
-    public enum BuildMode {Raise, Dig};
+    
+    public GameObject housePrefabGO;
+    public enum BuildMode { Raise, Dig, PlaceHouse };
 
     // ====================================================================
 
@@ -90,7 +92,7 @@ public class DualMesh : MonoBehaviour
 
     private bool inBuildMode = false, constructed = false;
     private BuildSystem builder;
-    private GameObject buildPreviewGO;
+    private GameObject buildPreviewGO, housePreviewGO;
 
     private BuildMode currentBuildMode = BuildMode.Raise;
 
@@ -115,49 +117,52 @@ public class DualMesh : MonoBehaviour
         // Initialize buildSystem
         buildPreviewGO = Instantiate(buildPrefabGO);
         buildPreviewGO.SetActive(false);
-        builder = new BuildSystem(duneModel, dualMeshConstructor, buildPreviewGO, currentBuildMode);
+        housePreviewGO = Instantiate(housePrefabGO);
+        housePreviewGO.SetActive(false);
+        builder = new BuildSystem(duneModel, dualMeshConstructor, buildPreviewGO, housePreviewGO, currentBuildMode);
     }
 
     void Update()
     {
-        // Instrucciones para previsualización en la construcción de un cubo
+        // Enter/Exit Build Mode
         if (Input.GetKeyDown(KeyCode.C))
         {
             inBuildMode = !inBuildMode;
             buildPreviewGO.SetActive(inBuildMode);
+            // Update the meshcolliders
             sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
         }
 
         if (Input.GetKeyDown(KeyCode.Tab) && inBuildMode)
         {
-            currentBuildMode = currentBuildMode == BuildMode.Raise ? BuildMode.Dig : BuildMode.Raise;
+            currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
             builder.currentBuildMode = currentBuildMode;
             builder.UpdateBuildPreviewVisual();
         }
 
         if (inBuildMode)
+        {
+            builder.HandleBuildPreview();
+
+            if (Input.GetMouseButtonDown(0))
             {
-                builder.HandleBuildPreview();
-
-                if (Input.GetMouseButtonDown(0))
-                {
-                    builder.ConfirmBuild();
-                    constructed = true;
-                    inBuildMode = !inBuildMode;
-                }
+                builder.ConfirmBuild();
+                constructed = true;
+                inBuildMode = !inBuildMode;
             }
-            else
+        }
+        else
+        {
+
+            if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+
+            for (int i = 0; i < 100; i++)
             {
-
-                if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
-
-                for (int i = 0; i < 100; i++)
-                {
-                    grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
-                }
-                ;
+                grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
             }
+            ;
+        }
 
         if (constructed)
         {

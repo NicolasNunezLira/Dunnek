@@ -13,7 +13,7 @@ namespace DunefieldModel_DualMesh
 
         public Material terainMaterial, sandMaterial;
 
-        public float[,] sandElev, terrainElev;
+        public float[,] sandElev, terrainElev, terrainGhost;
 
         public GameObject terrainGO, sandGO;
         public Transform parentTransform;
@@ -96,6 +96,8 @@ namespace DunefieldModel_DualMesh
             sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
             terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
 
+            terrainGhost = CopyArray(terrainElev);
+
             sandGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
 
@@ -134,7 +136,7 @@ namespace DunefieldModel_DualMesh
                 }
             }
 
-            for (int ti = 0, vi = 0, z = 0; z < resolution; z++, vi++)
+            for (int ti = 0, vi = 0, z = 0; z < resolution; z++)
             {
                 for (int x = 0; x < resolution; x++, ti += 6, vi++)
                 {
@@ -146,7 +148,14 @@ namespace DunefieldModel_DualMesh
                     triangles[ti + 4] = vi + resolution + 1;
                     triangles[ti + 5] = vi + resolution + 2;
                 }
+                vi++;
             }
+
+            if ((resolution + 1) * (resolution + 1) > 65000)
+            {
+                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            }
+
 
             mesh.vertices = vertices;
             mesh.uv = uv;
@@ -239,7 +248,7 @@ namespace DunefieldModel_DualMesh
                     vertices[index] = v;
                 }
             }
-
+            
             mesh.vertices = vertices;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
@@ -324,6 +333,19 @@ namespace DunefieldModel_DualMesh
         }
         
         public int WorldToIndex(float worldCoord) => Mathf.FloorToInt(worldCoord * resolution / size);
+
+        public float[,] CopyArray(float[,] source)
+        {
+            int rows = source.GetLength(0);
+            int cols = source.GetLength(1);
+            float[,] copy = new float[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+                for (int j = 0; j < cols; j++)
+                    copy[i, j] = source[i, j];
+
+            return copy;
+        }
 
 
     }
