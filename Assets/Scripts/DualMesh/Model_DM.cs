@@ -81,6 +81,7 @@ namespace DunefieldModel_DualMesh
         }
         #endregion
 
+        #region Auxiliar Variables
         public virtual bool UsesHopLength()
         {
             return true;  // does this model use the user-provided value of hop length?
@@ -96,6 +97,7 @@ namespace DunefieldModel_DualMesh
             openEnded = NewState;
             FindSlope.SetOpenEnded(openEnded);
         }
+        #endregion
 
     }
 }

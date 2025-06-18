@@ -13,7 +13,7 @@ namespace DunefieldModel_DualMesh
 
         public Material terainMaterial, sandMaterial;
 
-        public float[,] sandElev, terrainElev, terrainGhost;
+        public float[,] sandElev, terrainElev, terrainShadow;
 
         public GameObject terrainGO, sandGO;
         public Transform parentTransform;
@@ -49,7 +49,7 @@ namespace DunefieldModel_DualMesh
         }
 
         public void Initialize(out GameObject terrainGO, out GameObject sandGO,
-            out float[,] terrainElev, out float[,] sandElev)
+            out float[,] terrainElev, out float[,] sandElev, out float[,] terrainShadow)
         {
             /// <summary>
             /// Initializes the terrain and sand meshes, creating GameObjects for each.
@@ -96,7 +96,7 @@ namespace DunefieldModel_DualMesh
             sandElev = MeshToHeightMap(sandGO.GetComponent<MeshFilter>().mesh, resolution);
             terrainElev = MeshToHeightMap(terrainGO.GetComponent<MeshFilter>().mesh, resolution);
 
-            terrainGhost = CopyArray(terrainElev);
+            terrainShadow = CopyArray(terrainElev);
 
             sandGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;

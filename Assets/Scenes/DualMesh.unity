@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5354862a98581c4b98a89307dab78fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 511
+  resolution: 255
   size: 50
   terrainMaterial: {fileID: 2100000, guid: c9df7fed0d2882e4daa9486dee9bbf3e, type: 2}
   terrainScale1: 0.003
@@ -193,8 +193,9 @@ MonoBehaviour:
   avalancheTransferRate: 0.7
   conicShapeFactor: 1
   minAvalancheAmount: 1.5
-  buildPrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
+  buildPrefabGO: {fileID: 7960429348020450371, guid: bea85a0a54dc5a2449ee5e3d8672360a, type: 3}
   housePrefabGO: {fileID: 1659259488616942273, guid: 7dbdf52221356974aa796fc70b50dad0, type: 3}
+  wallPrefabGO: {fileID: 3149707725384881785, guid: a97fe0bcf5cf5ba499ad434339ea7397, type: 3}
 --- !u!23 &164671254
 MeshRenderer:
   m_ObjectHideFlags: 0

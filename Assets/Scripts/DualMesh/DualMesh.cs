@@ -5,10 +5,12 @@ using System;
 using System.Xml;
 using Unity.VisualScripting;
 using Building;
+using UnityEditor.EditorTools;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class DualMesh : MonoBehaviour
 {
+    #region Program Parameters
     [Header("Plane Settings")]
     [Range(31, 511)]
     [Tooltip("The number of subdivisions along each axis.")]
@@ -42,8 +44,6 @@ public class DualMesh : MonoBehaviour
     public float sandScale3 = 0.1f;
     public float sandAmplitude3 = 0.3f;
 
-    public float[,] terrainElev, sandElev;
-
     [Header("Simulation Settings")]
     [Tooltip("The height variation of the terrain.")]
     public float heightVariation = 0.1f;
@@ -72,15 +72,25 @@ public class DualMesh : MonoBehaviour
     public float minAvalancheAmount = 0.01f;
 
     [Header("Builds prefab")]
-    
-    public GameObject buildPrefabGO;
-    
-    public GameObject housePrefabGO;
-    public enum BuildMode { Raise, Dig, PlaceHouse };
+    [Tooltip("Box Prefab")]
+    [SerializeField] public GameObject buildPrefabGO;
+
+    [Tooltip("House Prefab")]
+    [SerializeField] public GameObject housePrefabGO;
+
+    [Tooltip("Wall prefab")]
+    [SerializeField] public GameObject wallPrefabGO;
+    public enum BuildMode
+    { Raise, Dig, PlaceHouse };
+
+    #endregion
 
     // ====================================================================
 
+    #region Variables
     private GameObject terrainGO, sandGO;
+
+    public float[,] terrainElev, sandElev, terrainShadow;
 
     private ModelDM duneModel;
     private FindSlopeMooreDeterministic slopeFinder;
@@ -92,9 +102,13 @@ public class DualMesh : MonoBehaviour
 
     private bool inBuildMode = false, constructed = false;
     private BuildSystem builder;
-    private GameObject buildPreviewGO, housePreviewGO;
+    private GameObject buildPreviewGO, housePreviewGO, wallPreviewGO, activePreview, boxPreviewGO;
 
-    private BuildMode currentBuildMode = BuildMode.Raise;
+    private BuildMode currentBuildMode = BuildMode.PlaceHouse;
+
+    #endregion
+
+    #region Start
 
     void Start()
     {
@@ -104,31 +118,47 @@ public class DualMesh : MonoBehaviour
         dualMeshConstructor = new DualMeshConstructor(resolution, size, terrainScale1, terrainScale2, terrainScale3, terrainAmplitude1, terrainAmplitude2, terrainAmplitude3,
             sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, criticalSlopes, criticalSlopeThreshold, this.transform);
 
-        dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev);
+        dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev, out terrainShadow);
 
         // Initialize the sand mesh to be above the terrain mesh
-        duneModel = new ModelDM(slopeFinder, sandElev, terrainElev, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+        duneModel = new ModelDM(slopeFinder, sandElev, terrainShadow, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
 
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
 
-        // Initialize buildSystem
-        buildPreviewGO = Instantiate(buildPrefabGO);
-        buildPreviewGO.SetActive(false);
+        boxPreviewGO = Instantiate(buildPrefabGO);
+        boxPreviewGO.SetActive(false);
+        MakePreviewTransparent(boxPreviewGO);
+
         housePreviewGO = Instantiate(housePrefabGO);
         housePreviewGO.SetActive(false);
-        builder = new BuildSystem(duneModel, dualMeshConstructor, buildPreviewGO, housePreviewGO, currentBuildMode);
+        MakePreviewTransparent(housePreviewGO);
+
+        wallPreviewGO = Instantiate(wallPrefabGO);
+        wallPreviewGO.SetActive(false);
+        MakePreviewTransparent(wallPreviewGO);
+
+        activePreview = housePreviewGO;
+
+
+        builder = new BuildSystem(
+            duneModel, dualMeshConstructor,
+            housePrefabGO, wallPrefabGO,
+            ref boxPreviewGO, ref housePreviewGO, ref wallPreviewGO, currentBuildMode, terrainElev, ref activePreview);
     }
+    #endregion
+
+    #region Update
 
     void Update()
+
     {
         // Enter/Exit Build Mode
         if (Input.GetKeyDown(KeyCode.C))
         {
             inBuildMode = !inBuildMode;
-            buildPreviewGO.SetActive(inBuildMode);
             // Update the meshcolliders
             sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
@@ -139,22 +169,29 @@ public class DualMesh : MonoBehaviour
             currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
             builder.currentBuildMode = currentBuildMode;
             builder.UpdateBuildPreviewVisual();
+            builder.HideAllPreviews();
+
         }
 
         if (inBuildMode)
         {
             builder.HandleBuildPreview();
 
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetKeyDown(KeyCode.R))
             {
-                builder.ConfirmBuild();
-                constructed = true;
-                inBuildMode = !inBuildMode;
+                builder.RotateWallPreview();
             }
+
+            if (Input.GetMouseButtonDown(0))
+                {
+                    builder.ConfirmBuild();
+                    constructed = true;
+                    inBuildMode = !inBuildMode;
+                }
         }
         else
         {
-
+            builder.HideAllPreviews();
             if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
 
             for (int i = 0; i < 100; i++)
@@ -171,7 +208,35 @@ public class DualMesh : MonoBehaviour
         }
 
 
-        dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);        
-        
+        dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
+
     }
+    #endregion
+
+    void MakePreviewTransparent(GameObject obj)
+    {
+        foreach (var rend in obj.GetComponentsInChildren<Renderer>())
+        {
+            Material mat = rend.material; // Esto instancia una copia
+            Color c = Color.green;
+            c.a = 0.3f;
+            mat.color = c;
+            mat.SetFloat("_Mode", 3); // Transparent
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetInt("_ZWrite", 0);
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.EnableKeyword("_ALPHABLEND_ON");
+            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            mat.renderQueue = 3000;
+        }
+
+        foreach (var col in obj.GetComponentsInChildren<Collider>())
+        {
+            col.enabled = false;
+        }
+    }
+
+
+
 }
