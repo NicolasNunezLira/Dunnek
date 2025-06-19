@@ -73,7 +73,7 @@ namespace DunefieldModel_DualMesh
 
                 algorithmDeposit(x, z, dx, dz, depositeH, verbose);
 
-                ue.Debug.Log("Granos erosionados en este tick:" + count + "/" + grainsPerStep);
+                //ue.Debug.Log("Granos erosionados en este tick:" + count + "/" + grainsPerStep);
 
                 
             }

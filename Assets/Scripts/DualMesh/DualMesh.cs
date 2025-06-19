@@ -91,6 +91,7 @@ public class DualMesh : MonoBehaviour
     private GameObject terrainGO, sandGO;
 
     public float[,] terrainElev, sandElev, terrainShadow;
+    public bool[,] isConstruible;
 
     private ModelDM duneModel;
     private FindSlopeMooreDeterministic slopeFinder;
@@ -105,6 +106,7 @@ public class DualMesh : MonoBehaviour
     private GameObject buildPreviewGO, housePreviewGO, wallPreviewGO, activePreview, boxPreviewGO;
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
+
 
     #endregion
 
@@ -142,11 +144,12 @@ public class DualMesh : MonoBehaviour
 
         activePreview = housePreviewGO;
 
-
+        isConstruible = new bool[resolution, resolution];
         builder = new BuildSystem(
             duneModel, dualMeshConstructor,
             housePrefabGO, wallPrefabGO,
-            ref boxPreviewGO, ref housePreviewGO, ref wallPreviewGO, currentBuildMode, terrainElev, ref activePreview);
+            ref boxPreviewGO, ref housePreviewGO, ref wallPreviewGO,
+            currentBuildMode, terrainElev, ref activePreview, ref isConstruible);
     }
     #endregion
 
@@ -184,9 +187,8 @@ public class DualMesh : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0))
                 {
-                    builder.ConfirmBuild();
-                    constructed = true;
-                    inBuildMode = !inBuildMode;
+                    constructed = builder.ConfirmBuild();
+                    inBuildMode = !constructed ? inBuildMode : !inBuildMode;
                 }
         }
         else
