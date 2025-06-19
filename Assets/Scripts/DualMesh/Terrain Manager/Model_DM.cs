@@ -11,6 +11,7 @@ using ue=UnityEngine;
 
 namespace DunefieldModel_DualMesh
 {
+    [System.Serializable]
     public partial class ModelDM
     {
         #region Variables

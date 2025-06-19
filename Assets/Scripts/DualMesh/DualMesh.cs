@@ -71,9 +71,12 @@ public class DualMesh : MonoBehaviour
     public float conicShapeFactor = 0.8f;
     public float minAvalancheAmount = 0.01f;
 
-    [Header("Builds prefab")]
-    [Tooltip("Box Prefab")]
-    [SerializeField] public GameObject buildPrefabGO;
+    [Header("Actions prefab")]
+    [Tooltip("Shovel Prefab")]
+    [SerializeField] public GameObject shovelPrefabGO;
+
+    [Tooltip("Shovel Prefab")]
+    [SerializeField] public GameObject sweeperPrefabGO;
 
     [Tooltip("House Prefab")]
     [SerializeField] public GameObject housePrefabGO;
@@ -82,6 +85,10 @@ public class DualMesh : MonoBehaviour
     [SerializeField] public GameObject wallPrefabGO;
     public enum BuildMode
     { Raise, Dig, PlaceHouse };
+
+    [Header("Testeo escena inicial")]
+    [Tooltip("Comenzar con planicie?")]
+    [SerializeField] public bool planicie;
 
     #endregion
 
@@ -103,7 +110,7 @@ public class DualMesh : MonoBehaviour
 
     private bool inBuildMode = false, constructed = false;
     private BuildSystem builder;
-    private GameObject buildPreviewGO, housePreviewGO, wallPreviewGO, activePreview, boxPreviewGO;
+    private GameObject buildPreviewGO, housePreviewGO, wallPreviewGO, activePreview, shovelPreviewGO;
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 
@@ -118,7 +125,7 @@ public class DualMesh : MonoBehaviour
 
         // Initialize the terrain and sand meshes
         dualMeshConstructor = new DualMeshConstructor(resolution, size, terrainScale1, terrainScale2, terrainScale3, terrainAmplitude1, terrainAmplitude2, terrainAmplitude3,
-            sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, criticalSlopes, criticalSlopeThreshold, this.transform);
+            sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, criticalSlopes, criticalSlopeThreshold, ref planicie, this.transform);
 
         dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev, out terrainShadow);
 
@@ -130,9 +137,9 @@ public class DualMesh : MonoBehaviour
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
 
-        boxPreviewGO = Instantiate(buildPrefabGO);
-        boxPreviewGO.SetActive(false);
-        MakePreviewTransparent(boxPreviewGO);
+        shovelPreviewGO = Instantiate(shovelPrefabGO);
+        shovelPreviewGO.SetActive(false);
+        MakePreviewTransparent(shovelPreviewGO);
 
         housePreviewGO = Instantiate(housePrefabGO);
         housePreviewGO.SetActive(false);
@@ -148,8 +155,9 @@ public class DualMesh : MonoBehaviour
         builder = new BuildSystem(
             duneModel, dualMeshConstructor,
             housePrefabGO, wallPrefabGO,
-            ref boxPreviewGO, ref housePreviewGO, ref wallPreviewGO,
-            currentBuildMode, terrainElev, ref activePreview, ref isConstruible);
+            ref shovelPreviewGO, ref housePreviewGO, ref wallPreviewGO,
+            currentBuildMode, terrainElev, ref activePreview, ref isConstruible,
+            planicie);
     }
     #endregion
 
