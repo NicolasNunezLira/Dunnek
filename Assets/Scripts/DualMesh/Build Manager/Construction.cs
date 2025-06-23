@@ -11,7 +11,7 @@ namespace Building
     public partial class BuildSystem
     {
         
-        public void GameObjectConstruction(GameObject prefab, UnityEngine.Quaternion rotation)
+        public void GameObjectConstruction(GameObject prefab, UnityEngine.Quaternion rotation, string name)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
 
@@ -26,7 +26,16 @@ namespace Building
                 (previewZ + 0.5f) * cellSize
             );
 
-            GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation);
+            GameObject parentGO = GameObject.Find("Construcciones");
+            if (parentGO == null)
+            {
+                parentGO = new GameObject("Construcciones");
+            }
+
+            // Instanciar el prefab con el objeto padre
+            GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
+            prefabInstance.name = name + System.DateTime.Now.ToString("HHmmss");
+            
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
 

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using TMPro;
 using UnityEngine.Rendering;
 using ue = UnityEngine;
@@ -99,6 +100,34 @@ namespace DunefieldModel_DualMesh
 
             while (true)
             {
+                int steps = Math.Max(Math.Abs(dx), Math.Abs(dz));
+                int stepX = dx / steps;  // dirección normalizada
+                int stepZ = dz / steps;
+
+                for (int s = 1; s <= steps; s++)
+                {
+                    int checkX = (xCurr + s * stepX + dx + xResolution) % xResolution;;
+                    int checkZ = (zCurr + s * stepZ + dz + zResolution) % zResolution;;
+
+                    if (!isConstruible[checkX, checkZ])
+                    {
+                        if (s == 1)
+                        {
+                            // El grano aún no se ha movido: deposita directamente sobre la construcción
+                            DepositGrain(checkX, checkZ, dx, dz, depositeH);
+                            if (verbose) ue.Debug.Log($"Grano cae sobre construcción en ({checkX}, {checkZ})");
+                        }
+                        else
+                        {
+                            // Se encontró una construcción antes de llegar: deposita en la celda anterior
+                            int stopX = xCurr + (s - 1) * stepX;
+                            int stopZ = zCurr + (s - 1) * stepZ;
+                            DepositGrain(stopX, stopZ, dx, dz, depositeH);
+                            if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), deposita en ({stopX}, {stopZ})");
+                        }
+                        return; // salida del método
+                    }
+                }
 
                 // Cálculo de la posición actual del grano considerando comportamiento toroidal
                 if (openEnded)
@@ -118,11 +147,11 @@ namespace DunefieldModel_DualMesh
 
                 // Si el grano está en sombra, depositar y salir del ciclo
                 if (Shadow[xCurr, zCurr] > 0 && sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr])
-                {
-                    if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
-                    DepositGrain(xCurr, zCurr, dx, dz, depositeH);
-                    break;
-                }
+                    {
+                        if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
+                        DepositGrain(xCurr, zCurr, dx, dz, depositeH);
+                        break;
+                    }
 
 
                 if (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr] &&
@@ -139,7 +168,9 @@ namespace DunefieldModel_DualMesh
                     int[] dxLateral = { -dz, dz };
                     int[] dzLateral = { dx, -dx };
 
-                    for (int j = 0; j < 2; j++)
+                    bool deposited = false;
+
+                    for (int j = 0; j < 2 && !deposited; j++)
                     {
                         int k = 1;
                         while (k <= i)
@@ -151,14 +182,12 @@ namespace DunefieldModel_DualMesh
                             {
                                 DepositGrain(lx, lz, dxLateral[j], dzLateral[j], depositeH);
                                 if (verbose) ue.Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
+                                deposited = true;
                                 break;
                             }
                             k++;
                         }
                     }
-
-                    DepositGrain(xCurr, zCurr, dx, dz, depositeH);
-                    if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
                     break;
                 }
                 countTerrain -= (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr]) ? 1 : 0;

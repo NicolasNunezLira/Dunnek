@@ -75,8 +75,12 @@ public class DualMesh : MonoBehaviour
     [Tooltip("Shovel Prefab")]
     [SerializeField] public GameObject shovelPrefabGO;
 
-    [Tooltip("Shovel Prefab")]
+    [Tooltip("Flat Prefab")]
     [SerializeField] public GameObject sweeperPrefabGO;
+
+    [Tooltip("Deposition Prefab")]
+    [SerializeField] public GameObject circlePrefabGO;
+
 
     [Tooltip("House Prefab")]
     [SerializeField] public GameObject housePrefabGO;
@@ -84,7 +88,7 @@ public class DualMesh : MonoBehaviour
     [Tooltip("Wall prefab")]
     [SerializeField] public GameObject wallPrefabGO;
     public enum BuildMode
-    { Raise, Dig, PlaceHouse };
+    { Raise, Dig, PlaceHouse, Flat, AddSand };
 
     [Header("Testeo escena inicial")]
     [Tooltip("Comenzar con planicie?")]
@@ -110,7 +114,7 @@ public class DualMesh : MonoBehaviour
 
     private bool inBuildMode = false, constructed = false;
     private BuildSystem builder;
-    private GameObject buildPreviewGO, housePreviewGO, wallPreviewGO, activePreview, shovelPreviewGO;
+    private GameObject housePreviewGO, wallPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 
@@ -121,6 +125,17 @@ public class DualMesh : MonoBehaviour
 
     void Start()
     {
+        isConstruible = new bool[resolution + 1, resolution + 1];
+
+        for (int x = 0; x < isConstruible.GetLength(0); x++)
+        {
+            for (int z = 0; z < isConstruible.GetLength(1); z++)
+            {
+                isConstruible[x, z] = true;
+            }
+        }
+
+
         slopeFinder = new FindSlopeMooreDeterministic();
 
         // Initialize the terrain and sand meshes
@@ -130,7 +145,7 @@ public class DualMesh : MonoBehaviour
         dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev, out terrainShadow);
 
         // Initialize the sand mesh to be above the terrain mesh
-        duneModel = new ModelDM(slopeFinder, sandElev, terrainShadow, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+        duneModel = new ModelDM(slopeFinder, sandElev, terrainShadow, isConstruible, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
 
@@ -149,13 +164,20 @@ public class DualMesh : MonoBehaviour
         wallPreviewGO.SetActive(false);
         MakePreviewTransparent(wallPreviewGO);
 
+        sweeperPreviewGO = Instantiate(sweeperPrefabGO);
+        sweeperPreviewGO.SetActive(false);
+        MakePreviewTransparent(sweeperPreviewGO);
+
+        circlePreviewGO = Instantiate(circlePrefabGO);
+        circlePreviewGO.SetActive(false);
+        MakePreviewTransparent(circlePreviewGO);
+
         activePreview = housePreviewGO;
 
-        isConstruible = new bool[resolution, resolution];
         builder = new BuildSystem(
             duneModel, dualMeshConstructor,
             housePrefabGO, wallPrefabGO,
-            ref shovelPreviewGO, ref housePreviewGO, ref wallPreviewGO,
+            ref shovelPreviewGO, ref housePreviewGO, ref wallPreviewGO, ref sweeperPreviewGO, ref circlePreviewGO,
             currentBuildMode, terrainElev, ref activePreview, ref isConstruible,
             planicie);
     }
@@ -194,10 +216,10 @@ public class DualMesh : MonoBehaviour
             }
 
             if (Input.GetMouseButtonDown(0))
-                {
-                    constructed = builder.ConfirmBuild();
-                    inBuildMode = !constructed ? inBuildMode : !inBuildMode;
-                }
+            {
+                constructed = builder.ConfirmBuild();
+                inBuildMode = !constructed ? inBuildMode : !inBuildMode;
+            }
         }
         else
         {

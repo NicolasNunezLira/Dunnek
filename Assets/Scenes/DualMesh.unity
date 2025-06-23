@@ -183,7 +183,7 @@ MonoBehaviour:
   sandAmplitude3: 0.3
   heightVariation: 0.08
   slope: 0.15
-  hopLength: 3
+  hopLength: 5
   shadowSlope: 0.02
   windDirection: {x: 1, y: 1}
   grainsPerStep: 500
@@ -193,7 +193,9 @@ MonoBehaviour:
   avalancheTransferRate: 0.7
   conicShapeFactor: 1
   minAvalancheAmount: 1.5
-  buildPrefabGO: {fileID: 7960429348020450371, guid: bea85a0a54dc5a2449ee5e3d8672360a, type: 3}
+  shovelPrefabGO: {fileID: 7960429348020450371, guid: bea85a0a54dc5a2449ee5e3d8672360a, type: 3}
+  sweeperPrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
+  circlePrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
   housePrefabGO: {fileID: 1659259488616942273, guid: 7dbdf52221356974aa796fc70b50dad0, type: 3}
   wallPrefabGO: {fileID: 3149707725384881785, guid: a97fe0bcf5cf5ba499ad434339ea7397, type: 3}
   planicie: 1

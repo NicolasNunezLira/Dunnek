@@ -80,13 +80,19 @@ namespace Building
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceHouse:
-                    GameObjectConstruction(housePrefab, prefabRotation);
+                    GameObjectConstruction(housePrefab, prefabRotation, "House");
                     return true;
                 case DualMesh.BuildMode.Raise:
-                    GameObjectConstruction(wallPrefab, prefabRotation);
+                    GameObjectConstruction(wallPrefab, prefabRotation, "Wall");
                     return true;
                 case DualMesh.BuildMode.Dig:
                     DigAction(previewX, previewZ, buildRadius, digDepth);
+                    return true;
+                case DualMesh.BuildMode.Flat:
+                    FlatSand(previewX, previewZ, 3 * buildRadius);
+                    return true;
+                case DualMesh.BuildMode.AddSand:
+                    AddSandCone(previewX, previewZ, 0.5f * buildRadius, 6f * buildRadius);
                     return true;
             }
             return false;
@@ -116,6 +122,14 @@ namespace Building
                 case DualMesh.BuildMode.PlaceHouse:
                     activePreview = housePreviewGO;
                     break;
+
+                case DualMesh.BuildMode.Flat:
+                    activePreview = sweeperPreviewGO;
+                    break;
+
+                case DualMesh.BuildMode.AddSand:
+                    activePreview = circlePreviewGO;
+                    break;
             }
             activePreview.SetActive(true);
         }
@@ -125,6 +139,8 @@ namespace Building
             shovelPreviewGO?.SetActive(false);
             wallPreviewGO?.SetActive(false);
             housePreviewGO?.SetActive(false);
+            sweeperPreviewGO?.SetActive(false);
+            circlePreviewGO?.SetActive(false);
         }
 
         public void RotateWallPreview()

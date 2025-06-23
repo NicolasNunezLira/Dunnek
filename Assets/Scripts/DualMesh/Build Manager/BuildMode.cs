@@ -12,7 +12,7 @@ namespace Building
     public partial class BuildSystem
     {
         #region Variables
-        public GameObject shovelPreviewGO, housePreviewGO, wallPreviewGO, activePreview, housePrefab, wallPrefab;
+        public GameObject shovelPreviewGO, housePreviewGO, wallPreviewGO, sweeperPreviewGO, activePreview, housePrefab, wallPrefab, circlePreviewGO;
         public ModelDM duneModel;
         public DualMeshConstructor dualMeshConstructor;
         public int buildRadius = 4;
@@ -38,7 +38,7 @@ namespace Building
         public BuildSystem(
             ModelDM model, DualMeshConstructor constructor,
             GameObject housePrefab, GameObject wallPrefab,
-            ref GameObject shovelPreviewGO, ref GameObject housePreviewGO, ref GameObject wallPreviewGO,
+            ref GameObject shovelPreviewGO, ref GameObject housePreviewGO, ref GameObject wallPreviewGO, ref GameObject sweeperPreviewGO, ref GameObject circlePreviewGO,
             DualMesh.BuildMode currentBuildMode, float[,] terrainElev, ref GameObject activePreview,
             ref bool[,] isConstruible, bool planicie)
         {
@@ -49,18 +49,12 @@ namespace Building
             this.shovelPreviewGO = shovelPreviewGO;
             this.housePreviewGO = housePreviewGO;
             this.wallPreviewGO = wallPreviewGO;
+            this.circlePreviewGO = circlePreviewGO;
+            this.sweeperPreviewGO = sweeperPreviewGO;
             this.currentBuildMode = currentBuildMode;
             this.terrainElev = terrainElev;
             this.isConstruible = isConstruible;
             this.planicie = planicie;
-
-            for (int x = 0; x < isConstruible.GetLength(0); x++)
-            {
-                for (int z = 0; z < isConstruible.GetLength(1); z++)
-                {
-                    isConstruible[x, z] = true;
-                }
-            }
 
             this.activePreview = activePreview;
 
@@ -70,7 +64,7 @@ namespace Building
             {
                 previewX = Mathf.FloorToInt((duneModel.size / 2) * duneModel.xResolution / duneModel.size);
                 previewZ = Mathf.FloorToInt((duneModel.size / 2) * duneModel.zResolution / duneModel.size);
-                GameObjectConstruction(housePrefab, Quaternion.identity);
+                GameObjectConstruction(housePrefab, Quaternion.identity, "House");
             }
 
         }
