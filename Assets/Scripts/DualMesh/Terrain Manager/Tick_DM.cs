@@ -72,7 +72,7 @@ namespace DunefieldModel_DualMesh
 
                 count++;
 
-                algorithmDeposit(x, z, dx, dz, depositeH, verbose);
+                AlgorithmDeposit(x, z, dx, dz, depositeH, verbose);
 
                 //ue.Debug.Log("Granos erosionados en este tick:" + count + "/" + grainsPerStep);
 
@@ -80,9 +80,8 @@ namespace DunefieldModel_DualMesh
             }
         }
 
-        public void algorithmDeposit(int x, int z , int dx, int dz, float depositeH, bool verbose = false)
+        public void AlgorithmDeposit(int x, int z , int dx, int dz, float depositeH, bool verbose = false)
         {
-        // Deposición del grano
             int i = HopLength;
             int xCurr = x;
             int zCurr = z;
@@ -106,9 +105,9 @@ namespace DunefieldModel_DualMesh
 
                 for (int s = 1; s <= steps; s++)
                 {
-                    int checkX = (xCurr + s * stepX + dx + xResolution) % xResolution;;
-                    int checkZ = (zCurr + s * stepZ + dz + zResolution) % zResolution;;
-
+                    int checkX = (xCurr + s * stepX + dx + xResolution) % xResolution; ;
+                    int checkZ = (zCurr + s * stepZ + dz + zResolution) % zResolution; ;
+                    /*
                     if (!isConstruible[checkX, checkZ])
                     {
                         if (s == 1)
@@ -126,6 +125,33 @@ namespace DunefieldModel_DualMesh
                             if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), deposita en ({stopX}, {stopZ})");
                         }
                         return; // salida del método
+                    }
+                    */
+                    if (!isConstruible[checkX, checkZ])
+                    {
+                        // Celda inmediatamente anterior (en barlovento)
+                        int xPrev = (checkX - dx + xResolution) % xResolution;
+                        int zPrev = (checkZ - dz + zResolution) % zResolution;
+
+                        // Verificar acumulación de arena frente a la construcción
+                        float acumulacionBarlovento =  terrainElev[checkX, checkZ] - sandElev[xPrev, zPrev];
+
+                        if (acumulacionBarlovento <= 0.2f) // umbralBarlovento = 0.2f
+                        {
+                            // Se permite depósito sobre construcción por acumulación barlovento
+                            DepositGrain(checkX, checkZ, dx, dz, depositeH);
+                            if (verbose) ue.Debug.Log($"Acumulación barlovento permite depósito en construcción ({checkX}, {checkZ})");
+                        }
+                        else
+                        {
+                            // Depositar justo antes de la construcción
+                            int stopX = xCurr + (s - 1) * stepX;
+                            int stopZ = zCurr + (s - 1) * stepZ;
+                            DepositGrain(stopX, stopZ, dx, dz, depositeH);
+                            if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), sin acumulación barlovento. Deposita en ({stopX}, {stopZ})");
+                        }
+
+                        return; // salir del método
                     }
                 }
 

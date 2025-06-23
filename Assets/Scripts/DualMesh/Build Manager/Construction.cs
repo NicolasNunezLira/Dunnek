@@ -66,12 +66,13 @@ namespace Building
                         duneModel.terrainElev[x, z] = targetHeight;
                         terrainElev[x, z] = floorHeight;
                         isConstruible[x, z] = false;
+                        support.Add(new float2(x, z));
                         duneModel.ActivateCell(x, z);
                         duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);
                     }
                 }
             }
-            AddConstructionToList(centerPos, prefabRotation, currentBuildMode);
+            AddConstructionToList(centerPos, prefabRotation, currentBuildMode, support);
             return;
         }
 
@@ -81,12 +82,14 @@ namespace Building
             public UnityEngine.Vector3 position;
             public UnityEngine.Quaternion rotation;
             public DualMesh.BuildMode type;
+            public List<float2> support;
         }
 
         public void AddConstructionToList(
             UnityEngine.Vector3 position,
             UnityEngine.Quaternion rotation,
-            DualMesh.BuildMode currentType
+            DualMesh.BuildMode currentType,
+            List<float2> support
         )
         {
             constructionList.Add(
@@ -94,7 +97,8 @@ namespace Building
                 {
                     position = position,
                     rotation = rotation,
-                    type = currentType
+                    type = currentType,
+                    support = support
                 }
             );
         }

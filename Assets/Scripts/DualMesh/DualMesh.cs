@@ -112,7 +112,7 @@ public class DualMesh : MonoBehaviour
 
     private int grainsForAvalanche = 0;
 
-    private bool inBuildMode = false, constructed = false;
+    private bool inBuildMode = false, constructed = false, inDestroyMode = false;
     private BuildSystem builder;
     private GameObject housePreviewGO, wallPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
 
@@ -152,25 +152,9 @@ public class DualMesh : MonoBehaviour
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
 
-        shovelPreviewGO = Instantiate(shovelPrefabGO);
-        shovelPreviewGO.SetActive(false);
-        MakePreviewTransparent(shovelPreviewGO);
-
-        housePreviewGO = Instantiate(housePrefabGO);
-        housePreviewGO.SetActive(false);
-        MakePreviewTransparent(housePreviewGO);
-
-        wallPreviewGO = Instantiate(wallPrefabGO);
-        wallPreviewGO.SetActive(false);
-        MakePreviewTransparent(wallPreviewGO);
-
-        sweeperPreviewGO = Instantiate(sweeperPrefabGO);
-        sweeperPreviewGO.SetActive(false);
-        MakePreviewTransparent(sweeperPreviewGO);
-
-        circlePreviewGO = Instantiate(circlePrefabGO);
-        circlePreviewGO.SetActive(false);
-        MakePreviewTransparent(circlePreviewGO);
+        // Prefabs and previews
+        AddCollidersToPrefabs();
+        CreatePreviews();
 
         activePreview = housePreviewGO;
 
@@ -192,6 +176,7 @@ public class DualMesh : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C))
         {
             inBuildMode = !inBuildMode;
+            inDestroyMode = false;
             // Update the meshcolliders
             sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
@@ -203,7 +188,6 @@ public class DualMesh : MonoBehaviour
             builder.currentBuildMode = currentBuildMode;
             builder.UpdateBuildPreviewVisual();
             builder.HideAllPreviews();
-
         }
 
         if (inBuildMode)
@@ -239,12 +223,29 @@ public class DualMesh : MonoBehaviour
             constructed = false;
         }
 
+        // Destruction gameobjects
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            inDestroyMode = !inDestroyMode;
+            inBuildMode = false;
+            // Update the meshcolliders
+            sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+        }
+
+        if (inDestroyMode)
+        {
+            builder.TryDestroyConstructionUnderCursor();
+        }
+
 
         dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
 
     }
     #endregion
 
+
+    #region Auxiliar Functions
     void MakePreviewTransparent(GameObject obj)
     {
         foreach (var rend in obj.GetComponentsInChildren<Renderer>())
@@ -269,6 +270,34 @@ public class DualMesh : MonoBehaviour
         }
     }
 
+    void AddCollidersToPrefabs()
+    {
+        housePrefabGO.AddComponent<BoxCollider>();
+        wallPrefabGO.AddComponent<BoxCollider>();
+    }
 
+    void CreatePreviews()
+    {
+        shovelPreviewGO = Instantiate(shovelPrefabGO);
+        shovelPreviewGO.SetActive(false);
+        MakePreviewTransparent(shovelPreviewGO);
 
+        housePreviewGO = Instantiate(housePrefabGO);
+        housePreviewGO.SetActive(false);
+        MakePreviewTransparent(housePreviewGO);
+
+        wallPreviewGO = Instantiate(wallPrefabGO);
+        wallPreviewGO.SetActive(false);
+        MakePreviewTransparent(wallPreviewGO);
+
+        sweeperPreviewGO = Instantiate(sweeperPrefabGO);
+        sweeperPreviewGO.SetActive(false);
+        MakePreviewTransparent(sweeperPreviewGO);
+
+        circlePreviewGO = Instantiate(circlePrefabGO);
+        circlePreviewGO.SetActive(false);
+        MakePreviewTransparent(circlePreviewGO);
+    }
+
+    #endregion
 }
