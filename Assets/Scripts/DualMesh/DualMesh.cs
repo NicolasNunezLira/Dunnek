@@ -172,8 +172,10 @@ public class DualMesh : MonoBehaviour
     void Update()
 
     {
+        float before = duneModel.TotalSand();
+        
         // Enter/Exit Build Mode
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.C) && !inDestroyMode)
         {
             inBuildMode = !inBuildMode;
             inDestroyMode = false;
@@ -181,6 +183,7 @@ public class DualMesh : MonoBehaviour
             sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
         }
+
 
         if (Input.GetKeyDown(KeyCode.Tab) && inBuildMode)
         {
@@ -223,23 +226,10 @@ public class DualMesh : MonoBehaviour
             constructed = false;
         }
 
-        // Destruction gameobjects
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            inDestroyMode = !inDestroyMode;
-            inBuildMode = false;
-            // Update the meshcolliders
-            sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
-            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
-        }
-
-        if (inDestroyMode)
-        {
-            builder.TryDestroyConstructionUnderCursor();
-        }
-
-
         dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
+
+        float after = duneModel.TotalSand();
+        Debug.Log($"Δ arena = {after - before:F5}");
 
     }
     #endregion

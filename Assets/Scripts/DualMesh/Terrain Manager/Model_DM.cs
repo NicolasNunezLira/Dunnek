@@ -80,7 +80,7 @@ namespace DunefieldModel_DualMesh
             Array.Clear(Shadow, 0, zResolution * xResolution);
             ShadowInit();
             FindSlope.Init(ref sandElev, ref terrainElev, this.xResolution, this.zResolution, this.slope);
-            FindSlope.SetOpenEnded(openEnded);
+            //FindSlope.SetOpenEnded(openEnded);
         }
         #endregion
 

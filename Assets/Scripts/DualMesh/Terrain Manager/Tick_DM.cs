@@ -50,14 +50,6 @@ namespace DunefieldModel_DualMesh
                 int x = rnd.Next(0, xResolution);
                 int z = rnd.Next(0, zResolution);
 
-                /*
-                if (Math.Max(sandElev[x, z], terrainElev[x, z]) <= 0) // Si no hay arena o terreno, saltar
-                {
-                    if (verbose) { ue.Debug.Log("Grano (" + x + "," + z + ") sin altura."); }
-                    ;
-                    continue;
-                }
-                */
                 if (Shadow[x, z] > 0 || terrainElev[x, z] >= sandElev[x, z]) // Si el grano está en sombra o no hay arena sobre el terreno, saltar
                 {
                     if (verbose) { ue.Debug.Log("Grano (" + x + "," + z + ") en sombra o terreno elevado."); }
@@ -65,22 +57,21 @@ namespace DunefieldModel_DualMesh
                     continue;
                 }
 
-
                 // Erosión del grano
                 if (verbose) { ue.Debug.Log("Grano a erosionar en (" + x + "," + z + ")."); }
                 depositeH = ErodeGrain(x, z, dx, dz, erosionHeight);
+
+                if (depositeH <= 0f) continue;
 
                 count++;
 
                 AlgorithmDeposit(x, z, dx, dz, depositeH, verbose);
 
-                //ue.Debug.Log("Granos erosionados en este tick:" + count + "/" + grainsPerStep);
-
-                
+                if (verbose) { ue.Debug.Log("Granos erosionados en este tick:" + count + "/" + grainsPerStep); }
             }
         }
 
-        public void AlgorithmDeposit(int x, int z , int dx, int dz, float depositeH, bool verbose = false)
+        public void AlgorithmDeposit(int x, int z, int dx, int dz, float depositeH, bool verbose = false)
         {
             int i = HopLength;
             int xCurr = x;
@@ -105,42 +96,24 @@ namespace DunefieldModel_DualMesh
 
                 for (int s = 1; s <= steps; s++)
                 {
-                    int checkX = (xCurr + s * stepX + dx + xResolution) % xResolution; ;
-                    int checkZ = (zCurr + s * stepZ + dz + zResolution) % zResolution; ;
-                    /*
-                    if (!isConstruible[checkX, checkZ])
-                    {
-                        if (s == 1)
-                        {
-                            // El grano aún no se ha movido: deposita directamente sobre la construcción
-                            DepositGrain(checkX, checkZ, dx, dz, depositeH);
-                            if (verbose) ue.Debug.Log($"Grano cae sobre construcción en ({checkX}, {checkZ})");
-                        }
-                        else
-                        {
-                            // Se encontró una construcción antes de llegar: deposita en la celda anterior
-                            int stopX = xCurr + (s - 1) * stepX;
-                            int stopZ = zCurr + (s - 1) * stepZ;
-                            DepositGrain(stopX, stopZ, dx, dz, depositeH);
-                            if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), deposita en ({stopX}, {stopZ})");
-                        }
-                        return; // salida del método
-                    }
-                    */
+                    int checkX = openEnded ? xCurr + s * stepX + dx : (xCurr + s * stepX + dx + xResolution) % xResolution;
+                    int checkZ = openEnded ? zCurr + s * stepZ + dz : (zCurr + s * stepZ + dz + zResolution) % zResolution;
+
                     if (!isConstruible[checkX, checkZ])
                     {
                         // Celda inmediatamente anterior (en barlovento)
-                        int xPrev = (checkX - dx + xResolution) % xResolution;
-                        int zPrev = (checkZ - dz + zResolution) % zResolution;
+                        int xPrev = openEnded ? checkX - dx : (checkX - dx + xResolution) % xResolution;
+                        int zPrev = openEnded ? checkX - dx : (checkZ - dz + zResolution) % zResolution;
 
                         // Verificar acumulación de arena frente a la construcción
-                        float acumulacionBarlovento =  terrainElev[checkX, checkZ] - sandElev[xPrev, zPrev];
+                        float acumulacionBarlovento = terrainElev[checkX, checkZ] - sandElev[xPrev, zPrev];
 
                         if (acumulacionBarlovento <= 0.2f) // umbralBarlovento = 0.2f
                         {
                             // Se permite depósito sobre construcción por acumulación barlovento
                             DepositGrain(checkX, checkZ, dx, dz, depositeH);
                             if (verbose) ue.Debug.Log($"Acumulación barlovento permite depósito en construcción ({checkX}, {checkZ})");
+                            return;
                         }
                         else
                         {
@@ -149,35 +122,26 @@ namespace DunefieldModel_DualMesh
                             int stopZ = zCurr + (s - 1) * stepZ;
                             DepositGrain(stopX, stopZ, dx, dz, depositeH);
                             if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), sin acumulación barlovento. Deposita en ({stopX}, {stopZ})");
+                            return;
                         }
-
-                        return; // salir del método
                     }
                 }
 
                 // Cálculo de la posición actual del grano considerando comportamiento toroidal
-                if (openEnded)
-                {
-                    xCurr += dx;
-                    zCurr += dz;
-                }
-                else
-                {
-                    xCurr = (xCurr + dx + xResolution) % xResolution;
-                    zCurr = (zCurr + dz + zResolution) % zResolution;
-                }
+                xCurr = openEnded ? xCurr + dx : (xCurr + dx + xResolution) % xResolution;
+                zCurr = openEnded ? zCurr + dz : (zCurr + dx + zResolution) % zResolution;
 
                 // Si el grano sale del dominio en campo abierto, detener la deposición
-                if (openEnded && (xCurr < 0 || xCurr >= xResolution || zCurr < 0 || zCurr >= zResolution))
-                    break;
+                if (openEnded && !IsInside(xCurr, zCurr))
+                    return;
 
                 // Si el grano está en sombra, depositar y salir del ciclo
                 if (Shadow[xCurr, zCurr] > 0 && sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr])
-                    {
-                        if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
-                        DepositGrain(xCurr, zCurr, dx, dz, depositeH);
-                        break;
-                    }
+                {
+                    if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
+                    DepositGrain(xCurr, zCurr, dx, dz, depositeH);
+                    return;
+                }
 
 
                 if (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr] &&
@@ -201,20 +165,19 @@ namespace DunefieldModel_DualMesh
                         int k = 1;
                         while (k <= i)
                         {
-                            int lx = (xCurr + dxLateral[j] * k + xResolution) % xResolution;
-                            int lz = (zCurr + dzLateral[j] * k + zResolution) % zResolution;
+                            int lx = openEnded ? xCurr + dxLateral[j] : (xCurr + dxLateral[j] * k + xResolution) % xResolution;
+                            int lz = openEnded ? zCurr + dzLateral[j] : (zCurr + dzLateral[j] * k + zResolution) % zResolution;
 
                             if (Math.Max(terrainElev[lx, lz], sandElev[lx, lz]) < Math.Max(terrainElev[xCurr, zCurr], sandElev[xCurr, zCurr]) - slopeThreshold)
                             {
                                 DepositGrain(lx, lz, dxLateral[j], dzLateral[j], depositeH);
                                 if (verbose) ue.Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
-                                deposited = true;
-                                break;
+                                return;
                             }
                             k++;
                         }
                     }
-                    break;
+                    //break;
                 }
                 countTerrain -= (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr]) ? 1 : 0;
 
@@ -228,15 +191,27 @@ namespace DunefieldModel_DualMesh
                     {
                         DepositGrain(xCurr, zCurr, dx, dz, depositeH);
                         if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
-                        break;
+                        return;
                     }
                     i = HopLength;
                 }
 
-                // 
             }
         }
-        
+
+        #endregion
+
+        #region Total sand amount
+
+        public float TotalSand()
+        {
+            float total = 0f;
+            for (int i = 0; i < xResolution; i++)
+                for (int j = 0; j < zResolution; j++)
+                    total += sandElev[i, j] - terrainElev[i, j];
+            return total;
+        }
+
         #endregion
     }
 }

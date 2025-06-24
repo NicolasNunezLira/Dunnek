@@ -39,32 +39,6 @@ namespace DunefieldModel_DualMesh
                 sandElev[x, z] += depositeHeight;
             }
 
-            /*
-            float h = Math.Max(sandElev[x, z], terrainElev[x, z]);
-            float hs;
-
-            if (openEnded && (x == 0 || z == 0))
-                hs = h;
-            else
-            {
-                int xs = (x - dx + xResolution) % xResolution;
-                int zs = (z - dz + zResolution) % zResolution;
-                hs = Math.Max(h, Math.Max(Math.Max(terrainElev[xs, zs], sandElev[xs, zs]), Shadow[xs, zs]) - shadowSlope);
-            }
-
-            while (hs >= (h = Math.Max(sandElev[x, z], terrainElev[x, z])))
-            {
-                Shadow[x, z] = (hs == h) ? 0 : hs;
-                hs -= shadowSlope;
-                
-                x = (x + dx + xResolution) % xResolution;
-                z = (z + dz + zResolution) % zResolution;
-
-                if (openEnded && (x == 0 || z == 0))
-                    return;
-            }
-            */
-            //Avalanche(x, z, 5);
             UpdateShadow(x, z, dx, dz);
 
             ActivateCell(x, z);
