@@ -26,7 +26,8 @@ namespace Building
 
                     if (x < 0 || x >= duneModel.xResolution || z < 0 || z >= duneModel.zResolution) continue;
 
-                    float h = Math.Max(terrainElev[x, z], duneModel.sandElev[x, z]);
+                    //float h = Math.Max(terrainElev[x, z], duneModel.sandElev[x, z]);
+                    float h = (terrainElev[x, z] >= duneModel.sandElev[x, z]) ? 0 : duneModel.sandElev[x, z];
                     sum += h;
                     count++;
                 }

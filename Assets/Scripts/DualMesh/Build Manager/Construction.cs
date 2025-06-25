@@ -66,7 +66,7 @@ namespace Building
                     if (bounds.Contains(new UnityEngine.Vector3(worldX, bounds.center.y, worldZ)))
                     {
                         duneModel.terrainElev[x, z] = targetHeight;
-                        terrainElev[x, z] = floorHeight;
+                        duneModel.sandElev[x, z] = floorHeight;
                         isConstruible[x, z] = false;
                         support.Add(new float2(x, z));
                         duneModel.ActivateCell(x, z);

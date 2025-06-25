@@ -319,7 +319,7 @@ public class DualMesh : MonoBehaviour
     {
         shovelPreviewGO = Instantiate(shovelPrefabGO);
         shovelPreviewGO.SetActive(false);
-        MakePreviewTransparent(shovelPreviewGO);
+        //MakePreviewTransparent(shovelPreviewGO);
 
         housePreviewGO = Instantiate(housePrefabGO);
         housePreviewGO.SetActive(false);
@@ -335,7 +335,7 @@ public class DualMesh : MonoBehaviour
 
         circlePreviewGO = Instantiate(circlePrefabGO);
         circlePreviewGO.SetActive(false);
-        MakePreviewTransparent(circlePreviewGO);
+        //MakePreviewTransparent(circlePreviewGO);
     }
 
     #endregion

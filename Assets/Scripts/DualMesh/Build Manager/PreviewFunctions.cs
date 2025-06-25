@@ -54,7 +54,7 @@ namespace Building
 
                 activePreview.transform.position = new UnityEngine.Vector3(avgX, maxY + 0.5f, avgZ);
 
-                // Aplicar color según disponibilidad
+                
                 Color color = canBuild ? new Color(0f, 1f, 0f, 0.3f) : new Color(1f, 0f, 0f, 0.3f);
                 foreach (var rend_ in activePreview.GetComponentsInChildren<Renderer>())
                 {
