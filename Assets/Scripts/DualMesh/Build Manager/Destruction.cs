@@ -10,45 +10,69 @@ namespace Building
 {
     public partial class BuildSystem
     {
-        public void TryDestroyConstructionUnderCursor()
+        public GameObject toDestroy;
+        public void DetectConstructionUnderCursor()
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
+            int layerMask = LayerMask.GetMask("Constructions");
 
-            if (Physics.Raycast(ray, out hit, 100f))
+            var construccionesParent = GameObject.Find("Construcciones")?.transform;
+            if (construccionesParent == null) { toDestroy = null; return; }
+
+            if (Physics.Raycast(ray, out hit, 100f, layerMask))
             {
                 GameObject hitGO = hit.collider.gameObject;
-
-                // Asegúrate de que es parte de "Construcciones"
-               var construccionesParent = GameObject.Find("Construcciones")?.transform;
-                if (construccionesParent == null) return;
-
                 if (hitGO.transform.IsChildOf(construccionesParent))
                 {
-                    GameObject toDestroy = hitGO.transform.root.gameObject;
-
-                    // Buscar la construcción correspondiente en la lista
-                    var data = constructionList.Find(c => Vector3.Distance(c.position, toDestroy.transform.position) < 0.1f);
-
-                    if (data != null)
+                    //selectedConstruction = hitGO.transform.root.gameObject;
+                    // Buscar el GameObject hijo directo de "Construcciones"
+                    Transform current = hitGO.transform;
+                    while (current.parent != null && current.parent.name != "Construcciones")
                     {
-                        // 🔍 Aquí accedes al soporte
-                        foreach (float2 coord in data.support)
-                        {
-                            int x = (int)coord.x;
-                            int z = (int)coord.y;
-
-                            // Restaurar estado si es necesario
-                            isConstruible[x, z] = true;
-                            duneModel.terrainElev[x, z] = terrainElev[x, z];
-                            duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz); // si quieres actualizar sombras
-                        }
-
-                        constructionList.Remove(data);
-                        UnityEngine.Object.Destroy(toDestroy);
+                        current = current.parent;
                     }
+                    toDestroy = current.gameObject;
+                    
+                    Debug.Log("Construcción seleccionada: " + toDestroy.name);
+                }
+                else
+                {
+                    toDestroy = null;
                 }
             }
+            else
+            {
+                toDestroy = null;
+            }
+        }
+
+        public bool DestroyConstruction()
+        {
+            if (toDestroy == null) { return false; };
+
+            var data = constructionList.Find(c => Vector3.Distance(c.position, toDestroy.transform.position) < 0.1f);
+            Debug.Log($"{toDestroy.name}");
+            if (data != null)
+            {
+                foreach (float2 coord in data.support)
+                {
+                    int x = (int)coord.x;
+                    int z = (int)coord.y;
+
+                    isConstruible[x, z] = true;
+                    duneModel.terrainElev[x, z] = terrainElev[x, z];
+                    duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);
+                }
+
+                string name = toDestroy.name;
+                constructionList.Remove(data);
+                UnityEngine.Object.Destroy(toDestroy);
+                Debug.Log($"{name} destruido");
+
+                toDestroy = null; // limpieza
+            }
+            return true;
         }
     }
 }

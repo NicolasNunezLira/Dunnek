@@ -196,7 +196,7 @@ MonoBehaviour:
   shovelPrefabGO: {fileID: 7960429348020450371, guid: bea85a0a54dc5a2449ee5e3d8672360a, type: 3}
   sweeperPrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
   circlePrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
-  housePrefabGO: {fileID: 1659259488616942273, guid: 7dbdf52221356974aa796fc70b50dad0, type: 3}
+  housePrefabGO: {fileID: 1529927929722832041, guid: 7dbdf52221356974aa796fc70b50dad0, type: 3}
   wallPrefabGO: {fileID: 3149707725384881785, guid: a97fe0bcf5cf5ba499ad434339ea7397, type: 3}
   planicie: 1
 --- !u!23 &164671254

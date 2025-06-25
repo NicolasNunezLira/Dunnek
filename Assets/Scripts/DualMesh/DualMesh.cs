@@ -87,8 +87,6 @@ public class DualMesh : MonoBehaviour
 
     [Tooltip("Wall prefab")]
     [SerializeField] public GameObject wallPrefabGO;
-    public enum BuildMode
-    { Raise, Dig, PlaceHouse, Flat, AddSand };
 
     [Header("Testeo escena inicial")]
     [Tooltip("Comenzar con planicie?")]
@@ -112,9 +110,15 @@ public class DualMesh : MonoBehaviour
 
     private int grainsForAvalanche = 0;
 
-    private bool inBuildMode = false, constructed = false, inDestroyMode = false;
+    private bool constructed = false, destructed = false;
     private BuildSystem builder;
     private GameObject housePreviewGO, wallPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
+
+
+    public enum PlayingMode { Build, Destroy, Simulation };
+    private PlayingMode inMode = PlayingMode.Simulation;
+    public enum BuildMode
+    { Raise, Dig, PlaceHouse, Flat, AddSand };
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 
@@ -172,52 +176,72 @@ public class DualMesh : MonoBehaviour
     void Update()
 
     {
-        float before = duneModel.TotalSand();
+        //float before = duneModel.TotalSand();
         
         // Enter/Exit Build Mode
-        if (Input.GetKeyDown(KeyCode.C) && !inDestroyMode)
+        if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
         {
-            inBuildMode = !inBuildMode;
-            inDestroyMode = false;
+            inMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
             // Update the meshcolliders
             sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
             terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
         }
 
-
-        if (Input.GetKeyDown(KeyCode.Tab) && inBuildMode)
+        if (Input.GetKeyDown(KeyCode.X) && inMode != PlayingMode.Build)
         {
-            currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
-            builder.currentBuildMode = currentBuildMode;
-            builder.UpdateBuildPreviewVisual();
-            builder.HideAllPreviews();
+            inMode = (inMode == PlayingMode.Destroy) ? PlayingMode.Simulation : PlayingMode.Destroy;
+            // Update the meshcolliders
+            sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
         }
 
-        if (inBuildMode)
+        switch (inMode)
         {
-            builder.HandleBuildPreview();
+            case PlayingMode.Build:
+                {
+                    if (Input.GetKeyDown(KeyCode.Tab) && inMode == PlayingMode.Build)
+                    {
+                        currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
+                        builder.currentBuildMode = currentBuildMode;
+                        builder.UpdateBuildPreviewVisual();
+                        builder.HideAllPreviews();
+                    }
 
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                builder.RotateWallPreview();
-            }
+                    builder.HandleBuildPreview();
 
-            if (Input.GetMouseButtonDown(0))
-            {
-                constructed = builder.ConfirmBuild();
-                inBuildMode = !constructed ? inBuildMode : !inBuildMode;
-            }
-        }
-        else
-        {
-            builder.HideAllPreviews();
-            if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+                    if (Input.GetKeyDown(KeyCode.R))
+                    {
+                        builder.RotateWallPreview();
+                    }
 
-            for (int i = 0; i < 100; i++)
-            {
-                grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
-            }
-            ;
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        constructed = builder.ConfirmBuild();
+                        inMode = !constructed ? inMode : PlayingMode.Simulation;
+                    };
+                    break;
+                }
+            case PlayingMode.Destroy:
+                {
+                    builder.DetectConstructionUnderCursor();
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        destructed = builder.DestroyConstruction();
+                        inMode = !destructed ? inMode : PlayingMode.Simulation;
+                    }    
+                    break;
+                }
+            case PlayingMode.Simulation:
+                {
+                    builder.HideAllPreviews();
+                    if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+
+                    for (int i = 0; i < 100; i++)
+                    {
+                        grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
+                    }
+                    break;
+                }
         }
 
         if (constructed)
@@ -228,8 +252,8 @@ public class DualMesh : MonoBehaviour
 
         dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
 
-        float after = duneModel.TotalSand();
-        Debug.Log($"Δ arena = {after - before:F5}");
+        //float after = duneModel.TotalSand();
+        //Debug.Log($"Δ arena = {after - before:F5}");
 
     }
     #endregion
@@ -262,9 +286,34 @@ public class DualMesh : MonoBehaviour
 
     void AddCollidersToPrefabs()
     {
-        housePrefabGO.AddComponent<BoxCollider>();
-        wallPrefabGO.AddComponent<BoxCollider>();
+        /*
+        housePrefabGO.AddComponent<MeshCollider>().convex = true;
+        wallPrefabGO.AddComponent<MeshCollider>().convex = true;
+        */
+        /*
+        AddFittedBoxCollider(housePrefabGO);
+        AddFittedBoxCollider(wallPrefabGO);
+        */
     }
+
+    /*
+    void AddFittedBoxCollider(GameObject go)
+    {
+        var coll = go.AddComponent<BoxCollider>();
+
+        Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0) return;
+
+        Bounds combinedBounds = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+        {
+            combinedBounds.Encapsulate(renderers[i].bounds);
+        }
+
+        coll.center = go.transform.InverseTransformPoint(combinedBounds.center);
+        coll.size = combinedBounds.size;
+    }
+    */
 
     void CreatePreviews()
     {

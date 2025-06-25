@@ -30,10 +30,12 @@ namespace Building
             if (parentGO == null)
             {
                 parentGO = new GameObject("Construcciones");
+                SetLayerRecursively(parentGO, LayerMask.NameToLayer("Constructions"));
             }
 
             // Instanciar el prefab con el objeto padre
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
+            SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
             prefabInstance.name = name + System.DateTime.Now.ToString("HHmmss");
             
             activePreview.SetActive(false);
@@ -74,6 +76,18 @@ namespace Building
             }
             AddConstructionToList(centerPos, prefabRotation, currentBuildMode, support);
             return;
+        }
+
+        // Helper method to set layer recursively
+        private void SetLayerRecursively(GameObject obj, int newLayer)
+        {
+            if (obj == null) return;
+            obj.layer = newLayer;
+            foreach (Transform child in obj.transform)
+            {
+                if (child == null) continue;
+                SetLayerRecursively(child.gameObject, newLayer);
+            }
         }
 
         #region Save constructions
