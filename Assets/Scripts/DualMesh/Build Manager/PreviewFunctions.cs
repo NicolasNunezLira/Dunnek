@@ -147,7 +147,7 @@ namespace Building
         {
             if (currentBuildMode == DualMesh.BuildMode.Dig) return;
 
-            prefabRotation *= UnityEngine.Quaternion.Euler(0, 90f, 0);
+            prefabRotation *= UnityEngine.Quaternion.Euler(0, 45f, 0);
             activePreview.transform.rotation = prefabRotation;
         }
 
