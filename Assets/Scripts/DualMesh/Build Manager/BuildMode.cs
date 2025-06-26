@@ -27,7 +27,6 @@ namespace Building
         private int currentConstructionID;
 
         private Coroutine shakeCoroutine;
-        private bool planicie;
 
         bool canBuild;
 
@@ -35,12 +34,23 @@ namespace Building
 
         #region Init Build System
         public BuildSystem(
-            ModelDM model, DualMeshConstructor constructor,
-            ref Dictionary<int, ConstructionData> constructions, ref int currentConstructionID,
-            GameObject housePrefab, GameObject wallPrefab,
-            ref GameObject shovelPreviewGO, ref GameObject housePreviewGO, ref GameObject wallPreviewGO, ref GameObject sweeperPreviewGO, ref GameObject circlePreviewGO,
-            DualMesh.BuildMode currentBuildMode, float[,] terrainElev, ref GameObject activePreview,
-            ref int[,] constructionGrid, bool planicie)
+            ModelDM model,
+            DualMeshConstructor constructor,
+            Dictionary<int, ConstructionData> constructions,
+            int currentConstructionID,
+            GameObject housePrefab,
+            GameObject wallPrefab,
+            GameObject shovelPreviewGO,
+            GameObject housePreviewGO,
+            GameObject wallPreviewGO,
+            GameObject sweeperPreviewGO,
+            GameObject circlePreviewGO,
+            DualMesh.BuildMode currentBuildMode,
+            float[,] terrainElev,
+            GameObject activePreview,
+            int[,] constructionGrid,
+            bool planicie
+        )
         {
             duneModel = model;
             dualMeshConstructor = constructor;
@@ -56,17 +66,14 @@ namespace Building
             this.currentBuildMode = currentBuildMode;
             this.terrainElev = terrainElev;
             this.constructionGrid = constructionGrid;
-            this.planicie = planicie;
-
             this.activePreview = activePreview;
 
             if (planicie)
             {
-                previewX = Mathf.FloorToInt((duneModel.size / 2) * duneModel.xResolution / duneModel.size);
-                previewZ = Mathf.FloorToInt((duneModel.size / 2) * duneModel.zResolution / duneModel.size);
+                previewX = duneModel.xResolution / 2;
+                previewZ = duneModel.zResolution / 2;
                 GameObjectConstruction(housePrefab, Quaternion.identity, "House");
             }
-
         }
         #endregion
 

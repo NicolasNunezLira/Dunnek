@@ -1,5 +1,5 @@
-using System;
-using ue = UnityEngine;
+using Data;
+using UnityEngine;
 
 namespace DunefieldModel_DualMesh
 {
@@ -34,6 +34,8 @@ namespace DunefieldModel_DualMesh
             z = (z + zResolution) % zResolution;
             return (x, z);
         }
+
+        
         
         #endregion
 

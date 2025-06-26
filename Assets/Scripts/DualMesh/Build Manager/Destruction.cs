@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Text.RegularExpressions;
 using Data;
+using System;
 
 namespace Building
 {
@@ -76,7 +77,13 @@ namespace Building
 
                 constructionGrid[cx, cz] = 0;
 
+                if (duneModel.sandElev[cx, cz] >= data.buildHeight)
+                {
+                    duneModel.sandElev[cx, cz] -= data.buildHeight;
+                }
+
                 duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+                duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
             foreach (int2 coord in data.boundarySupport)
@@ -89,6 +96,7 @@ namespace Building
                 constructionGrid[cx, cz] = 0;
 
                 duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+                duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
 

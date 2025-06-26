@@ -79,6 +79,7 @@ namespace Building
                 }
             }
             AddConstructionToList(
+                prefabInstance,
                 centerPos,
                 prefabRotation,
                 currentBuildMode,
@@ -104,6 +105,7 @@ namespace Building
         #region Save constructions
 
         public void AddConstructionToList(
+            GameObject obj,
             UnityEngine.Vector3 position,
             UnityEngine.Quaternion rotation,
             DualMesh.BuildMode currentType,
@@ -115,6 +117,7 @@ namespace Building
         {
             var data = new ConstructionData
             {
+                obj = obj,
                 position = position,
                 rotation = rotation,
                 type = currentType,

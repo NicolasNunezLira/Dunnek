@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Data;
 
 namespace DunefieldModel_DualMesh
 {
@@ -199,6 +199,11 @@ namespace DunefieldModel_DualMesh
                     {
                         sandElev[x, z] -= transfer;
                         sandElev[nx, nz] = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]) + transfer;
+
+                        if (constructionGrid[nx, nz] > 0)
+                        {
+                            TryToDeleteBuild(nx, nz);
+                        }
 
                         Vector2Int neighbor = new Vector2Int(nx, nz);
                         if (!inQueue.Contains(neighbor))

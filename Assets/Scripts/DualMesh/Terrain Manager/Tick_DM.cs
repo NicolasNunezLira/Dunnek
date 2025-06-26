@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using Data;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine.Rendering;
 using ue = UnityEngine;
 
@@ -71,6 +74,7 @@ namespace DunefieldModel_DualMesh
             }
         }
 
+        #region Deposit
         public void AlgorithmDeposit(int x, int z, int dx, int dz, float depositeH, bool verbose = false)
         {
             int i = HopLength;
@@ -90,6 +94,7 @@ namespace DunefieldModel_DualMesh
 
             while (true)
             {
+                #region Barlovento behaviour with structures
                 int steps = Math.Max(Math.Abs(dx), Math.Abs(dz));
                 int stepX = dx / steps;  // dirección normalizada
                 int stepZ = dz / steps;
@@ -113,6 +118,7 @@ namespace DunefieldModel_DualMesh
                             // Se permite depósito sobre construcción por acumulación barlovento
                             DepositGrain(checkX, checkZ, dx, dz, depositeH);
                             if (verbose) ue.Debug.Log($"Acumulación barlovento permite depósito en construcción ({checkX}, {checkZ})");
+                            TryToDeleteBuild(checkX, checkZ);
                             return;
                         }
                         else
@@ -122,11 +128,14 @@ namespace DunefieldModel_DualMesh
                             int stopZ = zCurr + (s - 1) * stepZ;
                             DepositGrain(stopX, stopZ, dx, dz, depositeH);
                             if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), sin acumulación barlovento. Deposita en ({stopX}, {stopZ})");
+                            TryToDeleteBuild(checkX, checkZ);
                             return;
                         }
                     }
                 }
+                #endregion
 
+                #region Open field behaviour
                 // Cálculo de la posición actual del grano considerando comportamiento toroidal
                 xCurr = openEnded ? xCurr + dx : (xCurr + dx + xResolution) % xResolution;
                 zCurr = openEnded ? zCurr + dz : (zCurr + dx + zResolution) % zResolution;
@@ -197,7 +206,10 @@ namespace DunefieldModel_DualMesh
                 }
 
             }
+            #endregion
+
         }
+        #endregion
 
         #endregion
 
@@ -212,6 +224,46 @@ namespace DunefieldModel_DualMesh
             return total;
         }
 
+        #endregion
+
+        #region Destroy buried builds
+
+        public void TryToDeleteBuild(int checkX, int checkZ)
+        {
+            int id = constructionGrid[checkX, checkZ];
+            if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
+            {
+                ue.Debug.LogWarning($"ID {id} no encontrado en constructions.");
+                return;
+            }
+            (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sandElev, constructionGrid);
+            if (isBuried) { ue.Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
+
+            foreach (var cell in needActivate)
+            {
+                ActivateCell(cell.x, cell.y);
+            }
+
+            DeleteBuild(idToDestroy);
+        }
+
+        public void DeleteBuild(int id)
+        {
+            if (!constructions.TryGetValue(id, out ConstructionData data))
+            {
+                ue.Debug.LogWarning($"ID {id} no encontrado al intentar eliminar construcción.");
+                return;
+            }
+
+            if (!data.isBuried) return;
+
+            if (data.obj != null)
+            {
+                UnityEngine.Object.Destroy(data.obj);
+            }
+
+            constructions.Remove(id);
+        }
         #endregion
     }
 }

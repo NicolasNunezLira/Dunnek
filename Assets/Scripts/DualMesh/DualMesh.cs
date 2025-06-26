@@ -123,7 +123,7 @@ public class DualMesh : MonoBehaviour
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 
     private Dictionary<int, ConstructionData> constructions;
-    private int currentConstructionID = 1;  
+    private int currentConstructionID = 1;
 
 
     #endregion
@@ -171,10 +171,10 @@ public class DualMesh : MonoBehaviour
 
         builder = new BuildSystem(
             duneModel, dualMeshConstructor,
-            ref constructions, ref currentConstructionID,
+            constructions, currentConstructionID,
             housePrefabGO, wallPrefabGO,
-            ref shovelPreviewGO, ref housePreviewGO, ref wallPreviewGO, ref sweeperPreviewGO, ref circlePreviewGO,
-            currentBuildMode, terrainElev, ref activePreview, ref constructionGrid,
+            shovelPreviewGO, housePreviewGO, wallPreviewGO, sweeperPreviewGO, circlePreviewGO,
+            currentBuildMode, terrainElev, activePreview, constructionGrid,
             planicie);
     }
     #endregion
@@ -185,7 +185,7 @@ public class DualMesh : MonoBehaviour
 
     {
         //float before = duneModel.TotalSand();
-        
+
         // Enter/Exit Build Mode
         if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
         {
@@ -226,7 +226,8 @@ public class DualMesh : MonoBehaviour
                     {
                         constructed = builder.ConfirmBuild();
                         inMode = !constructed ? inMode : PlayingMode.Simulation;
-                    };
+                    }
+                    ;
                     break;
                 }
             case PlayingMode.Destroy:
@@ -236,7 +237,7 @@ public class DualMesh : MonoBehaviour
                     {
                         destructed = builder.DestroyConstruction();
                         inMode = !destructed ? inMode : PlayingMode.Simulation;
-                    }    
+                    }
                     break;
                 }
             case PlayingMode.Simulation:
@@ -345,6 +346,5 @@ public class DualMesh : MonoBehaviour
         circlePreviewGO.SetActive(false);
         //MakePreviewTransparent(circlePreviewGO);
     }
-
     #endregion
 }
