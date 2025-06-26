@@ -2,10 +2,8 @@ using UnityEngine;
 using DunefieldModel_DualMesh;
 using System.Collections.Generic;
 using System;
-using System.Xml;
-using Unity.VisualScripting;
 using Building;
-using UnityEditor.EditorTools;
+using Data;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class DualMesh : MonoBehaviour
@@ -124,6 +122,9 @@ public class DualMesh : MonoBehaviour
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 
+    private Dictionary<int, ConstructionData> constructions;
+    private int currentConstructionID = 1;  
+
 
     #endregion
 
@@ -131,6 +132,8 @@ public class DualMesh : MonoBehaviour
 
     void Start()
     {
+        constructions = new Dictionary<int, ConstructionData>();
+
         constructionGrid = new int[resolution + 1, resolution + 1];
 
         for (int x = 0; x < constructionGrid.GetLength(0); x++)
@@ -151,7 +154,9 @@ public class DualMesh : MonoBehaviour
         dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev, out terrainShadow);
 
         // Initialize the sand mesh to be above the terrain mesh
-        duneModel = new ModelDM(slopeFinder, sandElev, terrainShadow, constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+        duneModel = new ModelDM(
+            slopeFinder, sandElev, terrainShadow, constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+            ref constructions, ref currentConstructionID,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
 
@@ -166,6 +171,7 @@ public class DualMesh : MonoBehaviour
 
         builder = new BuildSystem(
             duneModel, dualMeshConstructor,
+            ref constructions, ref currentConstructionID,
             housePrefabGO, wallPrefabGO,
             ref shovelPreviewGO, ref housePreviewGO, ref wallPreviewGO, ref sweeperPreviewGO, ref circlePreviewGO,
             currentBuildMode, terrainElev, ref activePreview, ref constructionGrid,

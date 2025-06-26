@@ -1,10 +1,8 @@
 using UnityEngine;
-using DunefieldModel_DualMesh;
-using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using UnityEngine.UIElements;
 using System.Linq;
+using Data;
 //using System.Numerics;
 
 namespace Building
@@ -104,16 +102,6 @@ namespace Building
         }
 
         #region Save constructions
-        public class ConstrucionData
-        {
-            public UnityEngine.Vector3 position;
-            public UnityEngine.Quaternion rotation;
-            public DualMesh.BuildMode type;
-            public List<int2> support;
-            public List<int2> boundarySupport;
-            public float floorHeight;
-            public float buildHeight;
-        }
 
         public void AddConstructionToList(
             UnityEngine.Vector3 position,
@@ -125,7 +113,7 @@ namespace Building
             float buildHeight
         )
         {
-            var data = new ConstrucionData
+            var data = new ConstructionData
             {
                 position = position,
                 rotation = rotation,

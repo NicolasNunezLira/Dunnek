@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using Data;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -44,6 +45,10 @@ namespace DunefieldModel_DualMesh
 
         private float erosionH, depositeH, aux;
 
+        public Dictionary<int, ConstructionData> constructions;
+
+        public int currentConstructionID;
+
         public bool verbose;
 
         public float maxCellsPerFrame, conicShapeFactor, avalancheTrasnferRate, minAvalancheAmount, size;
@@ -51,12 +56,16 @@ namespace DunefieldModel_DualMesh
         #endregion
 
         #region Init model
-        public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
+        public ModelDM(
+            IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
+            ref Dictionary<int, ConstructionData> constructions, ref int currentConstructionID,
             float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope, float maxCellsPerFrame,
             float conicShapeFactor, float avalancheTrasnferRate, float minAvalancheAmount, bool verbose = false)
         {
             FindSlope = SlopeFinder;
             this.constructionGrid = constructionGrid;
+            this.constructions = constructions;
+            this.currentConstructionID = currentConstructionID;
             this.size = size;
             this.maxCellsPerFrame = maxCellsPerFrame;
             this.avalancheTrasnferRate = avalancheTrasnferRate;

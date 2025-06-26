@@ -1,12 +1,8 @@
 using UnityEngine;
-using DunefieldModel_DualMesh;
-using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using UnityEngine.UIElements;
-using cakeslice;
 using System.Text.RegularExpressions;
-//using System.Numerics;
+using Data;
 
 namespace Building
 {
@@ -68,10 +64,22 @@ namespace Building
         {
             if (toDestroy == null) return false;
 
-            ConstrucionData data = constructions[idToDestroy];
+            ConstructionData data = constructions[idToDestroy];
 
             // Liberar celdas ocupadas
             foreach (int2 coord in data.support)
+            {
+                int cx = coord.x;
+                int cz = coord.y;
+
+                if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
+
+                constructionGrid[cx, cz] = 0;
+
+                duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+                duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
+            }
+            foreach (int2 coord in data.boundarySupport)
             {
                 int cx = coord.x;
                 int cz = coord.y;

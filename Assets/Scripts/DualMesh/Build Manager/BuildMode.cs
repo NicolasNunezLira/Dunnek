@@ -1,10 +1,7 @@
 using UnityEngine;
 using DunefieldModel_DualMesh;
-using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using UnityEngine.UIElements;
-//using System.Numerics;
+using Data;
 
 namespace Building
 {
@@ -26,8 +23,8 @@ namespace Building
         public int[,] constructionGrid;
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
 
-        private Dictionary<int, ConstrucionData> constructions;
-        private int currentConstructionID = 1;
+        private Dictionary<int, ConstructionData> constructions;
+        private int currentConstructionID;
 
         private Coroutine shakeCoroutine;
         private bool planicie;
@@ -39,6 +36,7 @@ namespace Building
         #region Init Build System
         public BuildSystem(
             ModelDM model, DualMeshConstructor constructor,
+            ref Dictionary<int, ConstructionData> constructions, ref int currentConstructionID,
             GameObject housePrefab, GameObject wallPrefab,
             ref GameObject shovelPreviewGO, ref GameObject housePreviewGO, ref GameObject wallPreviewGO, ref GameObject sweeperPreviewGO, ref GameObject circlePreviewGO,
             DualMesh.BuildMode currentBuildMode, float[,] terrainElev, ref GameObject activePreview,
@@ -46,6 +44,8 @@ namespace Building
         {
             duneModel = model;
             dualMeshConstructor = constructor;
+            this.constructions = constructions;
+            this.currentConstructionID = currentConstructionID;
             this.housePrefab = housePrefab;
             this.wallPrefab = wallPrefab;
             this.shovelPreviewGO = shovelPreviewGO;
@@ -59,8 +59,6 @@ namespace Building
             this.planicie = planicie;
 
             this.activePreview = activePreview;
-
-            constructions = new Dictionary<int, ConstrucionData>();
 
             if (planicie)
             {
