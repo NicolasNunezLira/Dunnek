@@ -99,7 +99,7 @@ namespace DunefieldModel_DualMesh
                     int checkX = openEnded ? xCurr + s * stepX + dx : (xCurr + s * stepX + dx + xResolution) % xResolution;
                     int checkZ = openEnded ? zCurr + s * stepZ + dz : (zCurr + s * stepZ + dz + zResolution) % zResolution;
 
-                    if (!isConstruible[checkX, checkZ])
+                    if (constructionGrid[checkX, checkZ] > 0)
                     {
                         // Celda inmediatamente anterior (en barlovento)
                         int xPrev = openEnded ? checkX - dx : (checkX - dx + xResolution) % xResolution;

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine.UIElements;
 using cakeslice;
+using System.Text.RegularExpressions;
 //using System.Numerics;
 
 namespace Building
@@ -12,6 +13,8 @@ namespace Building
     public partial class BuildSystem
     {
         public GameObject toDestroy, currentHoverObject;
+
+        public int idToDestroy = -1;
 
         public Dictionary<Renderer, Material[]> originalMaterials = new();
         public void DetectConstructionUnderCursor()
@@ -22,7 +25,7 @@ namespace Building
 
             var construccionesParent = GameObject.Find("Construcciones")?.transform;
             if (construccionesParent == null) { RestoreHoverMaterials(); toDestroy = null; return; }
-            
+
 
             if (Physics.Raycast(ray, out hit, 100f, layerMask))
             {
@@ -44,8 +47,9 @@ namespace Building
                         toDestroy = target;
                     }
 
-
                     Debug.Log("Construcción seleccionada: " + toDestroy.name);
+
+                    idToDestroy = int.Parse(Regex.Match(toDestroy.name, @"\d+$").Value);
                 }
                 else
                 {
@@ -62,30 +66,31 @@ namespace Building
 
         public bool DestroyConstruction()
         {
-            if (toDestroy == null) { return false; }
-            ;
+            if (toDestroy == null) return false;
 
-            var data = constructionList.Find(c => Vector3.Distance(c.position, toDestroy.transform.position) < 0.1f);
-            Debug.Log($"{toDestroy.name}");
-            if (data != null)
+            ConstrucionData data = constructions[idToDestroy];
+
+            // Liberar celdas ocupadas
+            foreach (int2 coord in data.support)
             {
-                foreach (float2 coord in data.support)
-                {
-                    int x = (int)coord.x;
-                    int z = (int)coord.y;
+                int cx = coord.x;
+                int cz = coord.y;
 
-                    isConstruible[x, z] = true;
-                    duneModel.terrainElev[x, z] = terrainElev[x, z];
-                    duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);
-                }
+                if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
 
-                string name = toDestroy.name;
-                constructionList.Remove(data);
-                UnityEngine.Object.Destroy(toDestroy);
-                Debug.Log($"{name} destruido");
+                constructionGrid[cx, cz] = 0;
 
-                toDestroy = null; // limpieza
+                duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+                duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
+
+            constructions.Remove(idToDestroy);
+            string name = toDestroy.name;
+            UnityEngine.Object.Destroy(toDestroy);
+            Debug.Log($"{name} destruido");
+
+            toDestroy = null;
+            idToDestroy = -1;
             return true;
         }
 

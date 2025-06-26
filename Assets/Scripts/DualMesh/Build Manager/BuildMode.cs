@@ -22,10 +22,12 @@ namespace Building
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
         public float[,] terrainElev;
-        public bool[,] isConstruible;
+        //public bool[,] isConstruible;
+        public int[,] constructionGrid;
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
 
-        private List<ConstrucionData> constructionList;
+        private Dictionary<int, ConstrucionData> constructions;
+        private int currentConstructionID = 1;
 
         private Coroutine shakeCoroutine;
         private bool planicie;
@@ -40,7 +42,7 @@ namespace Building
             GameObject housePrefab, GameObject wallPrefab,
             ref GameObject shovelPreviewGO, ref GameObject housePreviewGO, ref GameObject wallPreviewGO, ref GameObject sweeperPreviewGO, ref GameObject circlePreviewGO,
             DualMesh.BuildMode currentBuildMode, float[,] terrainElev, ref GameObject activePreview,
-            ref bool[,] isConstruible, bool planicie)
+            ref int[,] constructionGrid, bool planicie)
         {
             duneModel = model;
             dualMeshConstructor = constructor;
@@ -53,12 +55,12 @@ namespace Building
             this.sweeperPreviewGO = sweeperPreviewGO;
             this.currentBuildMode = currentBuildMode;
             this.terrainElev = terrainElev;
-            this.isConstruible = isConstruible;
+            this.constructionGrid = constructionGrid;
             this.planicie = planicie;
 
             this.activePreview = activePreview;
 
-            constructionList = new List<ConstrucionData>();
+            constructions = new Dictionary<int, ConstrucionData>();
 
             if (planicie)
             {

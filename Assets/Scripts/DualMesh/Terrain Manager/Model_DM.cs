@@ -17,7 +17,8 @@ namespace DunefieldModel_DualMesh
         #region Variables
         public float[,] sandElev, terrainElev;
         public float[,] Shadow;
-        public bool[,] isConstruible;
+        //public bool[,] isConstruible;
+        public int[,] constructionGrid;
 
         public int xResolution = 0, zResolution = 0;
         public int HopLength = 1;
@@ -50,12 +51,12 @@ namespace DunefieldModel_DualMesh
         #endregion
 
         #region Init model
-        public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, bool[,] isConstruible, float size, int xResolution, int zResolution, float slope, int dx, int dz,
+        public ModelDM(IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
             float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope, float maxCellsPerFrame,
             float conicShapeFactor, float avalancheTrasnferRate, float minAvalancheAmount, bool verbose = false)
         {
             FindSlope = SlopeFinder;
-            this.isConstruible = isConstruible;
+            this.constructionGrid = constructionGrid;
             this.size = size;
             this.maxCellsPerFrame = maxCellsPerFrame;
             this.avalancheTrasnferRate = avalancheTrasnferRate;

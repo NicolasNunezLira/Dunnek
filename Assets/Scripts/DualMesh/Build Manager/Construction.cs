@@ -37,7 +37,7 @@ namespace Building
             // Instanciar el prefab con el objeto padre
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = name + System.DateTime.Now.ToString("HHmmss");
+            prefabInstance.name = name + currentConstructionID;//+ System.DateTime.Now.ToString("HHmmss");
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
@@ -73,14 +73,21 @@ namespace Building
                     {
                         duneModel.terrainElev[x, z] = targetHeight;
                         duneModel.sandElev[x, z] = floorHeight;
-                        isConstruible[x, z] = false;
+                        //isConstruible[x, z] = false;
                         support.Add(new int2(x, z));
                         duneModel.ActivateCell(x, z);
                         duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);
                     }
                 }
             }
-            AddConstructionToList(centerPos, prefabRotation, currentBuildMode, support, GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution));
+            AddConstructionToList(
+                centerPos,
+                prefabRotation,
+                currentBuildMode,
+                support,
+                GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution),
+                floorHeight,
+                targetHeight - floorHeight);
             return;
         }
 
@@ -104,6 +111,8 @@ namespace Building
             public DualMesh.BuildMode type;
             public List<int2> support;
             public List<int2> boundarySupport;
+            public float floorHeight;
+            public float buildHeight;
         }
 
         public void AddConstructionToList(
@@ -111,19 +120,35 @@ namespace Building
             UnityEngine.Quaternion rotation,
             DualMesh.BuildMode currentType,
             List<int2> support,
-            List<int2> boundarySupport
+            List<int2> boundarySupport,
+            float floorHeight,
+            float buildHeight
         )
         {
-            constructionList.Add(
-                new ConstrucionData
-                {
-                    position = position,
-                    rotation = rotation,
-                    type = currentType,
-                    support = support,
-                    boundarySupport = boundarySupport
-                }
-            );
+            var data = new ConstrucionData
+            {
+                position = position,
+                rotation = rotation,
+                type = currentType,
+                support = support,
+                boundarySupport = boundarySupport,
+                floorHeight = floorHeight,
+                buildHeight = buildHeight
+            };
+
+            constructions.Add(currentConstructionID, data);
+
+            foreach (var cell in support)
+            {
+                constructionGrid[cell.x, cell.y] = currentConstructionID;
+            }
+
+            foreach (var cell in boundarySupport)
+            {
+                constructionGrid[cell.x, cell.y] = currentConstructionID;
+            }
+
+            currentConstructionID++;
         }
 
         public GameObject GetPrefabForType(DualMesh.BuildMode mode)

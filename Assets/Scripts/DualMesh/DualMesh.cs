@@ -100,7 +100,9 @@ public class DualMesh : MonoBehaviour
     private GameObject terrainGO, sandGO;
 
     public float[,] terrainElev, sandElev, terrainShadow;
-    public bool[,] isConstruible;
+    //public bool[,] isConstruible;
+
+    public int[,] constructionGrid;
 
     private ModelDM duneModel;
     private FindSlopeMooreDeterministic slopeFinder;
@@ -129,13 +131,13 @@ public class DualMesh : MonoBehaviour
 
     void Start()
     {
-        isConstruible = new bool[resolution + 1, resolution + 1];
+        constructionGrid = new int[resolution + 1, resolution + 1];
 
-        for (int x = 0; x < isConstruible.GetLength(0); x++)
+        for (int x = 0; x < constructionGrid.GetLength(0); x++)
         {
-            for (int z = 0; z < isConstruible.GetLength(1); z++)
+            for (int z = 0; z < constructionGrid.GetLength(1); z++)
             {
-                isConstruible[x, z] = true;
+                constructionGrid[x, z] = 0;
             }
         }
 
@@ -149,7 +151,7 @@ public class DualMesh : MonoBehaviour
         dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev, out terrainShadow);
 
         // Initialize the sand mesh to be above the terrain mesh
-        duneModel = new ModelDM(slopeFinder, sandElev, terrainShadow, isConstruible, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+        duneModel = new ModelDM(slopeFinder, sandElev, terrainShadow, constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
 
@@ -166,7 +168,7 @@ public class DualMesh : MonoBehaviour
             duneModel, dualMeshConstructor,
             housePrefabGO, wallPrefabGO,
             ref shovelPreviewGO, ref housePreviewGO, ref wallPreviewGO, ref sweeperPreviewGO, ref circlePreviewGO,
-            currentBuildMode, terrainElev, ref activePreview, ref isConstruible,
+            currentBuildMode, terrainElev, ref activePreview, ref constructionGrid,
             planicie);
     }
     #endregion
