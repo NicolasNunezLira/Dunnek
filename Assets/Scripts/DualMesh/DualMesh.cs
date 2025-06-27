@@ -90,6 +90,10 @@ public class DualMesh : MonoBehaviour
     [Tooltip("Comenzar con planicie?")]
     [SerializeField] public bool planicie;
 
+    
+    [Tooltip("Terreno abierto?")]
+    [SerializeField] public bool isOpened;
+
     #endregion
 
     // ====================================================================
@@ -147,6 +151,8 @@ public class DualMesh : MonoBehaviour
 
         slopeFinder = new FindSlopeMooreDeterministic();
 
+        slopeFinder.SetOpenEnded(isOpened);
+
         // Initialize the terrain and sand meshes
         dualMeshConstructor = new DualMeshConstructor(resolution, size, terrainScale1, terrainScale2, terrainScale3, terrainAmplitude1, terrainAmplitude2, terrainAmplitude3,
             sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, criticalSlopes, criticalSlopeThreshold, ref planicie, this.transform);
@@ -155,7 +161,7 @@ public class DualMesh : MonoBehaviour
 
         // Initialize the sand mesh to be above the terrain mesh
         duneModel = new ModelDM(
-            slopeFinder, sandElev, terrainShadow, constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+            slopeFinder, sandElev, terrainElev, terrainShadow, constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
             ref constructions, ref currentConstructionID,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
@@ -184,7 +190,7 @@ public class DualMesh : MonoBehaviour
     void Update()
 
     {
-        //float before = duneModel.TotalSand();
+        float before = duneModel.TotalSand();
 
         // Enter/Exit Build Mode
         if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
@@ -261,8 +267,8 @@ public class DualMesh : MonoBehaviour
 
         dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
 
-        //float after = duneModel.TotalSand();
-        //Debug.Log($"Δ arena = {after - before:F5}");
+        float after = duneModel.TotalSand();
+        Debug.Log($"Δ arena = {after - before:F5}");
 
     }
     #endregion

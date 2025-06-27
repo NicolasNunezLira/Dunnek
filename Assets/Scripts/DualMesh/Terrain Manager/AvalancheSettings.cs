@@ -12,8 +12,6 @@ namespace DunefieldModel_DualMesh
         public Queue<Vector2Int> avalancheQueue;
         private HashSet<Vector2Int> inQueue;
 
-        //private int avalancheChecksPerFrame = 500; // o ajustable públicamente
-
  
         private bool IsValidCell(int x, int z)
         {

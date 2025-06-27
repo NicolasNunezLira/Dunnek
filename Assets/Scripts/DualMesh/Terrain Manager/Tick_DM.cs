@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Data;
-using TMPro;
 using Unity.Mathematics;
-using UnityEngine.Rendering;
 using ue = UnityEngine;
 
 namespace DunefieldModel_DualMesh
@@ -85,7 +82,10 @@ namespace DunefieldModel_DualMesh
             int countTerrain = 0;
             for (int j = 1; j <= i; j++)
             {
-                (int xAUx, int zAux) = WrapCoords(xCurr + j * dx, zCurr + j * dz);
+                (int xAUx, int zAux) = openEnded ? (xCurr + j * dx, zCurr + j * dz) : WrapCoords(xCurr + j * dx, zCurr + j * dz);
+
+                if (openEnded && IsOutside(xAUx, zAux)) break;
+
                 if (terrainElev[xAUx, zAux] >= sandElev[xAUx, zAux])
                 {
                     countTerrain++;
@@ -104,11 +104,15 @@ namespace DunefieldModel_DualMesh
                     int checkX = openEnded ? xCurr + s * stepX + dx : (xCurr + s * stepX + dx + xResolution) % xResolution;
                     int checkZ = openEnded ? zCurr + s * stepZ + dz : (zCurr + s * stepZ + dz + zResolution) % zResolution;
 
+                    if (openEnded && IsOutside(checkX, checkZ)) continue;
+
                     if (constructionGrid[checkX, checkZ] > 0)
                     {
                         // Celda inmediatamente anterior (en barlovento)
                         int xPrev = openEnded ? checkX - dx : (checkX - dx + xResolution) % xResolution;
                         int zPrev = openEnded ? checkX - dx : (checkZ - dz + zResolution) % zResolution;
+
+                        if (openEnded && IsOutside(xPrev, zPrev)) break;
 
                         // Verificar acumulación de arena frente a la construcción
                         float acumulacionBarlovento = terrainElev[checkX, checkZ] - sandElev[xPrev, zPrev];
@@ -236,7 +240,7 @@ namespace DunefieldModel_DualMesh
                 ue.Debug.LogWarning($"ID {id} no encontrado en constructions.");
                 return;
             }
-            (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sandElev, constructionGrid);
+            (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sandElev, terrainElev, realTerrain, constructionGrid);
             if (isBuried) { ue.Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
 
             foreach (var cell in needActivate)

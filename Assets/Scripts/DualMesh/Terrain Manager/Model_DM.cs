@@ -16,7 +16,7 @@ namespace DunefieldModel_DualMesh
     public partial class ModelDM
     {
         #region Variables
-        public float[,] sandElev, terrainElev;
+        public float[,] sandElev, terrainElev, realTerrain;
         public float[,] Shadow;
         //public bool[,] isConstruible;
         public int[,] constructionGrid;
@@ -57,12 +57,13 @@ namespace DunefieldModel_DualMesh
 
         #region Init model
         public ModelDM(
-            IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
+            IFindSlope SlopeFinder, float[,] sandElev, float[,] realTerrain, float[,] terrainElev, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
             ref Dictionary<int, ConstructionData> constructions, ref int currentConstructionID,
             float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope, float maxCellsPerFrame,
             float conicShapeFactor, float avalancheTrasnferRate, float minAvalancheAmount, bool verbose = false)
         {
             FindSlope = SlopeFinder;
+            this.realTerrain = realTerrain;
             this.constructionGrid = constructionGrid;
             this.constructions = constructions;
             this.currentConstructionID = currentConstructionID;

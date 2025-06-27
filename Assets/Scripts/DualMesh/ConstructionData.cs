@@ -23,7 +23,9 @@ namespace Data
         #endregion
 
         #region Metodos
-        public (bool, string, int, List<int2>) IsBuried(float[,] sandElev, int[,] constructionGrid, float tolerance = 0.05f, float supportThreshold = 0.6f, float boundaryThreshold = 0.3f)
+        public (bool, string, int, List<int2>) IsBuried(
+            float[,] sandElev, float[,] terrainElev, float[,] realTerrain, int[,] constructionGrid,
+            float tolerance = 0.05f, float supportThreshold = 0.6f, float boundaryThreshold = 0.3f)
         {
             int buriedSupport = 0;
             foreach (var cell in support)
@@ -42,20 +44,22 @@ namespace Data
             float supportRatio = (float)buriedSupport / support.Count;
             float boundaryRatio = (float)buriedBoundary / boundarySupport.Count;
 
-            isBuried = supportRatio >= supportThreshold && boundaryRatio >= boundaryThreshold;
+            isBuried = (supportRatio >= supportThreshold && boundaryRatio >= boundaryThreshold)
+                    || (supportRatio >= 3 / 2 * supportThreshold && boundaryRatio >= 2 / 3 * boundaryThreshold)
+                    || (supportRatio >= 1 / 2 * supportThreshold && boundaryRatio >= 2 * boundaryThreshold);
 
             string constructionName = obj.name;
 
             List<int2> needActivate = new List<int2>();
             if (isBuried)
             {
-                needActivate = ErodeBuild(sandElev, constructionGrid);
+                needActivate = ErodeBuild(sandElev, terrainElev, realTerrain, constructionGrid);
             }
 
             return (isBuried, constructionName, int.Parse(Regex.Match(constructionName, @"\d+$").Value), needActivate);
         }
 
-        public List<int2> ErodeBuild(float[,] sandElev, int[,] constructionGrid)
+        public List<int2> ErodeBuild(float[,] sandElev, float[,] terrainElev, float[,] realTerrain, int[,] constructionGrid)
         {
             List<int2> needActivate = new List<int2>();
             foreach (var cell in support)
@@ -68,6 +72,7 @@ namespace Data
                     sandElev[cell.x, cell.y] = Math.Max(buildHeight + floorHeight, sandHeight);
                 }
 
+                terrainElev[cell.x, cell.y] = realTerrain[cell.x, cell.y];             
                 constructionGrid[cell.x, cell.y] = 0;
             }
             foreach (var cell in boundarySupport)

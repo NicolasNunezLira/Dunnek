@@ -1,5 +1,20 @@
 {
   "dependencies": {
+    "com.beans.deform": {
+      "version": "file:com.beans.deform",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.4.8"
+      }
+    },
+    "com.minu.voximport": {
+      "version": "https://github.com/minuJeong/VoxImporter-for-Unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "90785a6022b665fc7ab5eb6c99489ecb73e6473c"
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.7",
       "depth": 0,
@@ -11,7 +26,7 @@
     },
     "com.unity.burst": {
       "version": "1.8.21",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.mathematics": "1.2.1",
