@@ -19,7 +19,7 @@ public class GridInteraction : MonoBehaviour
         
         if (gridSystem == null)
         {
-            gridSystem = FindObjectOfType<GridSystem>();
+            gridSystem = FindFirstObjectByType<GridSystem>();
             if (gridSystem == null)
             {
                 Debug.LogError("No se encontró el GridSystem. Asigna uno en el inspector.");
