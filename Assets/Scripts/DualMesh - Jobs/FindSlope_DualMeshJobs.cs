@@ -35,7 +35,7 @@ namespace DunefieldModel_DualMeshJobs
       int xDOF = xResolution - 1;
 
       int indexCenter = x + (xResolution * z);
-      UnityEngine.Debug.Log("Center = (" + x + ", " + z + ") = " + indexCenter);
+      //UnityEngine.Debug.Log("Center = (" + x + ", " + z + ") = " + indexCenter);
 
       if (terrain[indexCenter] >= sand[indexCenter])
       {

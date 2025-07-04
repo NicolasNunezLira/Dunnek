@@ -88,7 +88,7 @@ namespace DunefieldModel_DualMeshJobs
             int x = randomsX[i];
             int z = randomsZ[i];
             int index = x + (xResolution * z);
-            ue.Debug.Log("(" + x + ", " + z + ") = " + index);
+            //ue.Debug.Log("(" + x + ", " + z + ") = " + index);
 
             if (Math.Max(sand[index], terrain[index]) <= 0 || // Cell without height
                 shadow[index] > 0 ||                          // Cell in shadow

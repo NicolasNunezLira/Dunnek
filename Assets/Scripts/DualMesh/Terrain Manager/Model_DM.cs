@@ -49,7 +49,7 @@ namespace DunefieldModel_DualMesh
 
         public int currentConstructionID;
 
-        public bool verbose;
+        public bool verbose, isPaused;
 
         public float maxCellsPerFrame, conicShapeFactor, avalancheTrasnferRate, minAvalancheAmount, size;
 
@@ -57,11 +57,13 @@ namespace DunefieldModel_DualMesh
 
         #region Init model
         public ModelDM(
+            ref bool isPaused,
             IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
             ref Dictionary<int, ConstructionData> constructions, ref int currentConstructionID,
             float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope, float maxCellsPerFrame,
             float conicShapeFactor, float avalancheTrasnferRate, float minAvalancheAmount, bool verbose = false)
         {
+            this.isPaused = isPaused;
             FindSlope = SlopeFinder;
             this.constructionGrid = constructionGrid;
             this.constructions = constructions;

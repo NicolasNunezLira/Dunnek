@@ -14,7 +14,7 @@ namespace Building
         public DualMeshConstructor dualMeshConstructor;
         public int buildRadius = 4;
         public int buildSize = 2; // puede ser 2 o 3d
-        public float digDepth = 1f;
+        public float digDepth = 1f, durationBuild = 5f;
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
@@ -38,6 +38,7 @@ namespace Building
             DualMeshConstructor constructor,
             Dictionary<int, ConstructionData> constructions,
             int currentConstructionID,
+            float pulledDownTime,
             GameObject housePrefab,
             GameObject wallPrefab,
             GameObject shovelPreviewGO,
@@ -55,6 +56,7 @@ namespace Building
             duneModel = model;
             dualMeshConstructor = constructor;
             this.constructions = constructions;
+            this.durationBuild = pulledDownTime;
             this.currentConstructionID = currentConstructionID;
             this.housePrefab = housePrefab;
             this.wallPrefab = wallPrefab;

@@ -18,6 +18,8 @@ namespace Data
         public List<int2> boundarySupport;
         public float floorHeight;
         public float buildHeight;
+        public float duration;
+        public float timeBuilt;
 
         public bool isBuried = false;
         #endregion
@@ -74,9 +76,74 @@ namespace Data
             {
                 constructionGrid[cell.x, cell.y] = 0;
                 needActivate.Add(cell);
-            }
+            }            
 
             return needActivate;
+        }
+
+        public System.Collections.IEnumerator InitPulledDownCoroutine(float[,] sandElev, float maxExtraHeight = 0.2f, float cellSize = 1f)
+        {
+            if (obj == null) yield break;
+            // Activar animación de derrumbe
+            var pulled = obj.transform.Find("default")?.GetComponent<PulledDown>();
+            if (pulled != null)
+            {
+                pulled.activatePulledDown = true;
+            }
+
+            // Esperar a que el componente esté listo
+            yield return new WaitUntil(() => pulled != null && pulled.IsCollapsing);
+
+            // Calcular centro en coordenadas de grilla
+            float cx = position.x / cellSize;
+            float cz = position.z / cellSize;
+
+            // Unir support + boundary
+            List<int2> allCells = new List<int2>();
+            allCells.AddRange(support);
+            allCells.AddRange(boundarySupport);
+
+            // Calcular distancia máxima desde el centro
+            List<(int2 cell, float dist)> distancias = new List<(int2, float)>();
+            float maxDist = 0f;
+
+            foreach (var cell in allCells)
+            {
+                float dx = cell.x - cx;
+                float dz = cell.y - cz;
+                float dist = Mathf.Sqrt(dx * dx + dz * dz);
+                distancias.Add((cell, dist));
+                if (dist > maxDist)
+                    maxDist = dist;
+            }
+
+            // Ordenar de adentro hacia afuera
+            distancias.Sort((a, b) => a.dist.CompareTo(b.dist));
+
+            float duration = pulled != null ? pulled.Duration : 2f;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                float t = pulled != null ? pulled.CollapseProgress : elapsed / duration;
+                float scaleY = pulled != null ? pulled.CurrentHeight : Mathf.Lerp(1f, 0f, t);
+
+                // Aumentar arena en base al progreso de colapso
+                foreach (var (cell, dist) in distancias)
+                {
+                    float coneHeight = maxExtraHeight * (1f - dist / maxDist);
+                    float altura = floorHeight + buildHeight * (1f - scaleY) + coneHeight * (1f - scaleY);
+                    sandElev[cell.x, cell.y] = Mathf.Max(sandElev[cell.x, cell.y], altura);
+                }
+
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+        }
+
+        public bool NeedPullDown()
+        {
+            return !isBuried && (Time.time - timeBuilt >= duration);
         }
 
         public void RestoreTerrain(float[,] terrainElev, float[,] duneTerrain)

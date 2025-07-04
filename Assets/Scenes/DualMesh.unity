@@ -193,10 +193,11 @@ MonoBehaviour:
   avalancheTransferRate: 0.7
   conicShapeFactor: 1
   minAvalancheAmount: 1.5
+  pulledDownTime: 800
   shovelPrefabGO: {fileID: 7960429348020450371, guid: bea85a0a54dc5a2449ee5e3d8672360a, type: 3}
   sweeperPrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
   circlePrefabGO: {fileID: 954444326845918246, guid: 3ca50639c2ba83c45baf16e33fd52f63, type: 3}
-  housePrefabGO: {fileID: 1529927929722832041, guid: 7dbdf52221356974aa796fc70b50dad0, type: 3}
+  housePrefabGO: {fileID: 3647818819472846073, guid: 7f67a8a243ded7d43b8f046ba2f3795f, type: 3}
   wallPrefabGO: {fileID: 3149707725384881785, guid: a97fe0bcf5cf5ba499ad434339ea7397, type: 3}
   planicie: 1
 --- !u!23 &164671254
@@ -1426,6 +1427,7 @@ MonoBehaviour:
   rotationSpeed: 5
   minZoom: 1
   maxZoom: 100
+  isControllable: 1
 --- !u!33 &285757673750222148
 MeshFilter:
   m_ObjectHideFlags: 0

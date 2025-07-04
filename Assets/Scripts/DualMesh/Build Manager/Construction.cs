@@ -124,7 +124,9 @@ namespace Building
                 support = support,
                 boundarySupport = boundarySupport,
                 floorHeight = floorHeight,
-                buildHeight = buildHeight
+                buildHeight = buildHeight,
+                duration = durationBuild,
+                timeBuilt = Time.time
             };
 
             constructions.Add(currentConstructionID, data);
