@@ -45,6 +45,5 @@ namespace DunefieldModel_DualMesh
             return erosionH;
         }
         #endregion
-
     }
 }

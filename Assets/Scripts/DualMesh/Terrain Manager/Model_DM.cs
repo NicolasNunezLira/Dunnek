@@ -36,7 +36,7 @@ namespace DunefieldModel_DualMesh
 
         public float slopeThreshold = .2f; // slope threshold for deposition
 
-        public int grainsPerStep;
+        public int grainsPerStep, grainsOutside;
 
         public float slope, avalancheSlope;
 
@@ -92,6 +92,7 @@ namespace DunefieldModel_DualMesh
             Array.Clear(Shadow, 0, zResolution * xResolution);
             ShadowInit();
             FindSlope.Init(ref sandElev, ref terrainElev, this.xResolution, this.zResolution, this.slope);
+            grainsOutside = 0;
             //FindSlope.SetOpenEnded(openEnded);
         }
         #endregion

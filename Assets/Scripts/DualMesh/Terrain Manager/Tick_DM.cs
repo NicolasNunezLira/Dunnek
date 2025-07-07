@@ -83,41 +83,50 @@ namespace DunefieldModel_DualMesh
             int xCurr = x;
             int zCurr = z;
 
-            // Conteo de celdas de terreno en las posibles deposiciones del grano
+            // Conteo de celdas de terreno en el camino
             int countTerrain = 0;
             for (int j = 1; j <= i; j++)
             {
-                (int xAUx, int zAux) = WrapCoords(xCurr + j * dx, zCurr + j * dz);
-                if (terrainElev[xAUx, zAux] >= sandElev[xAUx, zAux])
-                {
+                int xAux = xCurr + j * dx;
+                int zAux = zCurr + j * dz;
+
+                if (!openEnded)
+                    (xAux, zAux) = WrapCoords(xAux, zAux);
+                else if (!IsInside(xAux, zAux))
+                    break;
+
+                if (terrainElev[xAux, zAux] >= sandElev[xAux, zAux])
                     countTerrain++;
-                }
             }
 
             while (true)
             {
                 #region Barlovento behaviour with structures
                 int steps = Math.Max(Math.Abs(dx), Math.Abs(dz));
-                int stepX = dx / steps;  // dirección normalizada
+                int stepX = dx / steps;
                 int stepZ = dz / steps;
 
                 for (int s = 1; s <= steps; s++)
                 {
-                    int checkX = openEnded ? xCurr + s * stepX + dx : (xCurr + s * stepX + dx + xResolution) % xResolution;
-                    int checkZ = openEnded ? zCurr + s * stepZ + dz : (zCurr + s * stepZ + dz + zResolution) % zResolution;
+                    int checkX = xCurr + s * stepX + dx;
+                    int checkZ = zCurr + s * stepZ + dz;
+
+                    if (openEnded && !IsInside(checkX, checkZ)) return;
+                    if (!openEnded)
+                        (checkX, checkZ) = WrapCoords(checkX, checkZ);
 
                     if (constructionGrid[checkX, checkZ] > 0)
                     {
-                        // Celda inmediatamente anterior (en barlovento)
-                        int xPrev = openEnded ? checkX - dx : (checkX - dx + xResolution) % xResolution;
-                        int zPrev = openEnded ? checkX - dx : (checkZ - dz + zResolution) % zResolution;
+                        int xPrev = checkX - dx;
+                        int zPrev = checkZ - dz;
+                        if (!openEnded)
+                            (xPrev, zPrev) = WrapCoords(xPrev, zPrev);
+                        else if (!IsInside(xPrev, zPrev)) return;
 
-                        // Verificar acumulación de arena frente a la construcción
                         float acumulacionBarlovento = terrainElev[checkX, checkZ] - sandElev[xPrev, zPrev];
 
-                        if (acumulacionBarlovento <= 0.2f) // umbralBarlovento = 0.2f
+                        if (acumulacionBarlovento <= 0.2f)
                         {
-                            // Se permite depósito sobre construcción por acumulación barlovento
                             DepositGrain(checkX, checkZ, dx, dz, depositeH);
                             if (verbose) ue.Debug.Log($"Acumulación barlovento permite depósito en construcción ({checkX}, {checkZ})");
                             TryToDeleteBuild(checkX, checkZ);
@@ -125,7 +134,6 @@ namespace DunefieldModel_DualMesh
                         }
                         else
                         {
-                            // Depositar justo antes de la construcción
                             int stopX = xCurr + (s - 1) * stepX;
                             int stopZ = zCurr + (s - 1) * stepZ;
                             DepositGrain(stopX, stopZ, dx, dz, depositeH);
@@ -138,22 +146,19 @@ namespace DunefieldModel_DualMesh
                 #endregion
 
                 #region Open field behaviour
-                // Cálculo de la posición actual del grano considerando comportamiento toroidal
-                xCurr = openEnded ? xCurr + dx : (xCurr + dx + xResolution) % xResolution;
-                zCurr = openEnded ? zCurr + dz : (zCurr + dx + zResolution) % zResolution;
+                xCurr += dx;
+                zCurr += dz;
 
-                // Si el grano sale del dominio en campo abierto, detener la deposición
-                if (openEnded && !IsInside(xCurr, zCurr))
-                    return;
+                if (openEnded && !IsInside(xCurr, zCurr)) return;
+                if (!openEnded)
+                    (xCurr, zCurr) = WrapCoords(xCurr, zCurr);
 
-                // Si el grano está en sombra, depositar y salir del ciclo
                 if (Shadow[xCurr, zCurr] > 0 && sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr])
                 {
-                    if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
+                    if (verbose) ue.Debug.Log($"Grano a depositar en sombra en ({xCurr}, {zCurr})");
                     DepositGrain(xCurr, zCurr, dx, dz, depositeH);
                     return;
                 }
-
 
                 if (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr] &&
                     terrainElev[xCurr, zCurr] >= sandElev[x, z])
@@ -162,54 +167,47 @@ namespace DunefieldModel_DualMesh
                     continue;
                 }
 
-
                 if (countTerrain >= i - 1)
                 {
-                    // Direcciones laterales (perpendiculares al viento)
                     int[] dxLateral = { -dz, dz };
                     int[] dzLateral = { dx, -dx };
 
-                    bool deposited = false;
-
-                    for (int j = 0; j < 2 && !deposited; j++)
+                    for (int j = 0; j < 2; j++)
                     {
-                        int k = 1;
-                        while (k <= i)
+                        for (int k = 1; k <= i; k++)
                         {
-                            int lx = openEnded ? xCurr + dxLateral[j] : (xCurr + dxLateral[j] * k + xResolution) % xResolution;
-                            int lz = openEnded ? zCurr + dzLateral[j] : (zCurr + dzLateral[j] * k + zResolution) % zResolution;
+                            int lx = xCurr + dxLateral[j] * k;
+                            int lz = zCurr + dzLateral[j] * k;
 
-                            if (Math.Max(terrainElev[lx, lz], sandElev[lx, lz]) < Math.Max(terrainElev[xCurr, zCurr], sandElev[xCurr, zCurr]) - slopeThreshold)
+                            if (openEnded && !IsInside(lx, lz)) break;
+                            if (!openEnded)
+                                (lx, lz) = WrapCoords(lx, lz);
+
+                            if (Math.Max(terrainElev[lx, lz], sandElev[lx, lz]) <
+                                Math.Max(terrainElev[xCurr, zCurr], sandElev[xCurr, zCurr]) - slopeThreshold)
                             {
                                 DepositGrain(lx, lz, dxLateral[j], dzLateral[j], depositeH);
                                 if (verbose) ue.Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
                                 return;
                             }
-                            k++;
                         }
                     }
-                    //break;
                 }
+
                 countTerrain -= (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr]) ? 1 : 0;
 
-                // Si el grano no está en sombra, verificar si se debe depositar
                 if (--i <= 0)
-                {// Si el terreno es más alto que la arena, reiniciar posición
-
-
-                    // Verificar si el grano debe depositarse basado en la altura de arena y terreno
+                {
                     if (rnd.NextDouble() < (sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr] ? pSand : pNoSand))
                     {
                         DepositGrain(xCurr, zCurr, dx, dz, depositeH);
-                        if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
+                        if (verbose) ue.Debug.Log($"Grano a depositar en final de hop en ({xCurr}, {zCurr})");
                         return;
                     }
                     i = HopLength;
                 }
-
+                #endregion
             }
-            #endregion
-
         }
         #endregion
 

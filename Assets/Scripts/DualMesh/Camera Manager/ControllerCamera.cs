@@ -20,7 +20,7 @@ namespace CameraManager
 
         void Awake()
         {
-            Instance = this;   
+            Instance = this;
         }
 
         void Start()
@@ -37,6 +37,7 @@ namespace CameraManager
             HandleMovement();
             HandleRotation();
             HandleZoom();
+            HandleTilt();
         }
 
         void HandleMovement()
@@ -96,6 +97,21 @@ namespace CameraManager
 
             transform.position = endPos;
             transform.rotation = endRot;
+        }
+        
+        void HandleTilt()
+        {
+            if (Input.GetMouseButton(1)) // botón del medio
+            {
+                float tiltDelta = -Input.GetAxis("Mouse Y") * rotationSpeed;
+                Vector3 angles = transform.eulerAngles;
+                float newAngle = angles.x + tiltDelta;
+
+                // Limita la inclinación entre 10 y 80 grados (ajustable)
+                //newAngle = Mathf.Clamp(newAngle, 10f, 80f);
+
+                transform.eulerAngles = new Vector3(newAngle, angles.y, 0f);
+            }
         }
 
     }

@@ -168,13 +168,14 @@ MonoBehaviour:
   resolution: 255
   size: 50
   terrainMaterial: {fileID: 2100000, guid: c9df7fed0d2882e4daa9486dee9bbf3e, type: 2}
+  openEnded: 0
   terrainScale1: 0.003
   terrainAmplitude1: 8
   terrainScale2: 0.01
   terrainAmplitude2: 4
   terrainScale3: 0.05
   terrainAmplitude3: 2
-  sandMaterial: {fileID: 2100000, guid: d973757631d287749a34cc58a9a04b87, type: 2}
+  sandMaterial: {fileID: 2100000, guid: fa542ab47cc7bb3418c35926f8cab963, type: 2}
   sandScale1: 0.02
   sandAmplitude1: 1.5
   sandScale2: 0.06

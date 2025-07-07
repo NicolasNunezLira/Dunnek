@@ -23,6 +23,11 @@ public partial class DualMesh : MonoBehaviour
     [Tooltip("Meterial.")]
     public Material terrainMaterial;
 
+    [Header("Simulation behavior")]
+    [Tooltip("Is the simulaiton toroidal?")]
+    public bool openEnded = false;
+
+    [Header("Terrain generation settings")]
     [Tooltip("Perlin noise parameters.")]
     public float terrainScale1 = 0.003f;
     public float terrainAmplitude1 = 8f;
@@ -167,7 +172,7 @@ public partial class DualMesh : MonoBehaviour
             ref constructions, ref currentConstructionID,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
-
+        duneModel.SetOpenEnded(openEnded);
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
 
@@ -254,6 +259,8 @@ public partial class DualMesh : MonoBehaviour
                         builder.HideAllPreviews();
 
                         if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+
+                        if (openEnded) { duneModel.InjectDirectionalSand((int)windDirection.x, (int)windDirection.y, (int)heightVariation/2, UnityEngine.Random.Range(0, grainsPerStep / 50), 0.2f); };
 
                         for (int i = 0; i < 100; i++)
                         {

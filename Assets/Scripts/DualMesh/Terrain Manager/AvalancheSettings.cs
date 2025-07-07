@@ -8,19 +8,23 @@ namespace DunefieldModel_DualMesh
 {
     public partial class ModelDM
     {
+        #region Variables
         // Cola de celdas activas
         public Queue<Vector2Int> avalancheQueue;
         private HashSet<Vector2Int> inQueue;
 
         //private int avalancheChecksPerFrame = 500; // o ajustable públicamente
+        #endregion
 
- 
+        #region IsValidCell
         private bool IsValidCell(int x, int z)
         {
-            return x > 0 && x < sandElev.GetLength(0) - 1 &&
-                   z > 0 && z < sandElev.GetLength(1) - 1;
+            return openEnded ? IsInside(x, z) : (x > 0 && x < sandElev.GetLength(0) - 1 && z > 0 && z < sandElev.GetLength(1) - 1);
         }
-  
+        #endregion
+
+
+        #region Initialize Queues
         /// <summary>
         /// Inicializa la cola reactiva de avalanchas
         /// </summary>
@@ -44,19 +48,6 @@ namespace DunefieldModel_DualMesh
             }
         }
 
-        /// <summary>
-        /// Activa una celda para evaluación de avalancha
-        /// </summary>
-        public void ActivateCell(int x, int z)
-        {
-            Vector2Int cell = new Vector2Int(x, z);
-            if (!inQueue.Contains(cell))
-            {
-                avalancheQueue.Enqueue(cell);
-                inQueue.Add(cell);
-            }
-        }
-       
         public void InitCriticalSlopeCells()
         {
             if (avalancheQueue == null) avalancheQueue = new Queue<Vector2Int>();
@@ -90,9 +81,8 @@ namespace DunefieldModel_DualMesh
                     inQueue.Add(pos);
                 }
             }
-
-            //Debug.Log($"Celdas críticas iniciales activadas: {critical.Count}");
         }
+
         private bool CellIsCritical(int x, int z)
         {
             float h = sandElev[x, z];
@@ -109,11 +99,18 @@ namespace DunefieldModel_DualMesh
                     int nx = x + dx;
                     int nz = z + dz;
 
+                    if (!openEnded)
+                    {
+                        (nx, nz) = WrapCoords(nx, nz);
+                    }
+
                     if (!IsValidCell(nx, nz)) continue;
 
                     float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
                     float heightDiff = h - nh;
-                    float distance = size * Mathf.Sqrt(dx * dx / (xResolution * xResolution) + dz * dz / (zResolution * zResolution));
+                    float distance = size * Mathf.Sqrt(
+                        (float)dx * dx / (xResolution * xResolution) +
+                        (float)dz * dz / (zResolution * zResolution));
 
                     float slope = heightDiff / distance;
                     if (slope > avalancheSlope)
@@ -123,8 +120,25 @@ namespace DunefieldModel_DualMesh
 
             return false;
         }
+        #endregion
 
- 
+        #region ActivateCells
+        /// <summary>
+        /// Activa una celda para evaluación de avalancha
+        /// </summary>
+        public void ActivateCell(int x, int z)
+        {
+            Vector2Int cell = new Vector2Int(x, z);
+            if (!inQueue.Contains(cell))
+            {
+                avalancheQueue.Enqueue(cell);
+                inQueue.Add(cell);
+            }
+        }
+        #endregion
+
+
+        #region Run Avalanche
         public int RunAvalancheBurst(int maxStepsPerCall = 50, bool verbose = false)
         {
 
@@ -163,6 +177,12 @@ namespace DunefieldModel_DualMesh
 
                         int nx = x + dx;
                         int nz = z + dz;
+
+                        if (!openEnded)
+                        {
+                            (nx, nz) = WrapCoords(nx, nz);
+                        }
+
                         if (!IsValidCell(nx, nz)) continue;
 
                         float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
@@ -180,8 +200,7 @@ namespace DunefieldModel_DualMesh
 
                 if (neighbors.Count == 0) continue;
 
-                float totalWeight = 0f;
-                foreach (var n in neighbors) totalWeight += n.priority;
+                float totalWeight = neighbors.Sum(n => n.priority);
 
                 float maxTransfer = available * avalancheTrasnferRate;
 
@@ -189,6 +208,14 @@ namespace DunefieldModel_DualMesh
                 {
                     int nx = x + dx;
                     int nz = z + dz;
+
+                    if (!openEnded)
+                    {
+                        (nx, nz) = WrapCoords(nx, nz);
+                    }
+
+                    if (!IsValidCell(nx, nz)) continue;
+
                     float proportion = priority / totalWeight;
                     float transfer = maxTransfer * proportion;
 
@@ -227,7 +254,9 @@ namespace DunefieldModel_DualMesh
 
             return avalancheQueue.Count;
         }
+        #endregion
 
+        #region Max Slope
         private float GetMaxSlopeAt(int x, int z)
         {
             float h = sandElev[x, z];
@@ -240,26 +269,30 @@ namespace DunefieldModel_DualMesh
                 for (int dz = -1; dz <= 1; dz++)
                 {
                     if (dx == 0 && dz == 0) continue;
+
                     int nx = x + dx;
                     int nz = z + dz;
+
+                    if (!openEnded)
+                    {
+                        (nx, nz) = WrapCoords(nx, nz);
+                    }
+
                     if (!IsValidCell(nx, nz)) continue;
 
                     float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
                     float heightDiff = h - nh;
-                    float distance = size * Mathf.Sqrt(dx * dx / (xResolution * xResolution) + dz * dz / (zResolution * zResolution));
-                    float slope = heightDiff / distance;
+                    float distance = size * Mathf.Sqrt(
+                        (float)dx * dx / (xResolution * xResolution) +
+                        (float)dz * dz / (zResolution * zResolution));
 
+                    float slope = heightDiff / distance;
                     if (slope > maxSlope)
                         maxSlope = slope;
                 }
             }
             return maxSlope;
         }
-
-
-
-
-    }
-
-    
+        #endregion
+    } 
 }
