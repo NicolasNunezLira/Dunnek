@@ -49,6 +49,8 @@ namespace DunefieldModel_DualMesh
             int count = 0;
             for (int subticks = grainsPerStep; subticks > 0; subticks--)
             {
+                if (isPaused) return;
+
                 // Elección aleatoria de un grano
                 int x = rnd.Next(0, xResolution);
                 int z = rnd.Next(0, zResolution);
@@ -236,6 +238,7 @@ namespace DunefieldModel_DualMesh
                 ue.Debug.LogWarning($"ID {id} no encontrado en constructions.");
                 return;
             }
+
             (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sandElev, constructionGrid);
             if (isBuried) { ue.Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
 

@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System;
 using Building;
 using Data;
+using CameraManager;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class DualMesh : MonoBehaviour
+public partial class DualMesh : MonoBehaviour
 {
     #region Program Parameters
     [Header("Plane Settings")]
@@ -69,6 +70,10 @@ public class DualMesh : MonoBehaviour
     public float conicShapeFactor = 0.8f;
     public float minAvalancheAmount = 0.01f;
 
+    [Header("Constructions Settings")]
+    [Tooltip("Time in seconds to pulled down a construction after being built")]
+    [SerializeField] public float pulledDownTime = 5f;
+
     [Header("Actions prefab")]
     [Tooltip("Shovel Prefab")]
     [SerializeField] public GameObject shovelPrefabGO;
@@ -110,7 +115,7 @@ public class DualMesh : MonoBehaviour
 
     private int grainsForAvalanche = 0;
 
-    private bool constructed = false, destructed = false;
+    private bool constructed = false, destructed = false, isHandlingPullDown = false;
     private BuildSystem builder;
     private GameObject housePreviewGO, wallPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
 
@@ -124,6 +129,8 @@ public class DualMesh : MonoBehaviour
 
     private Dictionary<int, ConstructionData> constructions;
     private int currentConstructionID = 1;
+
+    private bool isPaused = false;
 
 
     #endregion
@@ -155,6 +162,7 @@ public class DualMesh : MonoBehaviour
 
         // Initialize the sand mesh to be above the terrain mesh
         duneModel = new ModelDM(
+            ref isPaused,
             slopeFinder, sandElev, terrainShadow, constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
             ref constructions, ref currentConstructionID,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
@@ -171,7 +179,7 @@ public class DualMesh : MonoBehaviour
 
         builder = new BuildSystem(
             duneModel, dualMeshConstructor,
-            constructions, currentConstructionID,
+            constructions, currentConstructionID, pulledDownTime,
             housePrefabGO, wallPrefabGO,
             shovelPreviewGO, housePreviewGO, wallPreviewGO, sweeperPreviewGO, circlePreviewGO,
             currentBuildMode, terrainElev, activePreview, constructionGrid,
@@ -185,166 +193,91 @@ public class DualMesh : MonoBehaviour
 
     {
         //float before = duneModel.TotalSand();
-
-        // Enter/Exit Build Mode
-        if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
+        if (!isPaused)
         {
-            inMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
-            // Update the meshcolliders
-            sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
-            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
-        }
+            // Enter/Exit Build Mode
+            if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
+            {
+                inMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
+                // Update the meshcolliders
+                sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+                terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+            }
 
-        if (Input.GetKeyDown(KeyCode.X) && inMode != PlayingMode.Build)
-        {
-            inMode = (inMode == PlayingMode.Destroy) ? PlayingMode.Simulation : PlayingMode.Destroy;
-            // Update the meshcolliders
-            sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
-            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
-        }
+            if (Input.GetKeyDown(KeyCode.X) && inMode != PlayingMode.Build)
+            {
+                inMode = (inMode == PlayingMode.Destroy) ? PlayingMode.Simulation : PlayingMode.Destroy;
+                // Update the meshcolliders
+                sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+                terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+            }
 
-        switch (inMode)
-        {
-            case PlayingMode.Build:
-                {
-                    if (Input.GetKeyDown(KeyCode.Tab) && inMode == PlayingMode.Build)
+            switch (inMode)
+            {
+                case PlayingMode.Build:
                     {
-                        currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
-                        builder.currentBuildMode = currentBuildMode;
-                        builder.UpdateBuildPreviewVisual();
+                        if (Input.GetKeyDown(KeyCode.Tab) && inMode == PlayingMode.Build)
+                        {
+                            currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
+                            builder.currentBuildMode = currentBuildMode;
+                            builder.UpdateBuildPreviewVisual();
+                            builder.HideAllPreviews();
+                        }
+
+                        builder.HandleBuildPreview();
+
+                        if (Input.GetKeyDown(KeyCode.R))
+                        {
+                            builder.RotateWallPreview();
+                        }
+
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            constructed = builder.ConfirmBuild();
+                            inMode = !constructed ? inMode : PlayingMode.Simulation;
+                        }
+                        ;
+                        break;
+                    }
+                case PlayingMode.Destroy:
+                    {
+                        builder.DetectConstructionUnderCursor();
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            destructed = builder.DestroyConstruction();
+                            inMode = !destructed ? inMode : PlayingMode.Simulation;
+                        }
+                        break;
+                    }
+                case PlayingMode.Simulation:
+                    {
                         builder.HideAllPreviews();
-                    }
 
-                    builder.HandleBuildPreview();
+                        if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
 
-                    if (Input.GetKeyDown(KeyCode.R))
-                    {
-                        builder.RotateWallPreview();
-                    }
+                        for (int i = 0; i < 100; i++)
+                        {
+                            grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
+                        }
 
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        constructed = builder.ConfirmBuild();
-                        inMode = !constructed ? inMode : PlayingMode.Simulation;
+                        break;
                     }
-                    ;
-                    break;
-                }
-            case PlayingMode.Destroy:
-                {
-                    builder.DetectConstructionUnderCursor();
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        destructed = builder.DestroyConstruction();
-                        inMode = !destructed ? inMode : PlayingMode.Simulation;
-                    }
-                    break;
-                }
-            case PlayingMode.Simulation:
-                {
-                    builder.HideAllPreviews();
-                    if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
+            }
 
-                    for (int i = 0; i < 100; i++)
-                    {
-                        grainsForAvalanche = duneModel.RunAvalancheBurst(Math.Max(maxCellsPerFrame, grainsForAvalanche));
-                    }
-                    break;
-                }
+            if (constructed)
+            {
+                dualMeshConstructor.ApplyHeightMapToMesh(terrainGO.GetComponent<MeshFilter>().mesh, terrainElev);
+                constructed = false;
+            }
         }
 
-        if (constructed)
-        {
-            dualMeshConstructor.ApplyHeightMapToMesh(terrainGO.GetComponent<MeshFilter>().mesh, terrainElev);
-            constructed = false;
-        }
-
+        CheckForPullDowns();
+        
         dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
 
         //float after = duneModel.TotalSand();
         //Debug.Log($"Δ arena = {after - before:F5}");
 
-    }
-    #endregion
-
-
-    #region Auxiliar Functions
-    void MakePreviewTransparent(GameObject obj)
-    {
-        foreach (var rend in obj.GetComponentsInChildren<Renderer>())
-        {
-            Material mat = rend.material; // Esto instancia una copia
-            Color c = Color.green;
-            c.a = 0.3f;
-            mat.color = c;
-            mat.SetFloat("_Mode", 3); // Transparent
-            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            mat.SetInt("_ZWrite", 0);
-            mat.DisableKeyword("_ALPHATEST_ON");
-            mat.EnableKeyword("_ALPHABLEND_ON");
-            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            mat.renderQueue = 3000;
-        }
-
-        foreach (var col in obj.GetComponentsInChildren<Collider>())
-        {
-            col.enabled = false;
-        }
-    }
-
-    void AddCollidersToPrefabs()
-    {
-        /*
-        housePrefabGO.AddComponent<MeshCollider>().convex = true;
-        wallPrefabGO.AddComponent<MeshCollider>().convex = true;
-        */
-        /*
-        AddFittedBoxCollider(housePrefabGO);
-        AddFittedBoxCollider(wallPrefabGO);
-        */
-    }
-
-    /*
-    void AddFittedBoxCollider(GameObject go)
-    {
-        var coll = go.AddComponent<BoxCollider>();
-
-        Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
-        if (renderers.Length == 0) return;
-
-        Bounds combinedBounds = renderers[0].bounds;
-        for (int i = 1; i < renderers.Length; i++)
-        {
-            combinedBounds.Encapsulate(renderers[i].bounds);
-        }
-
-        coll.center = go.transform.InverseTransformPoint(combinedBounds.center);
-        coll.size = combinedBounds.size;
-    }
-    */
-
-    void CreatePreviews()
-    {
-        shovelPreviewGO = Instantiate(shovelPrefabGO);
-        shovelPreviewGO.SetActive(false);
-        //MakePreviewTransparent(shovelPreviewGO);
-
-        housePreviewGO = Instantiate(housePrefabGO);
-        housePreviewGO.SetActive(false);
-        MakePreviewTransparent(housePreviewGO);
-
-        wallPreviewGO = Instantiate(wallPrefabGO);
-        wallPreviewGO.SetActive(false);
-        MakePreviewTransparent(wallPreviewGO);
-
-        sweeperPreviewGO = Instantiate(sweeperPrefabGO);
-        sweeperPreviewGO.SetActive(false);
-        MakePreviewTransparent(sweeperPreviewGO);
-
-        circlePreviewGO = Instantiate(circlePrefabGO);
-        circlePreviewGO.SetActive(false);
-        //MakePreviewTransparent(circlePreviewGO);
     }
     #endregion
 }
