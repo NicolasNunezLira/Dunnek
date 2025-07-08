@@ -168,7 +168,8 @@ public partial class DualMesh : MonoBehaviour
         // Initialize the sand mesh to be above the terrain mesh
         duneModel = new ModelDM(
             ref isPaused,
-            slopeFinder, sandElev, terrainShadow, constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
+            slopeFinder, sandElev, terrainShadow, terrainElev,
+            constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
             ref constructions, ref currentConstructionID,
             heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
             conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
@@ -200,6 +201,7 @@ public partial class DualMesh : MonoBehaviour
         //float before = duneModel.TotalSand();
         if (!isPaused)
         {
+            #region Handle Input
             // Enter/Exit Build Mode
             if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
             {
@@ -216,9 +218,11 @@ public partial class DualMesh : MonoBehaviour
                 sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
                 terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
             }
+            #endregion
 
             switch (inMode)
             {
+                #region Build Mode
                 case PlayingMode.Build:
                     {
                         if (Input.GetKeyDown(KeyCode.Tab) && inMode == PlayingMode.Build)
@@ -244,6 +248,9 @@ public partial class DualMesh : MonoBehaviour
                         ;
                         break;
                     }
+                #endregion
+
+                #region Destroy Mode
                 case PlayingMode.Destroy:
                     {
                         builder.DetectConstructionUnderCursor();
@@ -254,13 +261,25 @@ public partial class DualMesh : MonoBehaviour
                         }
                         break;
                     }
+                #endregion
+
+                #region Simulation Mode
                 case PlayingMode.Simulation:
                     {
                         builder.HideAllPreviews();
 
-                        if (windDirection.x != 0 || windDirection.y != 0) { duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation); }
-
-                        if (openEnded) { duneModel.InjectDirectionalSand((int)windDirection.x, (int)windDirection.y, (int)heightVariation/2, UnityEngine.Random.Range(0, grainsPerStep / 50), 0.2f); };
+                        if (windDirection.x != 0 || windDirection.y != 0)
+                        {
+                            int grainsOutside = duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
+                            if (openEnded)
+                            {
+                                int injectedGrains = UnityEngine.Random.Range(grainsOutside / 2, (3 / 2) * grainsOutside);
+                                duneModel.InjectDirectionalSand(
+                                    (int)windDirection.x, (int)windDirection.y, heightVariation,
+                                    injectedGrains, 1f
+                                );
+                            }
+                        }
 
                         for (int i = 0; i < 100; i++)
                         {
@@ -269,6 +288,7 @@ public partial class DualMesh : MonoBehaviour
 
                         break;
                     }
+                #endregion
             }
 
             if (constructed)

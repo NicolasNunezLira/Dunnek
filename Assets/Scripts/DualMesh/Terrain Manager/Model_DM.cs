@@ -16,7 +16,7 @@ namespace DunefieldModel_DualMesh
     public partial class ModelDM
     {
         #region Variables
-        public float[,] sandElev, terrainElev;
+        public float[,] sandElev, terrainElev, realTerrain;
         public float[,] Shadow;
         //public bool[,] isConstruible;
         public int[,] constructionGrid;
@@ -58,12 +58,13 @@ namespace DunefieldModel_DualMesh
         #region Init model
         public ModelDM(
             ref bool isPaused,
-            IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
+            IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, float[,] realTerrain, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
             ref Dictionary<int, ConstructionData> constructions, ref int currentConstructionID,
             float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope, float maxCellsPerFrame,
             float conicShapeFactor, float avalancheTrasnferRate, float minAvalancheAmount, bool verbose = false)
         {
             this.isPaused = isPaused;
+            this.realTerrain = realTerrain;
             FindSlope = SlopeFinder;
             this.constructionGrid = constructionGrid;
             this.constructions = constructions;
@@ -92,7 +93,6 @@ namespace DunefieldModel_DualMesh
             Array.Clear(Shadow, 0, zResolution * xResolution);
             ShadowInit();
             FindSlope.Init(ref sandElev, ref terrainElev, this.xResolution, this.zResolution, this.slope);
-            grainsOutside = 0;
             //FindSlope.SetOpenEnded(openEnded);
         }
         #endregion

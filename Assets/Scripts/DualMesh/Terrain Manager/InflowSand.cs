@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using UnityEngine;
 
 namespace DunefieldModel_DualMesh
@@ -9,15 +10,14 @@ namespace DunefieldModel_DualMesh
             int width = sandElev.GetLength(0);
             int height = sandElev.GetLength(1);
 
-            if (!openEnded) return;
-
             float total = Mathf.Abs(dx) + Mathf.Abs(dz);
             float px = (total > 0) ? Mathf.Abs(dx) / total : 0f;
 
-            for (int i = 0; i < attempts; i++)
+            int count = 0;
+            for (int i = 0; i < attempts; i++, count++)
             {
                 float r = Random.value;
-                int x = 0, z = 0;
+                int x, z;
 
                 if (r < px)
                 {
@@ -46,8 +46,10 @@ namespace DunefieldModel_DualMesh
                 UpdateShadow(x, z, dx, dz);
 
                 // Inyectar grano directamente al algoritmo de deposición
-                if (Random.value <= pDepositDirect) { AlgorithmDeposit(x, z, dx, dz, inflowAmount, verbose: false); };
+                if (Random.value <= pDepositDirect) { AlgorithmDeposit(x, z, dx, dz, inflowAmount, verbose: false); }
+                ;
             }
+            Debug.Log($"Inyectados {count} granos de arena en dirección ({dx}, {dz}) con cantidad {inflowAmount}.");
         }
 
     }

@@ -12,7 +12,7 @@ namespace DunefieldModel_DualMesh
     public partial class ModelDM
     {
         #region Tick
-        public virtual void Tick(int grainsPerStep, int dx, int dz, float erosionHeight, float depositeHeight, bool verbose = false)
+        public virtual int Tick(int grainsPerStep, int dx, int dz, float erosionHeight, float depositeHeight, bool verbose = false)
         {
             /// <summary> 
             /// Función que simula un tick del modelo de dunas.
@@ -47,11 +47,9 @@ namespace DunefieldModel_DualMesh
 
             // Ciclo para el movimiento de granos
             int count = 0;
+            grainsOutside = 0;
             for (int subticks = grainsPerStep; subticks > 0; subticks--)
             {
-                if (isPaused) return;
-
-                // Elección aleatoria de un grano
                 int x = rnd.Next(0, xResolution);
                 int z = rnd.Next(0, zResolution);
 
@@ -70,14 +68,15 @@ namespace DunefieldModel_DualMesh
 
                 count++;
 
-                AlgorithmDeposit(x, z, dx, dz, depositeH, verbose);
+                grainsOutside += AlgorithmDeposit(x, z, dx, dz, depositeH, verbose);
 
                 if (verbose) { ue.Debug.Log("Granos erosionados en este tick:" + count + "/" + grainsPerStep); }
             }
+            return grainsOutside;
         }
 
         #region Deposit
-        public void AlgorithmDeposit(int x, int z, int dx, int dz, float depositeH, bool verbose = false)
+        public int AlgorithmDeposit(int x, int z, int dx, int dz, float depositeH, bool verbose = false)
         {
             int i = HopLength;
             int xCurr = x;
@@ -111,7 +110,7 @@ namespace DunefieldModel_DualMesh
                     int checkX = xCurr + s * stepX + dx;
                     int checkZ = zCurr + s * stepZ + dz;
 
-                    if (openEnded && !IsInside(checkX, checkZ)) return;
+                    if (openEnded && !IsInside(checkX, checkZ)) return 1;
                     if (!openEnded)
                         (checkX, checkZ) = WrapCoords(checkX, checkZ);
 
@@ -121,7 +120,7 @@ namespace DunefieldModel_DualMesh
                         int zPrev = checkZ - dz;
                         if (!openEnded)
                             (xPrev, zPrev) = WrapCoords(xPrev, zPrev);
-                        else if (!IsInside(xPrev, zPrev)) return;
+                        else if (!IsInside(xPrev, zPrev)) return 1;
 
                         float acumulacionBarlovento = terrainElev[checkX, checkZ] - sandElev[xPrev, zPrev];
 
@@ -130,7 +129,7 @@ namespace DunefieldModel_DualMesh
                             DepositGrain(checkX, checkZ, dx, dz, depositeH);
                             if (verbose) ue.Debug.Log($"Acumulación barlovento permite depósito en construcción ({checkX}, {checkZ})");
                             TryToDeleteBuild(checkX, checkZ);
-                            return;
+                            return 0;
                         }
                         else
                         {
@@ -139,7 +138,7 @@ namespace DunefieldModel_DualMesh
                             DepositGrain(stopX, stopZ, dx, dz, depositeH);
                             if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), sin acumulación barlovento. Deposita en ({stopX}, {stopZ})");
                             TryToDeleteBuild(checkX, checkZ);
-                            return;
+                            return 0;
                         }
                     }
                 }
@@ -149,7 +148,7 @@ namespace DunefieldModel_DualMesh
                 xCurr += dx;
                 zCurr += dz;
 
-                if (openEnded && !IsInside(xCurr, zCurr)) return;
+                if (openEnded && !IsInside(xCurr, zCurr)) return 1;
                 if (!openEnded)
                     (xCurr, zCurr) = WrapCoords(xCurr, zCurr);
 
@@ -157,7 +156,7 @@ namespace DunefieldModel_DualMesh
                 {
                     if (verbose) ue.Debug.Log($"Grano a depositar en sombra en ({xCurr}, {zCurr})");
                     DepositGrain(xCurr, zCurr, dx, dz, depositeH);
-                    return;
+                    return 0;
                 }
 
                 if (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr] &&
@@ -188,7 +187,7 @@ namespace DunefieldModel_DualMesh
                             {
                                 DepositGrain(lx, lz, dxLateral[j], dzLateral[j], depositeH);
                                 if (verbose) ue.Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
-                                return;
+                                return 0;
                             }
                         }
                     }
@@ -202,7 +201,7 @@ namespace DunefieldModel_DualMesh
                     {
                         DepositGrain(xCurr, zCurr, dx, dz, depositeH);
                         if (verbose) ue.Debug.Log($"Grano a depositar en final de hop en ({xCurr}, {zCurr})");
-                        return;
+                        return 0;
                     }
                     i = HopLength;
                 }
@@ -240,12 +239,12 @@ namespace DunefieldModel_DualMesh
             (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sandElev, constructionGrid);
             if (isBuried) { ue.Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
 
+            DeleteBuild(idToDestroy);
+            
             foreach (var cell in needActivate)
             {
                 ActivateCell(cell.x, cell.y);
             }
-
-            DeleteBuild(idToDestroy);
         }
 
         public void DeleteBuild(int id)
@@ -258,10 +257,22 @@ namespace DunefieldModel_DualMesh
 
             if (!data.isBuried) return;
 
-            if (data.obj != null)
+            foreach (var cell in data.support)
             {
-                UnityEngine.Object.Destroy(data.obj);
+                constructionGrid[cell.x, cell.y] = 0;
+                terrainElev[cell.x, cell.y] = realTerrain[cell.x, cell.y];
             }
+            foreach (var cell in data.boundarySupport)
+            {
+                constructionGrid[cell.x, cell.y] = 0;
+                terrainElev[cell.x, cell.y] = realTerrain[cell.x, cell.y];
+            }
+            
+
+            if (data.obj != null)
+                {
+                    UnityEngine.Object.Destroy(data.obj);
+                }
 
             constructions.Remove(id);
         }
