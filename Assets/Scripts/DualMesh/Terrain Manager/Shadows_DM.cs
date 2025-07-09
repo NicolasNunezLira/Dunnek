@@ -1,10 +1,12 @@
 using System;
+using Unity.Collections;
+using UnityEngine.UI;
 
 namespace DunefieldModel_DualMesh
 {
     public partial class ModelDM
     {
-        #region Shadow Init
+        #region shadow Init
         public void ShadowInit()
         {
             /// <summary>
@@ -14,25 +16,24 @@ namespace DunefieldModel_DualMesh
         }
         #endregion
 
-        #region Shadow Check
+        #region shadow Check
         protected int ShadowCheck(bool ReportErrors, int dx, int dz)
         {
             /// <summary>
             /// Verifica y actualiza la sombra del modelo de dunas.
             /// </summary>
 
-            int height = sandElev.GetLength(0);
-            int width = sandElev.GetLength(1);
-            float[,] newShadow = new float[height, width];
-            Array.Clear(newShadow, 0, newShadow.Length);
+            int height = sand.Height;
+            int width = sand.Width;
+            NativeGrid newShadow = new NativeGrid(width, height, Allocator.Persistent);
 
             int errors = 0;
 
-            for (int x = 0; x < height; x++)
+            for (int x = 0; x < width; x++)
             {
-                for (int z = 0; z < width; z++)
+                for (int z = 0; z < height; z++)
                 {
-                    float h = Math.Max(sandElev[x, z], terrainElev[x, z]);
+                    float h = Math.Max(sand[x, z], terrainShadow[x, z]);
                     if (h <= 0) continue;
 
                     int xNext = x + dx;
@@ -40,7 +41,7 @@ namespace DunefieldModel_DualMesh
 
                     float hs = h;
                     float randomSlope = shadowSlope *
-                        ((terrainElev[x, z] >= sandElev[x, z]) ? 1f : (1f + UnityEngine.Random.Range(-0.1f, 0.1f)));
+                        ((terrainShadow[x, z] >= sand[x, z]) ? 1f : (1f + UnityEngine.Random.Range(-0.1f, 0.1f)));
 
                     while (true)
                     {
@@ -51,7 +52,7 @@ namespace DunefieldModel_DualMesh
                         if (!openEnded)
                             (xNext, zNext) = WrapCoords(xNext, zNext);
 
-                        float hNext = Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]);
+                        float hNext = Math.Max(sand[xNext, zNext], terrainShadow[xNext, zNext]);
 
                         if (hs < hNext) break;
 
@@ -69,7 +70,7 @@ namespace DunefieldModel_DualMesh
             {
                 for (int z = 0; z < width; z++)
                 {
-                    if (newShadow[x, z] <= Math.Max(sandElev[x, z], terrainElev[x, z]))
+                    if (newShadow[x, z] <= Math.Max(sand[x, z], terrainShadow[x, z]))
                         newShadow[x, z] = 0;
                 }
             }
@@ -79,7 +80,7 @@ namespace DunefieldModel_DualMesh
             {
                 for (int z = 0; z < width; z++)
                 {
-                    if (newShadow[x, z] != Shadow[x, z])
+                    if (newShadow[x, z] != shadow[x, z])
                         errors++;
                 }
             }
@@ -88,7 +89,7 @@ namespace DunefieldModel_DualMesh
             {
                 if (ReportErrors)
                     Console.WriteLine("shadowCheck error count: " + errors);
-                Array.Copy(newShadow, Shadow, Shadow.Length);
+                shadow.CopyFrom(newShadow);
             }
 
             return errors;
@@ -96,14 +97,14 @@ namespace DunefieldModel_DualMesh
 
         #endregion
 
-        #region Update Shadow
+        #region Update shadow
         public void UpdateShadow(int x, int z, int dx, int dz)
         {
             /// <summary>
             /// Actualiza la sombra desde la posición (x,z) en dirección del viento (dx,dz).
             /// </summary>
 
-            float h = Math.Max(sandElev[x, z], terrainElev[x, z]);
+            float h = Math.Max(sand[x, z], terrainShadow[x, z]);
             float hs;
 
             int xPrev = x - dx;
@@ -123,8 +124,8 @@ namespace DunefieldModel_DualMesh
                 hs = Math.Max(
                     h,
                     Math.Max(
-                        Math.Max(sandElev[xPrev, zPrev], terrainElev[xPrev, zPrev]),
-                        Shadow[xPrev, zPrev]
+                        Math.Max(sand[xPrev, zPrev], terrainShadow[xPrev, zPrev]),
+                        shadow[xPrev, zPrev]
                     ) - shadowSlope
                 );
             }
@@ -138,10 +139,10 @@ namespace DunefieldModel_DualMesh
                 if (!openEnded)
                     (xNext, zNext) = WrapCoords(xNext, zNext);
 
-                float currentHeight = Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]);
+                float currentHeight = Math.Max(sand[xNext, zNext], terrainShadow[xNext, zNext]);
                 if (hs < currentHeight) break;
 
-                Shadow[xNext, zNext] = (hs == currentHeight) ? 0 : hs;
+                shadow[xNext, zNext] = (hs == currentHeight) ? 0 : hs;
                 hs -= shadowSlope;
 
                 xNext += dx;
@@ -155,10 +156,10 @@ namespace DunefieldModel_DualMesh
                 if (!openEnded)
                     (xNext, zNext) = WrapCoords(xNext, zNext);
 
-                if (Shadow[xNext, zNext] <= 0)
+                if (shadow[xNext, zNext] <= 0)
                     break;
 
-                Shadow[xNext, zNext] = 0;
+                shadow[xNext, zNext] = 0;
 
                 xNext += dx;
                 zNext += dz;
@@ -174,10 +175,10 @@ namespace DunefieldModel_DualMesh
                 if (!openEnded)
                     (xNext, zNext) = WrapCoords(xNext, zNext);
 
-                float currentHeight = Math.Max(sandElev[xNext, zNext], terrainElev[xNext, zNext]);
+                float currentHeight = Math.Max(sand[xNext, zNext], terrainShadow[xNext, zNext]);
                 if (hs < currentHeight) break;
 
-                Shadow[xNext, zNext] = (hs == currentHeight) ? 0 : hs;
+                shadow[xNext, zNext] = (hs == currentHeight) ? 0 : hs;
                 hs -= shadowSlope;
 
                 xNext += dx;

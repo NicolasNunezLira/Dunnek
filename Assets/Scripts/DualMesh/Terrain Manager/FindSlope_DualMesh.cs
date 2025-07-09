@@ -10,7 +10,7 @@ namespace DunefieldModel_DualMesh
 	#region Slope Finder Interface
 	public interface IFindSlope
 	{
-		void Init(ref float[,] sandElev, ref float[,] terrainElev, int WidthAcross, int LengthDownwind, float slope);
+		void Init(ref NativeGrid sand, ref NativeGrid terrainShadow, int WidthAcross, int LengthDownwind, float slope);
 		void SetOpenEnded(bool NewState);
 		int Upslope(int x, int z, int dxWind, int dzWind, out int xSteep, out int zSteep);
 		int Downslope(int x, int z, int dxWind, int dyWind, out int xLow, out int zLow);
@@ -22,7 +22,7 @@ namespace DunefieldModel_DualMesh
 	public class FindSlopeMooreDeterministic : IFindSlope
 	{
 		#region Variables
-		public float[,] Elev, sandElev, terrainElev;
+		public NativeGrid sand, terrainShadow;
 		public bool[,] isErodable;
 		public int xDOF, zDOF; // xDOF = xResolution - 1, zDOF = zResolution - 1
 		public bool OpenEnded = false;
@@ -31,10 +31,11 @@ namespace DunefieldModel_DualMesh
 		#endregion
 
 		#region Init
-		public void Init(ref float[,] sandElev, ref float[,] terrainElev, int xResolution, int zResolution, float slope)
+		public void Init(
+			ref NativeGrid sand, ref NativeGrid terrainShadow, int xResolution, int zResolution, float slope)
 		{
-			this.sandElev = sandElev;
-			this.terrainElev = terrainElev;
+			this.sand = sand;
+			this.terrainShadow = terrainShadow;
 			this.slope = slope;
 			xDOF = xResolution - 1;
 			zDOF = zResolution - 1;
@@ -54,10 +55,10 @@ namespace DunefieldModel_DualMesh
 			xSteep = xCenter;
 			zSteep = zCenter;
 
-			if (terrainElev[xCenter, zCenter] >= sandElev[xCenter, zCenter])
+			if (terrainShadow[xCenter, zCenter] >= sand[xCenter, zCenter])
 				return 0;  // No se puede erosionar desde aquí
 
-			float h = sandElev[xCenter, zCenter];
+			float h = sand[xCenter, zCenter];
 			float maxDelta = slope;
 			float maxAlignment = float.NegativeInfinity;
 
@@ -83,7 +84,7 @@ namespace DunefieldModel_DualMesh
 				}
 				
 
-				float hi = sandElev[xi, zi];
+				float hi = sand[xi, zi];
 				float delta = hi - h;
 
 				if (delta >= slope)
@@ -110,10 +111,10 @@ namespace DunefieldModel_DualMesh
 			xLow = xCenter;
 			zLow = zCenter;
 
-			if (terrainElev[xCenter, zCenter] >= sandElev[xCenter, zCenter] + slope)
+			if (terrainShadow[xCenter, zCenter] >= sand[xCenter, zCenter] + slope)
 				return 0; // No se puede transportar desde aquí
 
-			float h = Math.Max(sandElev[xCenter, zCenter], terrainElev[xCenter, zCenter]);
+			float h = Math.Max(sand[xCenter, zCenter], terrainShadow[xCenter, zCenter]);
 			float minDelta = -slope;
 			float maxAlignment = float.NegativeInfinity;
 
@@ -138,7 +139,7 @@ namespace DunefieldModel_DualMesh
 					zi = (zi + zDOF + 1) % (zDOF + 1);
 				}
 				
-				float hi = Math.Max(sandElev[xi, zi], terrainElev[xi, zi]);
+				float hi = Math.Max(sand[xi, zi], terrainShadow[xi, zi]);
 				float delta = hi - h;  // queremos que sea negativo
 
 				if (delta <= -slope)
@@ -174,10 +175,10 @@ namespace DunefieldModel_DualMesh
 			xLow = xCenter;
 			zLow = zCenter;
 
-			if (terrainElev[xCenter, zCenter] >= sandElev[xCenter, zCenter] + avalancheSlope)
+			if (terrainShadow[xCenter, zCenter] >= sand[xCenter, zCenter] + avalancheSlope)
 				return 0; // No se puede transportar desde aquí
 
-			float h = Math.Max(sandElev[xCenter, zCenter], terrainElev[xCenter, zCenter]);
+			float h = Math.Max(sand[xCenter, zCenter], terrainShadow[xCenter, zCenter]);
 
 			int[] dX = { -1, 0, 1, -1, 1, -1, 0, 1 };
 			int[] dZ = { -1, -1, -1, 0, 0, 1, 1, 1 };
@@ -200,7 +201,7 @@ namespace DunefieldModel_DualMesh
 					zi = (zi + zDOF + 1) % (zDOF + 1);
 				}
 
-				float hi = Math.Max(sandElev[xi, zi], terrainElev[xi, zi]);
+				float hi = Math.Max(sand[xi, zi], terrainShadow[xi, zi]);
 				float delta = hi - h;  // queremos que sea negativo
 				float minDelta = float.NegativeInfinity;
 

@@ -7,8 +7,8 @@ namespace DunefieldModel_DualMesh
     {
         public void InjectDirectionalSand(int dx, int dz, float inflowAmount, int attempts, float pDepositDirect = 0.5f)
         {
-            int width = sandElev.GetLength(0);
-            int height = sandElev.GetLength(1);
+            int width = sand.Width;
+            int height = sand.Height;
 
             float total = Mathf.Abs(dx) + Mathf.Abs(dz);
             float px = (total > 0) ? Mathf.Abs(dx) / total : 0f;
@@ -18,7 +18,6 @@ namespace DunefieldModel_DualMesh
             {
                 float r = Random.value;
                 int x, z;
-
                 if (r < px)
                 {
                     // Entrada por borde lateral (x)
@@ -33,20 +32,20 @@ namespace DunefieldModel_DualMesh
                 }
 
                 // Agregar arena al borde
-                if (sandElev[x, z] <= terrainElev[x, z] + inflowAmount * 0.5f)
+                if (sand[x, z] <= terrainShadow[x, z] + inflowAmount * 0.5f)
                 {
-                    sandElev[x, z] = terrainElev[x, z] + inflowAmount;
+                    sand[x, z] = terrainShadow[x, z] + inflowAmount;
                 }
                 else
                 {
-                    sandElev[x, z] += inflowAmount;
+                    sand[x, z] += inflowAmount;
                 }
 
                 ActivateCell(x, z);
                 UpdateShadow(x, z, dx, dz);
 
                 // Inyectar grano directamente al algoritmo de deposición
-                if (Random.value <= pDepositDirect) { AlgorithmDeposit(x, z, dx, dz, inflowAmount, verbose: false); }
+                if (Random.value <= pDepositDirect) { AlgorithmDeposit(x, z, dx, dz, inflowAmount); }
                 ;
             }
             Debug.Log($"Inyectados {count} granos de arena en dirección ({dx}, {dz}) con cantidad {inflowAmount}.");

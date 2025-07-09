@@ -44,7 +44,7 @@ namespace Building
                         if (constructionGrid[xi, zj] > 0) // ← asegúrate que `true` signifique libre
                             canBuild = false;
 
-                        float y = Mathf.Max(duneModel.sandElev[xi, zj], duneModel.terrainElev[xi, zj]);
+                        float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrainShadow[xi, zj]);
                         if (y > maxY) maxY = y;
                     }
                 }

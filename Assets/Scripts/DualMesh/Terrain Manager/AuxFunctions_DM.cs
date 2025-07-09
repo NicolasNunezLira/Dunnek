@@ -38,7 +38,18 @@ namespace DunefieldModel_DualMesh
             return (x, z);
         }
 
-        
+        #region Total sand amount
+
+        public float TotalSand()
+        {
+            float total = 0f;
+            for (int i = 0; i < xResolution; i++)
+                for (int j = 0; j < zResolution; j++)
+                    total += sand[i, j] - terrainShadow[i, j];
+            return total;
+        }
+
+        #endregion
         
         #endregion
 

@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -130,12 +130,12 @@ namespace DunefieldModel_DualMesh
                     if (Elev[w, x] < minH)
                         minH = Elev[w, x];
                 }
-            /*
+            
             Range r = new Range();
             r.Min = minH;
             r.Max = maxH;
             return r;
-            */
+            
             return new Vector2(minH, maxH);
         }
 
@@ -148,7 +148,7 @@ namespace DunefieldModel_DualMesh
             return sum;
         }
 
-        /*
+        
         public float[] Profile(int WidthPosition)
         {
             float[] prof = new float[Length];
@@ -156,7 +156,7 @@ namespace DunefieldModel_DualMesh
                 prof[x] = Elev[WidthPosition, x];
             return prof;
         }
-        */
+        
 
         #region Sombras
         public void shadowInit()
@@ -309,7 +309,7 @@ namespace DunefieldModel_DualMesh
         #endregion
 
         #region Erosion
-        /*
+        
         public virtual void erodeGrain(int w, int x, int dx, int dy, float erosionHeight = 1f)
         {
             int wSteep, xSteep;
@@ -389,7 +389,7 @@ namespace DunefieldModel_DualMesh
                 }
             }
         }
-        */
+        
         public virtual void erodeGrain(int w, int x, int dx, int dy, float erosionHeight = 1f)
         {
             int wSteep, xSteep;
@@ -482,7 +482,7 @@ namespace DunefieldModel_DualMesh
         #endregion
 
         #region Deposicion
-        /*
+        
         public virtual void depositGrain(int w, int x, int dx, int dy, float depositeHeight = 1f)
         {
             int wSteep, xSteep;
@@ -523,7 +523,7 @@ namespace DunefieldModel_DualMesh
                     return;
             }
         }
-        */
+        
         public virtual void depositGrain(int w, int x, int dx, int dy, float depositeHeight = 1f)
         {
             int wLow, xLow;
@@ -581,7 +581,7 @@ namespace DunefieldModel_DualMesh
 
 
         #region Tick
-        /*
+        
         public virtual void Tick(int grainsPerStep, int dx, int dy, float erosionHeight = 1f, float depositeHeight = 1f)
         {
             for (int subticks = grainsPerStep; subticks > 0; subticks--)
@@ -628,7 +628,7 @@ namespace DunefieldModel_DualMesh
 
             //shadowCheck(true, dx, dy);
         }
-        */
+        
         public virtual void Tick(int grainsPerStep, int dx, int dy, float erosionHeight, float depositeHeight)
         {
             for (int subticks = grainsPerStep; subticks > 0; subticks--)
@@ -726,3 +726,4 @@ namespace DunefieldModel_DualMesh
 
     }
 }
+*/

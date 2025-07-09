@@ -31,13 +31,13 @@ namespace DunefieldModel_DualMesh
             }
 
             // Si el grano no tiene altura, no se erosiona
-            if (terrainElev[x, z] >= sandElev[x, z]) return 0f;
+            if (terrainShadow[x, z] >= sand[x, z]) return 0f;
 
             // Áltura de erosión
-            erosionH = Math.Min(erosionHeight, sandElev[x, z] - terrainElev[x, z]);
+            erosionH = Math.Min(erosionHeight, sand[x, z] - terrainShadow[x, z]);
 
             // Erosión
-            sandElev[x, z] -= erosionH;
+            sand[x, z] -= erosionH;
             
             UpdateShadow(x, z, dx, dz);
 

@@ -15,8 +15,8 @@ namespace Building
             float cellSize = duneModel.size / duneModel.xResolution;
 
             float y = Mathf.Max(
-                duneModel.sandElev[previewX, previewZ],
-                duneModel.terrainElev[previewX, previewZ]
+                duneModel.sand[previewX, previewZ],
+                duneModel.terrainShadow[previewX, previewZ]
             );
 
             UnityEngine.Vector3 centerPos = new UnityEngine.Vector3(
@@ -69,8 +69,8 @@ namespace Building
                     // Verificamos si está dentro del local bounds
                     if (localBounds.Contains(localPoint))
                     {
-                        duneModel.terrainElev[x, z] = targetHeight;
-                        duneModel.sandElev[x, z] = floorHeight;
+                        duneModel.terrainShadow[x, z] = targetHeight;
+                        duneModel.sand[x, z] = floorHeight;
                         //isConstruible[x, z] = false;
                         support.Add(new int2(x, z));
                         duneModel.ActivateCell(x, z);

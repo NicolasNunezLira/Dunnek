@@ -29,7 +29,7 @@ namespace Building
                     // Perfil cónico
                     float height = maxHeight * (1 - (dist / radius));
                     //float height = maxHeight * Mathf.Exp(- (dist * dist) / (2 * sigma * sigma));
-                    duneModel.sandElev[x, z] += height;
+                    duneModel.sand[x, z] += height;
 
                     duneModel.ActivateCell(x, z);
                     duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);

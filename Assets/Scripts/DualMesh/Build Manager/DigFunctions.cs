@@ -13,12 +13,12 @@ namespace Building
 
         public void DigAction(int centerX, int centerZ, int radius, float digDepth)
         {
-            if (terrainElev[centerX, centerZ] >= duneModel.sandElev[centerX, centerZ]) return;
+            if (terrainShadow[centerX, centerZ] >= duneModel.sand[centerX, centerZ]) return;
 
-            float[,] sandElev = duneModel.sandElev;
+            NativeGrid sandElev = duneModel.sand;
 
-            int width = sandElev.GetLength(0);
-            int height = sandElev.GetLength(1);
+            int width = sandElev.Width;
+            int height = sandElev.Height;
 
             float maxHeight = float.MinValue;
 
@@ -31,7 +31,7 @@ namespace Building
                     int nz = centerZ + dz;
                     if (nx < 0 || nx >= width || nz < 0 || nz >= height) continue;
 
-                    float h = Mathf.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                    float h = Mathf.Max(sandElev[nx, nz], terrainShadow[nx, nz]);
                     if (h > maxHeight) maxHeight = h;
                 }
             }
@@ -51,10 +51,10 @@ namespace Building
 
                     if (dist <= radius - 0.5f)
                     {
-                        if (terrainElev[nx, nz] >= sandElev[nx, nz] || constructionGrid[nx, nz] > 0) continue;
+                        if (terrainShadow[nx, nz] >= sandElev[nx, nz] || constructionGrid[nx, nz] > 0) continue;
                         float original = sandElev[nx, nz];
                         float newHeight = original - digDepth;
-                        newHeight = newHeight > terrainElev[nx, nz] ? newHeight : terrainElev[nx, nz];
+                        newHeight = newHeight > terrainShadow[nx, nz] ? newHeight : terrainShadow[nx, nz];
                         float removed = original - newHeight;
                         totalRemoved += removed;
 

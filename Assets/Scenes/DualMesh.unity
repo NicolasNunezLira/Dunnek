@@ -186,8 +186,8 @@ MonoBehaviour:
   slope: 0.15
   hopLength: 5
   shadowSlope: 0.02
-  windDirection: {x: 10, y: 0}
-  grainsPerStep: 5000
+  windDirection: {x: 1, y: 1}
+  grainsPerStep: 500
   avalancheSlope: 0.5
   criticalSlopeThreshold: 2
   maxCellsPerFrame: 100

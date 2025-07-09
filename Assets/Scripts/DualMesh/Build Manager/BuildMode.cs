@@ -18,7 +18,7 @@ namespace Building
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
-        public float[,] terrainElev;
+        public NativeGrid terrainShadow;
         //public bool[,] isConstruible;
         public int[,] constructionGrid;
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
@@ -47,7 +47,7 @@ namespace Building
             GameObject sweeperPreviewGO,
             GameObject circlePreviewGO,
             DualMesh.BuildMode currentBuildMode,
-            float[,] terrainElev,
+            NativeGrid terrainShadow,
             GameObject activePreview,
             int[,] constructionGrid,
             bool planicie
@@ -66,7 +66,7 @@ namespace Building
             this.circlePreviewGO = circlePreviewGO;
             this.sweeperPreviewGO = sweeperPreviewGO;
             this.currentBuildMode = currentBuildMode;
-            this.terrainElev = terrainElev;
+            this.terrainShadow = terrainShadow;
             this.constructionGrid = constructionGrid;
             this.activePreview = activePreview;
 
@@ -78,6 +78,5 @@ namespace Building
             }
         }
         #endregion
-
     }
 }

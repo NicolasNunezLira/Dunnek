@@ -19,7 +19,7 @@ namespace DunefieldModel_DualMesh
         #region IsValidCell
         private bool IsValidCell(int x, int z)
         {
-            return openEnded ? IsInside(x, z) : (x > 0 && x < sandElev.GetLength(0) - 1 && z > 0 && z < sandElev.GetLength(1) - 1);
+            return openEnded ? IsInside(x, z) : (x > 0 && x < sand.Width - 1 && z > 0 && z < sand.Height - 1);
         }
         #endregion
 
@@ -33,8 +33,8 @@ namespace DunefieldModel_DualMesh
             if (avalancheQueue == null) avalancheQueue = new Queue<Vector2Int>();
             if (inQueue == null) inQueue = new HashSet<Vector2Int>();
 
-            int width = sandElev.GetLength(0);
-            int height = sandElev.GetLength(1);
+            int width = sand.Width;
+            int height = sand.Height;
 
             for (int x = 1; x < width - 1; x++)
             {
@@ -55,8 +55,8 @@ namespace DunefieldModel_DualMesh
 
             List<(Vector2Int pos, float slope)> critical = new();
 
-            int width = sandElev.GetLength(0);
-            int height = sandElev.GetLength(1);
+            int width = sand.Width;
+            int height = sand.Height;
 
             for (int x = 1; x < width - 1; x++)
             {
@@ -85,8 +85,8 @@ namespace DunefieldModel_DualMesh
 
         private bool CellIsCritical(int x, int z)
         {
-            float h = sandElev[x, z];
-            float b = terrainElev[x, z];
+            float h = sand[x, z];
+            float b = terrainShadow[x, z];
 
             if (h <= b + minAvalancheAmount) return false;
 
@@ -106,7 +106,7 @@ namespace DunefieldModel_DualMesh
 
                     if (!IsValidCell(nx, nz)) continue;
 
-                    float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                    float nh = Math.Max(sand[nx, nz], terrainShadow[nx, nz]);
                     float heightDiff = h - nh;
                     float distance = size * Mathf.Sqrt(
                         (float)dx * dx / (xResolution * xResolution) +
@@ -162,8 +162,8 @@ namespace DunefieldModel_DualMesh
                 int x = cell.x;
                 int z = cell.y;
 
-                float h = sandElev[x, z];
-                float b = terrainElev[x, z];
+                float h = sand[x, z];
+                float b = terrainShadow[x, z];
                 float available = h - b;
                 if (available <= minAvalancheAmount) continue;
 
@@ -185,7 +185,7 @@ namespace DunefieldModel_DualMesh
 
                         if (!IsValidCell(nx, nz)) continue;
 
-                        float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                        float nh = Math.Max(sand[nx, nz], terrainShadow[nx, nz]);
                         float heightDiff = h - nh;
                         float distance = size * Mathf.Sqrt(dx * dx / (xResolution * xResolution) + dz * dz / (zResolution * zResolution));
                         float slope = heightDiff / distance;
@@ -219,13 +219,13 @@ namespace DunefieldModel_DualMesh
                     float proportion = priority / totalWeight;
                     float transfer = maxTransfer * proportion;
 
-                    float maxDiff = (sandElev[x, z] - Math.Max(sandElev[nx, nz], terrainElev[nx, nz])) * 0.5f;
+                    float maxDiff = (sand[x, z] - Math.Max(sand[nx, nz], terrainShadow[nx, nz])) * 0.5f;
                     transfer = Mathf.Min(transfer, maxDiff);
 
                     if (transfer > minAvalancheAmount)
                     {
-                        sandElev[x, z] -= transfer;
-                        sandElev[nx, nz] = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]) + transfer;
+                        sand[x, z] -= transfer;
+                        sand[nx, nz] = Math.Max(sand[nx, nz], terrainShadow[nx, nz]) + transfer;
 
                         if (constructionGrid[nx, nz] > 0)
                         {
@@ -259,8 +259,8 @@ namespace DunefieldModel_DualMesh
         #region Max Slope
         private float GetMaxSlopeAt(int x, int z)
         {
-            float h = sandElev[x, z];
-            float b = terrainElev[x, z];
+            float h = sand[x, z];
+            float b = terrainShadow[x, z];
             if (h <= b + minAvalancheAmount) return 0f;
 
             float maxSlope = 0f;
@@ -280,7 +280,7 @@ namespace DunefieldModel_DualMesh
 
                     if (!IsValidCell(nx, nz)) continue;
 
-                    float nh = Math.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                    float nh = Math.Max(sand[nx, nz], terrainShadow[nx, nz]);
                     float heightDiff = h - nh;
                     float distance = size * Mathf.Sqrt(
                         (float)dx * dx / (xResolution * xResolution) +

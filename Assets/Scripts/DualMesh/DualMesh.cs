@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System;
 using Building;
 using Data;
-using CameraManager;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
@@ -12,22 +11,24 @@ public partial class DualMesh : MonoBehaviour
     #region Program Parameters
     [Header("Plane Settings")]
     [Range(31, 511)]
-    [Tooltip("The number of subdivisions along each axis.")]
-    public int resolution = 127;
+    [Tooltip("The number of subdivisions of visual mesh along each axis.")]
+    public int xResolution = 127, zResolution = 127;
+
+    
+    
 
     [Header("Mesh Settings")]
     [Tooltip("The size of the plane in world units.")]
     public float size = 10f;
 
-    [Header("Terrain Settings")]
-    [Tooltip("Meterial.")]
-    public Material terrainMaterial;
-
     [Header("Simulation behavior")]
     [Tooltip("Is the simulaiton toroidal?")]
     public bool openEnded = false;
 
-    [Header("Terrain generation settings")]
+    [Header("Terrain Settings")]
+    [Tooltip("Meterial.")]
+    public Material terrainMaterial;
+
     [Tooltip("Perlin noise parameters.")]
     public float terrainScale1 = 0.003f;
     public float terrainAmplitude1 = 8f;
@@ -105,10 +106,15 @@ public partial class DualMesh : MonoBehaviour
     // ====================================================================
 
     #region Variables
+
+    public int simXResolution => openEnded ? xResolution * 3/2 : xResolution;
+    public int simZResolution => openEnded ? zResolution * 3/2 : zResolution;
+
     private GameObject terrainGO, sandGO;
 
-    public float[,] terrainElev, sandElev, terrainShadow;
-    //public bool[,] isConstruible;
+    //public float[,] terrainElev, sandElev, terrainShadow;
+    // Native arrays for simulation
+    public NativeGrid sand, terrain, terrainShadow;
 
     public int[,] constructionGrid;
 
@@ -146,7 +152,7 @@ public partial class DualMesh : MonoBehaviour
     {
         constructions = new Dictionary<int, ConstructionData>();
 
-        constructionGrid = new int[resolution + 1, resolution + 1];
+        constructionGrid = new int[xResolution + 1, zResolution + 1];
 
         for (int x = 0; x < constructionGrid.GetLength(0); x++)
         {
@@ -160,19 +166,40 @@ public partial class DualMesh : MonoBehaviour
         slopeFinder = new FindSlopeMooreDeterministic();
 
         // Initialize the terrain and sand meshes
-        dualMeshConstructor = new DualMeshConstructor(resolution, size, terrainScale1, terrainScale2, terrainScale3, terrainAmplitude1, terrainAmplitude2, terrainAmplitude3,
-            sandScale1, sandScale2, sandScale3, sandAmplitude1, sandAmplitude2, sandAmplitude3, terrainMaterial, sandMaterial, criticalSlopes, criticalSlopeThreshold, ref planicie, this.transform);
+        dualMeshConstructor = new DualMeshConstructor(
+            xResolution, zResolution,
+            simXResolution, simZResolution,
+            size,
+            terrainScale1, terrainScale2, terrainScale3,
+            terrainAmplitude1, terrainAmplitude2, terrainAmplitude3,
+            sandScale1, sandScale2, sandScale3,
+            sandAmplitude1, sandAmplitude2, sandAmplitude3,
+            terrainMaterial, sandMaterial,
+            criticalSlopes, criticalSlopeThreshold,
+            ref planicie, this.transform);
 
-        dualMeshConstructor.Initialize(out terrainGO, out sandGO, out terrainElev, out sandElev, out terrainShadow);
+        dualMeshConstructor.Initialize(
+            out terrainGO, out sandGO,
+            out sand, out terrain, out terrainShadow);
 
         // Initialize the sand mesh to be above the terrain mesh
         duneModel = new ModelDM(
-            ref isPaused,
-            slopeFinder, sandElev, terrainShadow, terrainElev,
-            constructionGrid, size, resolution + 1, resolution + 1, slope, (int)windDirection.x, (int)windDirection.y,
-            ref constructions, ref currentConstructionID,
-            heightVariation, heightVariation, hopLength, shadowSlope, avalancheSlope, maxCellsPerFrame,
-            conicShapeFactor, avalancheTransferRate, minAvalancheAmount, false);
+            slopeFinder,
+            sand, terrain, terrainShadow,
+            constructionGrid,
+            size,
+            xResolution + 1, zResolution + 1,
+            slope,
+            (int)windDirection.x, (int)windDirection.y,
+            ref constructions,
+            ref currentConstructionID,
+            heightVariation, heightVariation,
+            hopLength, shadowSlope, avalancheSlope,
+            maxCellsPerFrame,
+            conicShapeFactor,
+            avalancheTransferRate,
+            minAvalancheAmount
+        );
         duneModel.SetOpenEnded(openEnded);
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
@@ -184,18 +211,29 @@ public partial class DualMesh : MonoBehaviour
         activePreview = housePreviewGO;
 
         builder = new BuildSystem(
-            duneModel, dualMeshConstructor,
-            constructions, currentConstructionID, pulledDownTime,
-            housePrefabGO, wallPrefabGO,
-            shovelPreviewGO, housePreviewGO, wallPreviewGO, sweeperPreviewGO, circlePreviewGO,
-            currentBuildMode, terrainElev, activePreview, constructionGrid,
+            duneModel,
+            dualMeshConstructor,
+            constructions,
+            currentConstructionID,
+            pulledDownTime,
+            housePrefabGO,
+            wallPrefabGO,
+            shovelPreviewGO,
+            housePreviewGO,
+            wallPreviewGO,
+            sweeperPreviewGO,
+            circlePreviewGO,
+            currentBuildMode,
+            terrainShadow,
+            activePreview,
+            constructionGrid,
             planicie);
     }
     #endregion
 
     #region Update
 
-    void Update()
+    /*void Update()
 
     {
         //float before = duneModel.TotalSand();
@@ -270,15 +308,7 @@ public partial class DualMesh : MonoBehaviour
 
                         if (windDirection.x != 0 || windDirection.y != 0)
                         {
-                            int grainsOutside = duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
-                            if (openEnded)
-                            {
-                                int injectedGrains = UnityEngine.Random.Range(grainsOutside / 2, (3 / 2) * grainsOutside);
-                                duneModel.InjectDirectionalSand(
-                                    (int)windDirection.x, (int)windDirection.y, heightVariation,
-                                    injectedGrains, 1f
-                                );
-                            }
+                            duneModel.Tick(grainsPerStep, (int)windDirection.x, (int)windDirection.y, heightVariation, heightVariation);
                         }
 
                         for (int i = 0; i < 100; i++)
@@ -293,18 +323,20 @@ public partial class DualMesh : MonoBehaviour
 
             if (constructed)
             {
-                dualMeshConstructor.ApplyHeightMapToMesh(terrainGO.GetComponent<MeshFilter>().mesh, terrainElev);
+                dualMeshConstructor.ApplyHeightMapToMesh(terrainGO.GetComponent<MeshFilter>().mesh, terrainShadow);
                 constructed = false;
             }
         }
 
         CheckForPullDowns();
         
-        dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sandElev);
+        dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sand);
 
         //float after = duneModel.TotalSand();
         //Debug.Log($"Δ arena = {after - before:F5}");
 
     }
+
+    */
     #endregion
 }

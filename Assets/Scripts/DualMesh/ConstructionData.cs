@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Text.RegularExpressions;
 using System;
+using DunefieldModel_DualMesh;
 
 namespace Data
 {
@@ -25,7 +26,7 @@ namespace Data
         #endregion
 
         #region Metodos
-        public (bool, string, int, List<int2>) IsBuried(float[,] sandElev, int[,] constructionGrid, float tolerance = 0.05f, float supportThreshold = 0.6f, float boundaryThreshold = 0.3f)
+        public (bool, string, int, List<int2>) IsBuried(NativeGrid sandElev, int[,] constructionGrid, float tolerance = 0.05f, float supportThreshold = 0.6f, float boundaryThreshold = 0.3f)
         {
             int buriedSupport = 0;
             foreach (var cell in support)
@@ -57,7 +58,7 @@ namespace Data
             return (isBuried, constructionName, int.Parse(Regex.Match(constructionName, @"\d+$").Value), needActivate);
         }
 
-        public List<int2> ErodeBuild(float[,] sandElev, int[,] constructionGrid)
+        public List<int2> ErodeBuild(NativeGrid sandElev, int[,] constructionGrid)
         {
             List<int2> needActivate = new List<int2>();
             foreach (var cell in support)
@@ -81,7 +82,7 @@ namespace Data
             return needActivate;
         }
 
-        public System.Collections.IEnumerator InitPulledDownCoroutine(float[,] sandElev, float maxExtraHeight = 0.2f, float cellSize = 1f)
+        public System.Collections.IEnumerator InitPulledDownCoroutine(NativeGrid sandElev, float maxExtraHeight = 0.2f, float cellSize = 1f)
         {
             if (obj == null) yield break;
             // Activar animación de derrumbe

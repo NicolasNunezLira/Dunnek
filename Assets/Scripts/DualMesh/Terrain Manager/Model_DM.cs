@@ -16,8 +16,8 @@ namespace DunefieldModel_DualMesh
     public partial class ModelDM
     {
         #region Variables
-        public float[,] sandElev, terrainElev, realTerrain;
-        public float[,] Shadow;
+        //public float[,] sandElev, terrainElev, realTerrain;
+        public NativeGrid sand, terrain, terrainShadow, shadow;
         //public bool[,] isConstruible;
         public int[,] constructionGrid;
 
@@ -57,14 +57,25 @@ namespace DunefieldModel_DualMesh
 
         #region Init model
         public ModelDM(
-            ref bool isPaused,
-            IFindSlope SlopeFinder, float[,] sandElev, float[,] terrainElev, float[,] realTerrain, int[,] constructionGrid, float size, int xResolution, int zResolution, float slope, int dx, int dz,
-            ref Dictionary<int, ConstructionData> constructions, ref int currentConstructionID,
-            float depositeHeight, float erosionHeight, int hopLength, float shadowSlope, float avalancheSlope, float maxCellsPerFrame,
-            float conicShapeFactor, float avalancheTrasnferRate, float minAvalancheAmount, bool verbose = false)
+            IFindSlope SlopeFinder,
+            NativeGrid sand, NativeGrid terrain, NativeGrid terrainShadow,
+            int[,] constructionGrid,
+            float size,
+            int xResolution, int zResolution,
+            float slope,
+            int dx, int dz,
+            ref Dictionary<int, ConstructionData> constructions,
+            ref int currentConstructionID,
+            float depositeHeight, float erosionHeight,
+            int hopLength, float shadowSlope, float avalancheSlope,
+            float maxCellsPerFrame,
+            float conicShapeFactor,
+            float avalancheTrasnferRate,
+            float minAvalancheAmount)
         {
-            this.isPaused = isPaused;
-            this.realTerrain = realTerrain;
+            this.terrain = terrain;
+            this.terrainShadow = terrainShadow;
+            this.terrain = terrain;
             FindSlope = SlopeFinder;
             this.constructionGrid = constructionGrid;
             this.constructions = constructions;
@@ -74,8 +85,6 @@ namespace DunefieldModel_DualMesh
             this.avalancheTrasnferRate = avalancheTrasnferRate;
             this.minAvalancheAmount = minAvalancheAmount;
             this.conicShapeFactor = conicShapeFactor;
-            this.sandElev = sandElev;
-            this.terrainElev = terrainElev;
             this.depositeHeight = depositeHeight;
             this.erosionHeight = erosionHeight;
             this.HopLength = hopLength;
@@ -86,13 +95,14 @@ namespace DunefieldModel_DualMesh
             this.dz = dz;
             this.xResolution = xResolution;
             this.zResolution = zResolution;
-            this.verbose = verbose;
             xDOF = this.xResolution - 1;
             zDOF = this.zResolution - 1;
-            Shadow = new float[xResolution, zResolution];
-            Array.Clear(Shadow, 0, zResolution * xResolution);
+            shadow = new NativeGrid(xResolution, zResolution, Allocator.Persistent);
+            //Array.Clear(shadow, 0, zResolution * xResolution);
             ShadowInit();
-            FindSlope.Init(ref sandElev, ref terrainElev, this.xResolution, this.zResolution, this.slope);
+            FindSlope.Init(
+                ref sand, ref terrain, this.xResolution, this.zResolution, this.slope
+            );
             //FindSlope.SetOpenEnded(openEnded);
         }
         #endregion

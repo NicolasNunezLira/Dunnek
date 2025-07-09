@@ -27,7 +27,7 @@ namespace Building
                     if (x < 0 || x >= duneModel.xResolution || z < 0 || z >= duneModel.zResolution) continue;
 
                     //float h = Math.Max(terrainElev[x, z], duneModel.sandElev[x, z]);
-                    float h = (terrainElev[x, z] >= duneModel.sandElev[x, z]) ? 0 : duneModel.sandElev[x, z];
+                    float h = (terrainShadow[x, z] >= duneModel.sand[x, z]) ? 0 : duneModel.sand[x, z];
                     sum += h;
                     count++;
                 }
@@ -46,12 +46,12 @@ namespace Building
 
                     if (x < 0 || x >= duneModel.xResolution || z < 0 || z >= duneModel.zResolution) continue;
 
-                    float total = Math.Max(duneModel.sandElev[x, z], terrainElev[x, z]);
+                    float total = Math.Max(duneModel.sand[x, z], terrainShadow[x, z]);
                     float delta = avg - total;
 
                     // Aplicar cambio solo al terreno si hay más arena
                     if (delta < 0f)
-                        duneModel.sandElev[x, z] += delta;
+                        duneModel.sand[x, z] += delta;
 
                     //terrainElev[x, z] = duneModel.terrainElev[x, z];
 

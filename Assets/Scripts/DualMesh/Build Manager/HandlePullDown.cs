@@ -41,7 +41,7 @@ public partial class DualMesh
 
         yield return new WaitForSeconds(0.5f);
 
-        yield return construction.InitPulledDownCoroutine(duneModel.sandElev);
+        yield return construction.InitPulledDownCoroutine(duneModel.sand);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -74,7 +74,7 @@ public partial class DualMesh
             }
             */
 
-            duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+            duneModel.terrainShadow[cx, cz] = terrainShadow[cx, cz]; // restaura altura original
             duneModel.ActivateCell(cx, cz);
             duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
         }
@@ -88,7 +88,7 @@ public partial class DualMesh
             constructionGrid[cx, cz] = 0;
             //duneModel.constructionGrid[cx, cz] = 0;
 
-            duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+            duneModel.terrainShadow[cx, cz] = terrainShadow[cx, cz]; // restaura altura original
             duneModel.ActivateCell(cx, cz);
             duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
         }

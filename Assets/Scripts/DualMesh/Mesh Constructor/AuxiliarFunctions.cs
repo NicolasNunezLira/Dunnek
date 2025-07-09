@@ -54,16 +54,15 @@ namespace DunefieldModel_DualMesh
             return heightMap;
         }
 
-        public void ApplyHeightMapToMesh(Mesh mesh, float[,] heightMap)
+        public void ApplyHeightMapToMesh(Mesh mesh, NativeGrid heightMap)
         {
             Vector3[] vertices = mesh.vertices;
-            int resolution = heightMap.GetLength(0) - 1;
 
-            for (int z = 0; z <= resolution; z++)
+            for (int z = 0; z <= zResolution; z++)
             {
-                for (int x = 0; x <= resolution; x++)
+                for (int x = 0; x <= xResolution; x++)
                 {
-                    int index = z * (resolution + 1) + x;
+                    int index = z * (zResolution + 1) + x;
                     Vector3 v = vertices[index];
                     v.y = heightMap[x, z];
                     vertices[index] = v;
@@ -75,7 +74,9 @@ namespace DunefieldModel_DualMesh
             mesh.RecalculateBounds();
         }
 
-        public void RegularizeMesh(Mesh sandMesh, Mesh terrainMesh)
+        public void RegularizeMesh(
+            Mesh sandMesh, Mesh terrainMesh
+        )
         {
             // Regularize the sand mesh to match the terrain mesh
             Vector3[] sandVertices = sandMesh.vertices;
@@ -94,80 +95,28 @@ namespace DunefieldModel_DualMesh
             sandMesh.RecalculateBounds();
         }
 
-        /*
-        public Dictionary<(int, int), Vector2Int> InitializeCriticalSlopes(float criticalSlopeThreshold)
+        public void ApplyOffset(GameObject terrainGO, GameObject sandGO, NativeGrid terrain)
         {
-            criticalSlopes.Clear();
-            int width = sandElev.GetLength(0);
-            int height = sandElev.GetLength(1);
+            // Adjust the terrain mesh to be above the sand mesh
+            // This assumes the terrain mesh is higher than the sand mesh
+            float terrainMinY = GetMinYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
+            float terrainMaxY = GetMaxYFromMesh(terrainGO.GetComponent<MeshFilter>().mesh);
+            float sandMinY = GetMinYFromMesh(sandGO.GetComponent<MeshFilter>().mesh);
 
-            for (int x = 1; x < width - 1; x++)
+            float offset = (terrainMaxY + terrainMinY) * 0.5f - sandMinY + 0.005f * (terrainMaxY - terrainMinY);
+            Mesh terrainMesh = terrainGO.GetComponent<MeshFilter>().mesh;
+            Vector3[] vertices = terrainMesh.vertices;
+            for (int i = 0; i < vertices.Length; i++)
             {
-                for (int z = 1; z < height - 1; z++)
-                {
-                    if (sandElev[x, z] < terrainElev[x, z])
-                    {
-                        // Si la elevación de la arena es menor que la del terreno, no hay pendiente crítica
-                        continue;
-                    }
-
-                    float h = sandElev[x, z];
-
-                    // Revisar las 4 direcciones principales
-                    Vector2Int[] directions = {
-                        new(1, 0), new(-1, 0),
-                        new(0, 1), new(0, -1),
-                        new(1, 1), new(-1, -1),
-                        new(-1, 1), new(1, -1)
-                    };
-
-                    float minSlope = float.PositiveInfinity;
-
-                    foreach (var dir in directions)
-                    {
-
-                        int xn = x + dir.x;
-                        int zn = z + dir.y;
-
-                        if (IsOutside(xn, zn))
-                        {
-                            continue; // Ignorar fuera de límites
-                        }
-
-                        float hNeighbor = sandElev[xn, zn];
-
-                        float slope = h - hNeighbor; // o usar Mathf.Atan para ángulo
-                        if (slope > criticalSlopeThreshold && slope < minSlope)
-                        {
-                            // Registrar punto crítico y dirección
-                            criticalSlopes[(x, z)] = dir;
-                        }
-                    }
-                }
+                vertices[i].y -= offset;
             }
-
-            return criticalSlopes;
-        }
-        */
-
-        public bool IsOutside(int x, int z)
-        {
-            return x < 0 || x >= sandElev.GetLength(0) || z < 0 || z >= sandElev.GetLength(1);
-        }
-
-        public int WorldToIndex(float worldCoord) => Mathf.FloorToInt(worldCoord * resolution / size);
-
-        public float[,] CopyArray(float[,] source)
-        {
-            int rows = source.GetLength(0);
-            int cols = source.GetLength(1);
-            float[,] copy = new float[rows, cols];
-
-            for (int i = 0; i < rows; i++)
-                for (int j = 0; j < cols; j++)
-                    copy[i, j] = source[i, j];
-
-            return copy;
+            terrainMesh.vertices = vertices;
+            terrainMesh.RecalculateNormals();
+            terrainMesh.RecalculateBounds();
+            for (int i = 0; i < terrain.data.Length; i++)
+            {
+                terrain.data[i] -= offset;
+            }
         }
     }
 
