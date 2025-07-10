@@ -76,13 +76,13 @@ namespace Building
                 if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
 
                 constructionGrid[cx, cz] = 0;
-
-                if (duneModel.sand[cx, cz] >= data.buildHeight)
+                
+                if (duneModel.sand[cx, cz] >= data.buildHeight + data.floorHeight)
                 {
                     duneModel.sand[cx, cz] -= data.buildHeight;
                 }
 
-                duneModel.terrainShadow[cx, cz] = terrainShadow[cx, cz]; // restaura altura original
+                duneModel.terrainShadow[cx, cz] = terrain[cx, cz]; // restaura altura original
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
@@ -95,7 +95,7 @@ namespace Building
 
                 constructionGrid[cx, cz] = 0;
 
-                duneModel.terrainShadow[cx, cz] = terrainShadow[cx, cz]; // restaura altura original
+                duneModel.terrainShadow[cx, cz] = terrain[cx, cz]; // restaura altura original
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }

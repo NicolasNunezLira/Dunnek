@@ -17,7 +17,7 @@ namespace DunefieldModel_DualMesh
     {
         #region Variables
         //public float[,] sandElev, terrainElev, realTerrain;
-        public NativeGrid sand, terrain, terrainShadow, shadow;
+        public NativeGrid sand, terrainShadow, shadow, terrain;
         //public bool[,] isConstruible;
         public int[,] constructionGrid;
 
@@ -58,7 +58,7 @@ namespace DunefieldModel_DualMesh
         #region Init model
         public ModelDM(
             IFindSlope SlopeFinder,
-            NativeGrid sand, NativeGrid terrain, NativeGrid terrainShadow,
+            NativeGrid sand, NativeGrid terrainShadow, ref NativeGrid terrain,
             int[,] constructionGrid,
             float size,
             int xResolution, int zResolution,
@@ -101,7 +101,7 @@ namespace DunefieldModel_DualMesh
                 sand.Width, sand.Height, sand.VisualWidth, sand.VisualHeight, Allocator.Persistent);
             ShadowInit();
             FindSlope.Init(
-                ref sand, ref terrain, this.sand.Width, this.sand.Height, this.slope
+                ref sand, ref terrainShadow, this.sand.Width, this.sand.Height, this.slope
             );
         }
         #endregion

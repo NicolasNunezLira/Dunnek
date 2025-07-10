@@ -186,7 +186,7 @@ public partial class DualMesh : MonoBehaviour
         // Initialize the sand mesh to be above the terrain mesh
         duneModel = new ModelDM(
             slopeFinder,
-            sand, terrain, terrainShadow,
+            sand, terrainShadow, ref terrain,
             constructionGrid,
             size,
             xResolution + 1, zResolution + 1,
@@ -225,7 +225,7 @@ public partial class DualMesh : MonoBehaviour
             sweeperPreviewGO,
             circlePreviewGO,
             currentBuildMode,
-            terrainShadow,
+            terrain,
             activePreview,
             constructionGrid,
             planicie);
