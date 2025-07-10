@@ -1,6 +1,5 @@
 using System;
-using Unity.VisualScripting;
-using UnityEngine;
+using Data;
 
 namespace DunefieldModel_DualMesh
 {
@@ -52,11 +51,6 @@ namespace DunefieldModel_DualMesh
                 int xAux = xCurr + j * dx;
                 int zAux = zCurr + j * dz;
 
-                if (!openEnded)
-                    (xAux, zAux) = WrapCoords(xAux, zAux);
-                else if (!IsInside(xAux, zAux))
-                    break;
-
                 if (terrainShadow[xAux, zAux] >= sand[xAux, zAux])
                     countTerrain++;
             }
@@ -73,34 +67,38 @@ namespace DunefieldModel_DualMesh
                     int checkX = xCurr + s * stepX + dx;
                     int checkZ = zCurr + s * stepZ + dz;
 
-                    if (openEnded && !IsInside(checkX, checkZ)) return;
-                    if (!openEnded)
-                        (checkX, checkZ) = WrapCoords(checkX, checkZ);
-
-                    if (constructionGrid[checkX, checkZ] > 0)
+                    if (checkX >= 0 && checkX < constructionGrid.GetLength(0) &&
+                        checkZ >= 0 && checkZ < constructionGrid.GetLength(1))
                     {
-                        int xPrev = checkX - dx;
-                        int zPrev = checkZ - dz;
-                        if (!openEnded)
-                            (xPrev, zPrev) = WrapCoords(xPrev, zPrev);
-                        else if (!IsInside(xPrev, zPrev)) return;
-
-                        float acumulacionBarlovento = terrainShadow[checkX, checkZ] - sand[xPrev, zPrev];
-
-                        if (acumulacionBarlovento <= 0.2f)
+                        int id = constructionGrid[checkX, checkZ];
+                        if (id > 0)
                         {
-                            DepositGrain(checkX, checkZ, dx, dz, depositeH);
-                            TryToDeleteBuild(checkX, checkZ);
-                            return;
+                            constructions.TryGetValue(id, out ConstructionData currentConstruction);
+                            ;
+                            int xPrev = checkX - dx;
+                            int zPrev = checkZ - dz;
+
+                            float acumulacionBarlovento = terrainShadow[checkX, checkZ] - sand[xPrev, zPrev];
+
+                            if (acumulacionBarlovento <= currentConstruction.buildHeight * 0.2f)
+                            {
+                                DepositGrain(checkX, checkZ, dx, dz, depositeH);
+                                TryToDeleteBuild(checkX, checkZ);
+                                return;
+                            }
+                            else
+                            {
+                                int stopX = xCurr + (s - 1) * stepX;
+                                int stopZ = zCurr + (s - 1) * stepZ;
+                                DepositGrain(stopX, stopZ, dx, dz, depositeH);
+                                TryToDeleteBuild(checkX, checkZ);
+                                return;
+                            }
                         }
-                        else
-                        {
-                            int stopX = xCurr + (s - 1) * stepX;
-                            int stopZ = zCurr + (s - 1) * stepZ;
-                            DepositGrain(stopX, stopZ, dx, dz, depositeH);
-                            TryToDeleteBuild(checkX, checkZ);
-                            return;
-                        }
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
                 #endregion
@@ -108,10 +106,6 @@ namespace DunefieldModel_DualMesh
                 #region Open field behaviour
                 xCurr += dx;
                 zCurr += dz;
-
-                if (openEnded && !IsInside(xCurr, zCurr)) return;
-                if (!openEnded)
-                    (xCurr, zCurr) = WrapCoords(xCurr, zCurr);
 
                 if (shadow[xCurr, zCurr] > 0 && sand[xCurr, zCurr] > terrainShadow[xCurr, zCurr])
                 {
@@ -137,10 +131,6 @@ namespace DunefieldModel_DualMesh
                         {
                             int lx = xCurr + dxLateral[j] * k;
                             int lz = zCurr + dzLateral[j] * k;
-
-                            if (openEnded && !IsInside(lx, lz)) break;
-                            if (!openEnded)
-                                (lx, lz) = WrapCoords(lx, lz);
 
                             if (Math.Max(terrainShadow[lx, lz], sand[lx, lz]) <
                                 Math.Max(terrainShadow[xCurr, zCurr], sand[xCurr, zCurr]) - slopeThreshold)

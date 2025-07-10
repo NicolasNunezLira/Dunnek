@@ -99,11 +99,6 @@ namespace DunefieldModel_DualMesh
                     int nx = x + dx;
                     int nz = z + dz;
 
-                    if (!openEnded)
-                    {
-                        (nx, nz) = WrapCoords(nx, nz);
-                    }
-
                     if (!IsValidCell(nx, nz)) continue;
 
                     float nh = Math.Max(sand[nx, nz], terrainShadow[nx, nz]);
@@ -141,8 +136,6 @@ namespace DunefieldModel_DualMesh
         #region Run Avalanche
         public int RunAvalancheBurst(int maxStepsPerCall = 50, bool verbose = false)
         {
-
-            if (verbose) Debug.Log($"Granos avalanchados por paso: {avalancheQueue.Count}/{maxStepsPerCall}");
             if (avalancheQueue == null || avalancheQueue.Count == 0)
                 return 0;
 
@@ -178,11 +171,6 @@ namespace DunefieldModel_DualMesh
                         int nx = x + dx;
                         int nz = z + dz;
 
-                        if (!openEnded)
-                        {
-                            (nx, nz) = WrapCoords(nx, nz);
-                        }
-
                         if (!IsValidCell(nx, nz)) continue;
 
                         float nh = Math.Max(sand[nx, nz], terrainShadow[nx, nz]);
@@ -208,11 +196,6 @@ namespace DunefieldModel_DualMesh
                 {
                     int nx = x + dx;
                     int nz = z + dz;
-
-                    if (!openEnded)
-                    {
-                        (nx, nz) = WrapCoords(nx, nz);
-                    }
 
                     if (!IsValidCell(nx, nz)) continue;
 
@@ -272,11 +255,6 @@ namespace DunefieldModel_DualMesh
 
                     int nx = x + dx;
                     int nz = z + dz;
-
-                    if (!openEnded)
-                    {
-                        (nx, nz) = WrapCoords(nx, nz);
-                    }
 
                     if (!IsValidCell(nx, nz)) continue;
 

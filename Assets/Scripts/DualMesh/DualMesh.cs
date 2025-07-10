@@ -14,8 +14,8 @@ public partial class DualMesh : MonoBehaviour
     [Tooltip("The number of subdivisions of visual mesh along each axis.")]
     public int xResolution = 127, zResolution = 127;
 
-    
-    
+
+
 
     [Header("Mesh Settings")]
     [Tooltip("The size of the plane in world units.")]
@@ -107,8 +107,8 @@ public partial class DualMesh : MonoBehaviour
 
     #region Variables
 
-    public int simXResolution => openEnded ? xResolution * 3/2 : xResolution;
-    public int simZResolution => openEnded ? zResolution * 3/2 : zResolution;
+    public int simXResolution => openEnded ? xResolution + 40 : xResolution;
+    public int simZResolution => openEnded ? zResolution + 40 : zResolution;
 
     private GameObject terrainGO, sandGO;
 
@@ -152,7 +152,8 @@ public partial class DualMesh : MonoBehaviour
     {
         constructions = new Dictionary<int, ConstructionData>();
 
-        constructionGrid = new int[xResolution + 1, zResolution + 1];
+        
+        constructionGrid = new int[simXResolution + 1, simZResolution + 1];
 
         for (int x = 0; x < constructionGrid.GetLength(0); x++)
         {
@@ -233,8 +234,8 @@ public partial class DualMesh : MonoBehaviour
 
     #region Update
 
-    /*void Update()
-
+    
+    void Update()
     {
         //float before = duneModel.TotalSand();
         if (!isPaused)
@@ -323,7 +324,7 @@ public partial class DualMesh : MonoBehaviour
 
             if (constructed)
             {
-                dualMeshConstructor.ApplyHeightMapToMesh(terrainGO.GetComponent<MeshFilter>().mesh, terrainShadow);
+                dualMeshConstructor.ApplyHeightMapToMesh(terrainGO.GetComponent<MeshFilter>().mesh, terrain);
                 constructed = false;
             }
         }
@@ -336,7 +337,14 @@ public partial class DualMesh : MonoBehaviour
         //Debug.Log($"Δ arena = {after - before:F5}");
 
     }
-
-    */
+    
     #endregion
+
+    public void OnDestroy()
+    {
+        sand.Dispose();
+        terrain.Dispose();
+        terrainShadow.Dispose();
+        duneModel.shadow.Dispose();
+    }
 }

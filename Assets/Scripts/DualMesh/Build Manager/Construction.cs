@@ -71,7 +71,6 @@ namespace Building
                     {
                         duneModel.terrainShadow[x, z] = targetHeight;
                         duneModel.sand[x, z] = floorHeight;
-                        //isConstruible[x, z] = false;
                         support.Add(new int2(x, z));
                         duneModel.ActivateCell(x, z);
                         duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);

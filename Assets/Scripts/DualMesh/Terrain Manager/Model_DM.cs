@@ -75,7 +75,7 @@ namespace DunefieldModel_DualMesh
         {
             this.terrain = terrain;
             this.terrainShadow = terrainShadow;
-            this.terrain = terrain;
+            this.sand = sand;
             FindSlope = SlopeFinder;
             this.constructionGrid = constructionGrid;
             this.constructions = constructions;
@@ -97,13 +97,12 @@ namespace DunefieldModel_DualMesh
             this.zResolution = zResolution;
             xDOF = this.xResolution - 1;
             zDOF = this.zResolution - 1;
-            shadow = new NativeGrid(xResolution, zResolution, Allocator.Persistent);
-            //Array.Clear(shadow, 0, zResolution * xResolution);
+            shadow = new NativeGrid(
+                sand.Width, sand.Height, sand.VisualWidth, sand.VisualHeight, Allocator.Persistent);
             ShadowInit();
             FindSlope.Init(
-                ref sand, ref terrain, this.xResolution, this.zResolution, this.slope
+                ref sand, ref terrain, this.sand.Width, this.sand.Height, this.slope
             );
-            //FindSlope.SetOpenEnded(openEnded);
         }
         #endregion
 

@@ -25,7 +25,7 @@ namespace DunefieldModel_DualMesh
 
             int height = sand.Height;
             int width = sand.Width;
-            NativeGrid newShadow = new NativeGrid(width, height, Allocator.Persistent);
+            NativeGrid newShadow = new NativeGrid(width, height, sand.VisualWidth, sand.VisualHeight, Allocator.Persistent);
 
             int errors = 0;
 
@@ -91,7 +91,7 @@ namespace DunefieldModel_DualMesh
                     Console.WriteLine("shadowCheck error count: " + errors);
                 shadow.CopyFrom(newShadow);
             }
-
+            newShadow.Dispose();
             return errors;
         }
 
@@ -110,35 +110,19 @@ namespace DunefieldModel_DualMesh
             int xPrev = x - dx;
             int zPrev = z - dz;
 
-            if (openEnded && IsOutside(xPrev, zPrev))
-            {
-                hs = h;
-            }
-            else
-            {
-                if (!openEnded)
-                    (xPrev, zPrev) = WrapCoords(xPrev, zPrev);
-
-                if (IsOutside(xPrev, zPrev)) return; // Prevención por seguridad
-
-                hs = Math.Max(
+            hs = Math.Max(
                     h,
                     Math.Max(
                         Math.Max(sand[xPrev, zPrev], terrainShadow[xPrev, zPrev]),
                         shadow[xPrev, zPrev]
                     ) - shadowSlope
                 );
-            }
 
             int xNext = x;
             int zNext = z;
 
             while (true)
             {
-                if (openEnded && IsOutside(xNext, zNext)) return;
-                if (!openEnded)
-                    (xNext, zNext) = WrapCoords(xNext, zNext);
-
                 float currentHeight = Math.Max(sand[xNext, zNext], terrainShadow[xNext, zNext]);
                 if (hs < currentHeight) break;
 
@@ -152,10 +136,6 @@ namespace DunefieldModel_DualMesh
             // Borrar sombra si ya no se proyecta
             while (true)
             {
-                if (openEnded && IsOutside(xNext, zNext)) return;
-                if (!openEnded)
-                    (xNext, zNext) = WrapCoords(xNext, zNext);
-
                 if (shadow[xNext, zNext] <= 0)
                     break;
 
@@ -170,11 +150,6 @@ namespace DunefieldModel_DualMesh
 
             while (true)
             {
-                if (openEnded && IsOutside(xNext, zNext)) return;
-                
-                if (!openEnded)
-                    (xNext, zNext) = WrapCoords(xNext, zNext);
-
                 float currentHeight = Math.Max(sand[xNext, zNext], terrainShadow[xNext, zNext]);
                 if (hs < currentHeight) break;
 

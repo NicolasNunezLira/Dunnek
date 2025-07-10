@@ -30,9 +30,6 @@ namespace DunefieldModel_DualMesh
 
         private (int, int) WrapCoords(int x, int z)
         {
-            if (openEnded)
-                return (x, z);
-
             x = (x + xResolution) % xResolution;
             z = (z + zResolution) % zResolution;
             return (x, z);

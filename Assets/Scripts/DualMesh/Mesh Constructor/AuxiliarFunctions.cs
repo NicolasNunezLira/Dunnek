@@ -54,17 +54,17 @@ namespace DunefieldModel_DualMesh
             return heightMap;
         }
 
-        public void ApplyHeightMapToMesh(Mesh mesh, NativeGrid heightMap)
+        public void ApplyHeightMapToMesh(Mesh mesh, NativeGrid grid)
         {
             Vector3[] vertices = mesh.vertices;
 
-            for (int z = 0; z <= zResolution; z++)
+            for (int z = 0, i = 0; z <= zResolution; z++)
             {
-                for (int x = 0; x <= xResolution; x++)
+                for (int x = 0; x <= xResolution; x++, i++)
                 {
-                    int index = z * (zResolution + 1) + x;
+                    int index = z * (xResolution + 1) + x;
                     Vector3 v = vertices[index];
-                    v.y = heightMap[x, z];
+                    v.y = grid.data[grid.visualIndex[i]];
                     vertices[index] = v;
                 }
             }
@@ -88,6 +88,11 @@ namespace DunefieldModel_DualMesh
                 {
                     sandVertices[i].y = terrainVertices[i].y * (1f - 0.05f);
                 }
+            }
+
+            for (int i = 0; i < sand.data.Length; i++)
+            {
+                sand.data[i] *= (1f - 0.05f);
             }
 
             sandMesh.vertices = sandVertices;

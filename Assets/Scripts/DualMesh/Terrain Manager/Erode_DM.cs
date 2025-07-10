@@ -22,9 +22,10 @@ namespace DunefieldModel_DualMesh
             // Busqueda del punto más alto en la vecindad del grano
             while (FindSlope.Upslope(x, z, dx, dz, out int xSteep, out int zSteep) >= 2)
             {
-                // Si se sale del dominio en campo abierto
+                /*
                 if (openEnded && IsOutside(xSteep, zSteep))
                     return 0f;
+                */
 
                 x = xSteep;
                 z = zSteep;

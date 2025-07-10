@@ -16,10 +16,10 @@ namespace DunefieldModel_DualMesh
             string materialCube = null
         )
         {
-            NativeGrid mesh = new NativeGrid(simXResolution, simZResolution, Allocator.Persistent);
-            for (int x = 0; x < simXResolution; x++)
+            NativeGrid mesh = new NativeGrid(simXResolution + 1, simZResolution + 1, xResolution + 1, zResolution + 1, Allocator.Persistent);
+            for (int x = 0; x < mesh.Width; x++)
             {
-                for (int z = 0; z < simZResolution; z++)
+                for (int z = 0; z < mesh.Height; z++)
                 {
                     if (cube && materialCube == "terrain" && z > 150 - 40 && z < 170 - 40 && x > 100 && x < 120)
                     {
@@ -54,7 +54,7 @@ namespace DunefieldModel_DualMesh
                 for (int x = 0; x <= xResolution; x++, i++)
                 {
                     float xPos = (float)x / xResolution * size;
-                    float yPos = grid[x, z];
+                    float yPos = grid.data[grid.visualIndex[i]];
                     float zPos = (float)z / zResolution * size;
                     vertices[i] = new Vector3(xPos, yPos, zPos);
                     uv[i] = new Vector2((float)x / xResolution,
@@ -100,12 +100,14 @@ namespace DunefieldModel_DualMesh
             float xCenter = size / 2;
             float zCenter = size / 2;
 
-            NativeGrid grid = new NativeGrid(simXResolution, simZResolution, Allocator.Persistent);
-            for (int x = 0; x < simXResolution; x++)
+            NativeGrid grid = new NativeGrid(simXResolution + 1, simZResolution + 1, xResolution + 1, zResolution + 1, Allocator.Persistent);
+            for (int x = 0; x <= simXResolution; x++)
             {
-                for (int z = 0; z < simZResolution; z++)
+                for (int z = 0; z <= simZResolution; z++)
                 {
-                    grid[x, z] = GetTruncatedConeHeight(x, z, xCenter, zCenter, size / 3, size / 8, 5f);
+                    float xPos = (float)x / (simXResolution - 1) * size;
+                    float zPos = (float)z / (simZResolution - 1) * size;
+                    grid[x, z] = GetTruncatedConeHeight(xPos, zPos, xCenter, zCenter, size / 3, size / 8, 5f);
                 }
             }
 

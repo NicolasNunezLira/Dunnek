@@ -165,17 +165,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5354862a98581c4b98a89307dab78fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 255
+  xResolution: 255
+  zResolution: 255
   size: 50
-  terrainMaterial: {fileID: 2100000, guid: c9df7fed0d2882e4daa9486dee9bbf3e, type: 2}
   openEnded: 1
+  terrainMaterial: {fileID: 2100000, guid: c9df7fed0d2882e4daa9486dee9bbf3e, type: 2}
   terrainScale1: 0.003
   terrainAmplitude1: 8
   terrainScale2: 0.01
   terrainAmplitude2: 4
   terrainScale3: 0.05
   terrainAmplitude3: 2
-  sandMaterial: {fileID: 2100000, guid: fa542ab47cc7bb3418c35926f8cab963, type: 2}
+  sandMaterial: {fileID: 2100000, guid: d973757631d287749a34cc58a9a04b87, type: 2}
   sandScale1: 0.02
   sandAmplitude1: 1.5
   sandScale2: 0.06
@@ -187,7 +188,7 @@ MonoBehaviour:
   hopLength: 5
   shadowSlope: 0.02
   windDirection: {x: 1, y: 1}
-  grainsPerStep: 500
+  grainsPerStep: 300
   avalancheSlope: 0.5
   criticalSlopeThreshold: 2
   maxCellsPerFrame: 100

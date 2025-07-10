@@ -16,8 +16,10 @@ namespace DunefieldModel_DualMesh
             // Buscar el punto más bajo en la dirección del viento
             while (FindSlope.Downslope(x, z, dx, dz, out int xLow, out int zLow) >= 1)
             {
+                /*
                 if (openEnded && IsOutside(xLow, zLow))
                     break;
+                */
 
                 x = xLow;
                 z = zLow;
