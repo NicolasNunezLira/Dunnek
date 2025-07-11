@@ -11,6 +11,7 @@ namespace DunefieldModel_DualMesh
 
         public void TryToDeleteBuild(int checkX, int checkZ)
         {
+            
             int id = constructionGrid[checkX, checkZ];
             if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
             {
@@ -18,7 +19,7 @@ namespace DunefieldModel_DualMesh
                 return;
             }
 
-            (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sand, constructionGrid);
+            (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sand, constructionGrid, sandChanges);
             if (isBuried) { Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
 
             DeleteBuild(idToDestroy);
@@ -43,11 +44,13 @@ namespace DunefieldModel_DualMesh
             {
                 constructionGrid[cell.x, cell.y] = 0;
                 terrainShadow[cell.x, cell.y] = terrain[cell.x, cell.y];
+                //AddChanges(terrainShadowChanges, cell.x, cell.y);
             }
             foreach (var cell in data.boundarySupport)
             {
                 constructionGrid[cell.x, cell.y] = 0;
                 terrainShadow[cell.x, cell.y] = terrain[cell.x, cell.y];
+                //AddChanges(terrainShadowChanges, cell.x, cell.y);
             }
 
 

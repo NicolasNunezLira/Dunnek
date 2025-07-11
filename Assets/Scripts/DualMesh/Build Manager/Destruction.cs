@@ -140,7 +140,7 @@ namespace Building
         }
         
         
-        private void RestoreHoverMaterials()
+        public void RestoreHoverMaterials()
         {
             if (currentHoverObject == null) return;
 

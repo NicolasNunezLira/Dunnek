@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using ue = UnityEngine;
 
 namespace DunefieldModel_DualMesh
@@ -39,7 +40,8 @@ namespace DunefieldModel_DualMesh
 
             // Erosión
             sand[x, z] -= erosionH;
-            
+            AddChanges(sandChanges, x, z);
+
             UpdateShadow(x, z, dx, dz);
 
             ActivateCell(x, z);

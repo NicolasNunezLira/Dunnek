@@ -208,7 +208,9 @@ namespace DunefieldModel_DualMesh
                     if (transfer > minAvalancheAmount)
                     {
                         sand[x, z] -= transfer;
+                        sandChanges.AddChanges(x, z);
                         sand[nx, nz] = Math.Max(sand[nx, nz], terrainShadow[nx, nz]) + transfer;
+                        sandChanges.AddChanges(nx, nz);
 
                         if (constructionGrid[nx, nz] > 0)
                         {

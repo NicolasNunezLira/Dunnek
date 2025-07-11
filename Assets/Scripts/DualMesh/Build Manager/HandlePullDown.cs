@@ -41,7 +41,7 @@ public partial class DualMesh
 
         yield return new WaitForSeconds(0.5f);
 
-        yield return construction.InitPulledDownCoroutine(duneModel.sand);
+        yield return construction.InitPulledDownCoroutine(duneModel.sand, duneModel.sandChanges);
 
         yield return new WaitForSeconds(0.5f);
 

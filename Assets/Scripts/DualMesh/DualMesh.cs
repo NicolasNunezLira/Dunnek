@@ -143,6 +143,8 @@ public partial class DualMesh : MonoBehaviour
 
     private bool isPaused = false;
 
+    private FrameVisualChanges sandChanges, terrainShadowChanges;
+
 
     #endregion
 
@@ -184,6 +186,9 @@ public partial class DualMesh : MonoBehaviour
             out sand, out terrain, out terrainShadow);
 
         // Initialize the sand mesh to be above the terrain mesh
+        sandChanges = new FrameVisualChanges(xResolution + 1, zResolution + 1);
+        terrainShadowChanges = new FrameVisualChanges(xResolution + 1, zResolution + 1);
+
         duneModel = new ModelDM(
             slopeFinder,
             sand, terrainShadow, ref terrain,
@@ -199,7 +204,9 @@ public partial class DualMesh : MonoBehaviour
             maxCellsPerFrame,
             conicShapeFactor,
             avalancheTransferRate,
-            minAvalancheAmount
+            minAvalancheAmount,
+            sandChanges,
+            terrainShadowChanges
         );
         duneModel.SetOpenEnded(openEnded);
         duneModel.InitAvalancheQueue();
@@ -234,7 +241,7 @@ public partial class DualMesh : MonoBehaviour
 
     #region Update
 
-    
+
     void Update()
     {
         //float before = duneModel.TotalSand();
@@ -256,6 +263,11 @@ public partial class DualMesh : MonoBehaviour
                 // Update the meshcolliders
                 sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
                 terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh; // demasiado caro para realizarlo todos los frames
+
+                if (inMode == PlayingMode.Simulation)
+                {
+                    builder.RestoreHoverMaterials();
+                }
             }
             #endregion
 
@@ -319,7 +331,7 @@ public partial class DualMesh : MonoBehaviour
 
                         break;
                     }
-                #endregion
+                    #endregion
             }
 
             if (constructed)
@@ -330,14 +342,16 @@ public partial class DualMesh : MonoBehaviour
         }
 
         CheckForPullDowns();
-        
-        dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sand);
+
+        //dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sand);
+        dualMeshConstructor.ApplyChanges(sandGO.GetComponent<MeshFilter>().mesh, sand, sandChanges);
+        terrainShadowChanges.ClearChanges();
 
         //float after = duneModel.TotalSand();
         //Debug.Log($"Δ arena = {after - before:F5}");
 
     }
-    
+
     #endregion
 
     public void OnDestroy()
@@ -346,5 +360,7 @@ public partial class DualMesh : MonoBehaviour
         terrain.Dispose();
         terrainShadow.Dispose();
         duneModel.shadow.Dispose();
+        sandChanges.Dispose();
+        terrainShadowChanges.Dispose(); 
     }
 }

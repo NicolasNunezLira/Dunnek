@@ -1,5 +1,4 @@
-using Data;
-using UnityEngine;
+using Unity.Mathematics;
 
 namespace DunefieldModel_DualMesh
 {
@@ -46,6 +45,21 @@ namespace DunefieldModel_DualMesh
             return total;
         }
 
+        #endregion
+
+        #region Changes list methos
+        public void AddChanges(FrameVisualChanges list, int x, int z)
+        {
+            if (IsVisual(x, z))
+            {
+                list.changes.Add(new int2(x, z));
+            }
+        }
+
+        public bool IsVisual(int x, int z)
+        {
+            return x >= 0 && x < xResolution && z >= 0 && z < zResolution;
+        }
         #endregion
         
         #endregion

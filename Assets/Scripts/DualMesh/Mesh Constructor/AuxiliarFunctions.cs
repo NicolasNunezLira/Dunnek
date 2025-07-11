@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+//using System.Numerics;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace DunefieldModel_DualMesh
@@ -72,6 +73,25 @@ namespace DunefieldModel_DualMesh
             mesh.vertices = vertices;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+        }
+
+        public void ApplyChanges(Mesh mesh, NativeGrid grid, FrameVisualChanges changes)
+        {
+            Vector3[] vertices = mesh.vertices;
+
+            foreach (int2 index in changes.changes)
+            {
+                int i = index.y * (xResolution + 1) + index.x;
+                if (vertices.Length <= i) continue;
+                Vector3 v = vertices[i];
+                v.y = grid[index.x, index.y];
+                vertices[i] = v;
+            }
+            mesh.vertices = vertices;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            changes.ClearChanges();
         }
 
         public void RegularizeMesh(

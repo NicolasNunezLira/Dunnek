@@ -168,7 +168,7 @@ MonoBehaviour:
   xResolution: 255
   zResolution: 255
   size: 50
-  openEnded: 1
+  openEnded: 0
   terrainMaterial: {fileID: 2100000, guid: c9df7fed0d2882e4daa9486dee9bbf3e, type: 2}
   terrainScale1: 0.003
   terrainAmplitude1: 8

@@ -53,6 +53,8 @@ namespace DunefieldModel_DualMesh
 
         public float maxCellsPerFrame, conicShapeFactor, avalancheTrasnferRate, minAvalancheAmount, size;
 
+        public FrameVisualChanges sandChanges, terrainShadowChanges;
+
         #endregion
 
         #region Init model
@@ -71,7 +73,9 @@ namespace DunefieldModel_DualMesh
             float maxCellsPerFrame,
             float conicShapeFactor,
             float avalancheTrasnferRate,
-            float minAvalancheAmount)
+            float minAvalancheAmount,
+            FrameVisualChanges sandChanges,
+            FrameVisualChanges terrainShadowChanges)
         {
             this.terrain = terrain;
             this.terrainShadow = terrainShadow;
@@ -95,8 +99,10 @@ namespace DunefieldModel_DualMesh
             this.dz = dz;
             this.xResolution = xResolution;
             this.zResolution = zResolution;
-            xDOF = this.xResolution - 1;
-            zDOF = this.zResolution - 1;
+            xDOF = this.xResolution + 1;
+            zDOF = this.zResolution + 1;
+            this.sandChanges = sandChanges;
+            this.terrainShadowChanges = terrainShadowChanges;
             shadow = new NativeGrid(
                 sand.Width, sand.Height, sand.VisualWidth, sand.VisualHeight, Allocator.Persistent);
             ShadowInit();
@@ -106,7 +112,7 @@ namespace DunefieldModel_DualMesh
         }
         #endregion
 
-        #region Auxiliar Variables
+        #region Auxiliar methods
         public virtual bool UsesHopLength()
         {
             return true;  // does this model use the user-provided value of hop length?

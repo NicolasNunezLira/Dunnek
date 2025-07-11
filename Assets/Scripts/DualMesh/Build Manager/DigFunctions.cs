@@ -60,6 +60,7 @@ namespace Building
 
                         //terrainElev[nx, nz] = newHeight;
                         sandElev[nx, nz] = newHeight;
+                        duneModel.sandChanges.AddChanges(nx, nz);
                     }
                 }
             }
@@ -95,6 +96,7 @@ namespace Building
             {
                 float amount = totalRemoved * (weight / weightSum);
                 sandElev[x, z] += amount;
+                duneModel.sandChanges.AddChanges(x, z);
 
                 duneModel.ActivateCell(x, z);
                 duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);

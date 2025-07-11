@@ -70,7 +70,9 @@ namespace Building
                     if (localBounds.Contains(localPoint))
                     {
                         duneModel.terrainShadow[x, z] = targetHeight;
+                        duneModel.terrainShadowChanges.AddChanges(x, z);
                         duneModel.sand[x, z] = floorHeight;
+                        duneModel.sandChanges.AddChanges(x, z);
                         support.Add(new int2(x, z));
                         duneModel.ActivateCell(x, z);
                         duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);

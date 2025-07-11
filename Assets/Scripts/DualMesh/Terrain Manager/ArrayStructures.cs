@@ -1,8 +1,10 @@
 using Unity.Collections;
+using Unity.Mathematics;
 
 namespace DunefieldModel_DualMesh
 {
     using Unity.Collections;
+    using Unity.VisualScripting;
     using UnityEngine;
 
     public struct NativeGrid
@@ -35,11 +37,9 @@ namespace DunefieldModel_DualMesh
 
         private int WrappedIndex(int x, int z)
         {
-            x = (x + 2*width) % width;
-            z = (z + height) % height;
-            if (x + z * width < 0)
-                Debug.Log($"x={x}, z={z}, index={x + z * width}");
-            
+            x = ((x % width) + width) % width;
+            z = ((z % height) + height) % height;
+
             return x + z * width;
         }
 
@@ -116,4 +116,37 @@ namespace DunefieldModel_DualMesh
                 data.Dispose();
         }
     }
+
+    public struct FrameVisualChanges
+    {
+        public NativeHashSet<int2> changes;
+        private int xDOF, zDOF;
+
+        public FrameVisualChanges(int xDOF, int zDOF)
+        {
+            this.xDOF = xDOF;
+            this.zDOF = zDOF;
+            changes = new NativeHashSet<int2>(xDOF * zDOF, Allocator.Persistent);
+        }
+
+        public void AddChanges(int x, int z)
+        {
+            if (x >= 0 && x < zDOF && z >= 0 && z < zDOF)
+            {
+                changes.Add(new int2(x, z));
+            }
+        }
+
+        public void ClearChanges()
+        {
+            if (changes.IsCreated)
+                changes.Clear();
+        }
+        public void Dispose()
+        {
+            if (changes.IsCreated)
+                changes.Dispose();
+        }
+    }
+
 }

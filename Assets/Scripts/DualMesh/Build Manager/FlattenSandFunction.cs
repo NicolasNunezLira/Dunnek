@@ -51,12 +51,16 @@ namespace Building
 
                     // Aplicar cambio solo al terreno si hay más arena
                     if (delta < 0f)
+                    {
                         duneModel.sand[x, z] += delta;
+                        duneModel.sandChanges.AddChanges(x, z);
+                        duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);
+                        duneModel.ActivateCell(x, z);
+                    }
 
                     //terrainElev[x, z] = duneModel.terrainElev[x, z];
 
-                    duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);
-                    duneModel.ActivateCell(x, z);
+                    
                 }
             }
         }
