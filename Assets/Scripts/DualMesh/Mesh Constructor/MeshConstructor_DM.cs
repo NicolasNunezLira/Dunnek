@@ -22,6 +22,11 @@ namespace DunefieldModel_DualMesh
         public Transform parentTransform;
         public bool planicie;
 
+        private int xDOF => xResolution + 1;
+        private int zDOF => zResolution + 1;
+        private int simXDOF => simXResolution + 1;
+        private int simZDOF => simZResolution + 1;
+
         public Dictionary<(int, int), Vector2Int> criticalSlopes;
 
         public DualMeshConstructor(

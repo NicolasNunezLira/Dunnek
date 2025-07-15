@@ -186,8 +186,8 @@ public partial class DualMesh : MonoBehaviour
             out sand, out terrain, out terrainShadow);
 
         // Initialize the sand mesh to be above the terrain mesh
-        sandChanges = new FrameVisualChanges(xResolution + 1, zResolution + 1);
-        terrainShadowChanges = new FrameVisualChanges(xResolution + 1, zResolution + 1);
+        sandChanges = new FrameVisualChanges(sand.VisualWidth, sand.VisualHeight);
+        terrainShadowChanges = new FrameVisualChanges(terrainShadow.VisualWidth, terrainShadow.VisualHeight);
 
         duneModel = new ModelDM(
             slopeFinder,

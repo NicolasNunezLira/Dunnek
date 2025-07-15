@@ -16,17 +16,16 @@ namespace DunefieldModel_DualMesh
     public partial class ModelDM
     {
         #region Variables
-        //public float[,] sandElev, terrainElev, realTerrain;
         public NativeGrid sand, terrainShadow, shadow, terrain;
-        //public bool[,] isConstruible;
         public int[,] constructionGrid;
 
-        public int xResolution = 0, zResolution = 0;
+        public int xResolution, zResolution;
         public int HopLength = 1;
         public float pSand = 0.6f;
         public float pNoSand = 0.4f;
         public IFindSlope FindSlope;
-        protected int xDOF, zDOF; // xDOF = xResolution - 1, zDOF = zResolution - 1
+        protected int xDOF => xResolution + 1;
+        protected int zDOF => zResolution + 1;
         protected System.Random rnd = new System.Random(42);
         protected bool openEnded = false;
         public float shadowSlope;  //  3 * tan(15 degrees) \approx 0.803847577f
@@ -99,8 +98,6 @@ namespace DunefieldModel_DualMesh
             this.dz = dz;
             this.xResolution = xResolution;
             this.zResolution = zResolution;
-            xDOF = this.xResolution + 1;
-            zDOF = this.zResolution + 1;
             this.sandChanges = sandChanges;
             this.terrainShadowChanges = terrainShadowChanges;
             shadow = new NativeGrid(

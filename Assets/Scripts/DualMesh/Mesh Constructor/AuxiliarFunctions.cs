@@ -81,7 +81,7 @@ namespace DunefieldModel_DualMesh
 
             foreach (int2 index in changes.changes)
             {
-                int i = index.y * (xResolution + 1) + index.x;
+                int i = (index.y * xDOF) + index.x;
                 if (vertices.Length <= i) continue;
                 Vector3 v = vertices[i];
                 v.y = grid[index.x, index.y];

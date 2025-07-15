@@ -20,10 +20,10 @@ namespace DunefieldModel_DualMesh
 
         public NativeGrid(int width, int height, int visualWidth, int visualHeight, Allocator allocator)
         {
-            this.width = width;
-            this.height = height;
-            this.visualWidth = visualWidth;
-            this.visualHeight = visualHeight;
+            this.width = width; // Dof x axis
+            this.height = height; // Dof z axis
+            this.visualWidth = visualWidth; // Dof visual x axis
+            this.visualHeight = visualHeight; // Dof visual z axis
             data = new NativeArray<float>(width * height, allocator, NativeArrayOptions.ClearMemory);
             visualIndex = new NativeArray<int>(visualWidth * visualHeight, Allocator.Persistent); ;
             GenerateVisualIndex();
@@ -78,8 +78,8 @@ namespace DunefieldModel_DualMesh
                 for (int x = 0; x < Width; x++)
                 {
                     if (
-                        x >= 0 && x < VisualHeight &&
-                        z >= 0 && z < VisualWidth
+                        x >= 0 && x < VisualWidth &&
+                        z >= 0 && z < VisualHeight
                     )
                     {
                         visualIndex[i] = WrappedIndex(x, z);
@@ -131,7 +131,7 @@ namespace DunefieldModel_DualMesh
 
         public void AddChanges(int x, int z)
         {
-            if (x >= 0 && x < zDOF && z >= 0 && z < zDOF)
+            if (x >= 0 && x < xDOF && z >= 0 && z < zDOF)
             {
                 changes.Add(new int2(x, z));
             }

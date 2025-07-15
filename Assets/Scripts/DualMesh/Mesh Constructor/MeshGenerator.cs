@@ -16,7 +16,7 @@ namespace DunefieldModel_DualMesh
             string materialCube = null
         )
         {
-            NativeGrid mesh = new NativeGrid(simXResolution + 1, simZResolution + 1, xResolution + 1, zResolution + 1, Allocator.Persistent);
+            NativeGrid mesh = new NativeGrid(simXDOF, simZDOF, xDOF, zDOF, Allocator.Persistent);
             for (int x = 0; x < mesh.Width; x++)
             {
                 for (int z = 0; z < mesh.Height; z++)
@@ -45,13 +45,13 @@ namespace DunefieldModel_DualMesh
         {
             // Generate the terrain mesh
             Mesh mesh = new Mesh();
-            Vector3[] vertices = new Vector3[(xResolution + 1) * (zResolution + 1)];
+            Vector3[] vertices = new Vector3[xDOF * zDOF];
             Vector2[] uv = new Vector2[vertices.Length];
             int[] triangles = new int[xResolution * zResolution * 6];
 
-            for (int i = 0, z = 0; z <= zResolution; z++)
+            for (int i = 0, z = 0; z < zDOF; z++)
             {
-                for (int x = 0; x <= xResolution; x++, i++)
+                for (int x = 0; x < xDOF; x++, i++)
                 {
                     float xPos = (float)x / xResolution * size;
                     float yPos = grid.data[grid.visualIndex[i]];
@@ -77,7 +77,7 @@ namespace DunefieldModel_DualMesh
                 vi++;
             }
 
-            if ((xResolution + 1) * (zResolution + 1) > 65000)
+            if (xDOF * zDOF > 65000)
             {
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             }
@@ -100,10 +100,10 @@ namespace DunefieldModel_DualMesh
             float xCenter = size / 2;
             float zCenter = size / 2;
 
-            NativeGrid grid = new NativeGrid(simXResolution + 1, simZResolution + 1, xResolution + 1, zResolution + 1, Allocator.Persistent);
-            for (int x = 0; x <= simXResolution; x++)
+            NativeGrid grid = new NativeGrid(simXDOF, simZDOF, xDOF, zDOF, Allocator.Persistent);
+            for (int x = 0; x < simXDOF; x++)
             {
-                for (int z = 0; z <= simZResolution; z++)
+                for (int z = 0; z < simZDOF; z++)
                 {
                     float xPos = (float)x / (simXResolution - 1) * size;
                     float zPos = (float)z / (simZResolution - 1) * size;
