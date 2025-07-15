@@ -9,7 +9,7 @@ namespace Building
     public partial class BuildSystem
     {
         #region Variables
-        public GameObject shovelPreviewGO, housePreviewGO, wallPreviewGO, sweeperPreviewGO, activePreview, housePrefab, wallPrefab, circlePreviewGO;
+        public GameObject shovelPreviewGO, housePreviewGO, wallPreviewGO, towerPreviewGO, sweeperPreviewGO, activePreview, housePrefab, wallPrefab, towerPrefab, circlePreviewGO;
         public ModelDM duneModel;
         public DualMeshConstructor dualMeshConstructor;
         public int buildRadius = 4;
@@ -30,6 +30,13 @@ namespace Building
 
         bool canBuild;
 
+        private Vector3? wallStartPoint = null;
+        private Vector3? wallEndPoint = null;
+
+        private bool isWallPreviewActive = false;
+        private float wallPrefabLength;
+        private GameObject wallPreviewParent;
+
         #endregion
 
         #region Init Build System
@@ -41,9 +48,11 @@ namespace Building
             float pulledDownTime,
             GameObject housePrefab,
             GameObject wallPrefab,
+            GameObject towerPrefab,
             GameObject shovelPreviewGO,
             GameObject housePreviewGO,
             GameObject wallPreviewGO,
+            GameObject towerPreviewGO,
             GameObject sweeperPreviewGO,
             GameObject circlePreviewGO,
             DualMesh.BuildMode currentBuildMode,
@@ -60,9 +69,11 @@ namespace Building
             this.currentConstructionID = currentConstructionID;
             this.housePrefab = housePrefab;
             this.wallPrefab = wallPrefab;
+            this.towerPrefab = towerPrefab;
             this.shovelPreviewGO = shovelPreviewGO;
             this.housePreviewGO = housePreviewGO;
             this.wallPreviewGO = wallPreviewGO;
+            this.towerPreviewGO = towerPreviewGO;
             this.circlePreviewGO = circlePreviewGO;
             this.sweeperPreviewGO = sweeperPreviewGO;
             this.currentBuildMode = currentBuildMode;
@@ -70,13 +81,31 @@ namespace Building
             this.constructionGrid = constructionGrid;
             this.activePreview = activePreview;
 
+            wallPrefabLength = CalculateWallPrefabLength(wallPrefab);
+            wallPreviewParent = new GameObject();
+            wallPreviewParent.name = "Wall Previews";
+
             if (planicie)
             {
                 previewX = duneModel.xResolution / 2;
                 previewZ = duneModel.zResolution / 2;
-                GameObjectConstruction(housePrefab, Quaternion.identity, "House");
+                GameObjectConstruction(housePrefab, previewX, previewZ, Quaternion.identity, "House");
             }
         }
         #endregion
+
+        private float CalculateWallPrefabLength(GameObject prefab)
+        {
+            Renderer rend = prefab.GetComponentInChildren<Renderer>();
+            if (rend != null)
+            {
+                return rend.bounds.size.x;
+            }
+            else
+            {
+                Debug.LogWarning("Wall prefab does not have a renderer!");
+                return 1f; // valor por defecto
+            }
+        }
     }
 }

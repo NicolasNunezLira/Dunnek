@@ -25,6 +25,11 @@ public partial class DualMesh : MonoBehaviour
     [Tooltip("Is the simulaiton toroidal?")]
     public bool openEnded = false;
 
+    
+    [Header("Testeo escena inicial")]
+    [Tooltip("Comenzar con planicie?")]
+    [SerializeField] public bool planicie;
+
     [Header("Terrain Settings")]
     [Tooltip("Meterial.")]
     public Material terrainMaterial;
@@ -97,9 +102,9 @@ public partial class DualMesh : MonoBehaviour
     [Tooltip("Wall prefab")]
     [SerializeField] public GameObject wallPrefabGO;
 
-    [Header("Testeo escena inicial")]
-    [Tooltip("Comenzar con planicie?")]
-    [SerializeField] public bool planicie;
+    [Tooltip("Tower prefab")]
+    [SerializeField] public GameObject towerPrefabGO;
+
 
     #endregion
 
@@ -128,20 +133,20 @@ public partial class DualMesh : MonoBehaviour
 
     private bool constructed = false, destructed = false, isHandlingPullDown = false;
     private BuildSystem builder;
-    private GameObject housePreviewGO, wallPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
+    private GameObject housePreviewGO, wallPreviewGO, towerPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
 
 
     public enum PlayingMode { Build, Destroy, Simulation };
     private PlayingMode inMode = PlayingMode.Simulation;
     public enum BuildMode
-    { Raise, Dig, PlaceHouse, Flat, AddSand };
+    { Raise, Dig, PlaceHouse, Flat, AddSand, PlaceWallBetweenPoints };
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 
     private Dictionary<int, ConstructionData> constructions;
     private int currentConstructionID = 1;
 
-    private bool isPaused = false;
+    private bool isPaused = false, isWallReadyForConstruction = false;
 
     private FrameVisualChanges sandChanges, terrainShadowChanges;
 
@@ -226,9 +231,11 @@ public partial class DualMesh : MonoBehaviour
             pulledDownTime,
             housePrefabGO,
             wallPrefabGO,
+            towerPrefabGO,
             shovelPreviewGO,
             housePreviewGO,
             wallPreviewGO,
+            towerPreviewGO,
             sweeperPreviewGO,
             circlePreviewGO,
             currentBuildMode,
@@ -293,10 +300,29 @@ public partial class DualMesh : MonoBehaviour
 
                         if (Input.GetMouseButtonDown(0))
                         {
-                            constructed = builder.ConfirmBuild();
-                            inMode = !constructed ? inMode : PlayingMode.Simulation;
-                        }
+                            if (currentBuildMode != BuildMode.PlaceWallBetweenPoints)
+                            {
+                                constructed = builder.ConfirmBuild();
+                                inMode = !constructed ? inMode : PlayingMode.Simulation;
+                            }
+                            else
+                            {
+                                if (Input.GetMouseButtonDown(0))
+                                {
+                                    isWallReadyForConstruction = builder.SetPointsForWall();
+                                    if (isWallReadyForConstruction)
+                                    {
+                                        constructed = builder.ConfirmBuild();
+                                        inMode = !constructed ? inMode : PlayingMode.Simulation;
+                                    }
+                                }
+                                else
+                                {
+                                    builder.PreviewWall();
+                                }
+                            }
                         ;
+                        }
                         break;
                     }
                 #endregion

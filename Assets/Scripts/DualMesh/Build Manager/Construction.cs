@@ -10,19 +10,19 @@ namespace Building
     public partial class BuildSystem
     {
 
-        public void GameObjectConstruction(GameObject prefab, UnityEngine.Quaternion rotation, string name)
+        public void GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, string name, Vector3? overridePosition = null)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
 
             float y = Mathf.Max(
-                duneModel.sand[previewX, previewZ],
-                duneModel.terrainShadow[previewX, previewZ]
+                duneModel.sand[posX, posZ],
+                duneModel.terrainShadow[posX, posZ]
             );
 
-            UnityEngine.Vector3 centerPos = new UnityEngine.Vector3(
-                (previewX + 0.5f) * cellSize,
+            Vector3 centerPos = overridePosition ?? new Vector3(
+                (posX + 0.5f) * cellSize,
                 y,
-                (previewZ + 0.5f) * cellSize
+                (posZ + 0.5f) * cellSize
             );
 
             GameObject parentGO = GameObject.Find("Construcciones");
@@ -35,7 +35,7 @@ namespace Building
             // Instanciar el prefab con el objeto padre
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = name + currentConstructionID;//+ System.DateTime.Now.ToString("HHmmss");
+            prefabInstance.name = name + currentConstructionID;
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);

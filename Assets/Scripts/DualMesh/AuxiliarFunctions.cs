@@ -78,6 +78,10 @@ public partial class DualMesh : MonoBehaviour
         wallPreviewGO.SetActive(false);
         MakePreviewTransparent(wallPreviewGO);
 
+        towerPreviewGO = Instantiate(towerPrefabGO);
+        towerPreviewGO.SetActive(false);
+        MakePreviewTransparent(towerPreviewGO);
+
         sweeperPreviewGO = Instantiate(sweeperPrefabGO);
         sweeperPreviewGO.SetActive(false);
         MakePreviewTransparent(sweeperPreviewGO);
