@@ -170,14 +170,14 @@ MonoBehaviour:
   size: 50
   openEnded: 0
   planicie: 1
-  terrainMaterial: {fileID: 2100000, guid: c9df7fed0d2882e4daa9486dee9bbf3e, type: 2}
+  terrainMaterial: {fileID: 2100000, guid: 07a9a9609108e4b4caf4730f4f6e0761, type: 2}
   terrainScale1: 0.003
   terrainAmplitude1: 8
   terrainScale2: 0.01
   terrainAmplitude2: 4
   terrainScale3: 0.05
   terrainAmplitude3: 2
-  sandMaterial: {fileID: 2100000, guid: d973757631d287749a34cc58a9a04b87, type: 2}
+  sandMaterial: {fileID: 2100000, guid: fa542ab47cc7bb3418c35926f8cab963, type: 2}
   sandScale1: 0.02
   sandAmplitude1: 1.5
   sandScale2: 0.06
@@ -201,8 +201,8 @@ MonoBehaviour:
   sweeperPrefabGO: {fileID: 764005709239548789, guid: 7a3c1b1ba94ad9a439081d5fb391abce, type: 3}
   circlePrefabGO: {fileID: 954444326845918246, guid: 3ca50639c2ba83c45baf16e33fd52f63, type: 3}
   housePrefabGO: {fileID: 1529927929722832041, guid: 7dbdf52221356974aa796fc70b50dad0, type: 3}
-  wallPrefabGO: {fileID: 6318413769584622558, guid: e4f22f35ab6d073488f8610c4173e9bb, type: 3}
-  towerPrefabGO: {fileID: 1999525263686921396, guid: ed03c4554f34c634faf32f11341ae6f3, type: 3}
+  wallPrefabGO: {fileID: 3142241196571455547, guid: 2990417a1a963d343819ea2cc57f8d5e, type: 3}
+  towerPrefabGO: {fileID: 1438140936659687386, guid: 020bf98341036464cb265e25e84686b7, type: 3}
 --- !u!23 &164671254
 MeshRenderer:
   m_ObjectHideFlags: 0

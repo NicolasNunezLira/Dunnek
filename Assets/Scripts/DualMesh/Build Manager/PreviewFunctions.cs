@@ -1,9 +1,15 @@
+using Data;
 using UnityEngine;
 
 namespace Building
 {
     public partial class BuildSystem
     {
+        private ConstructionData construction;
+        private Color originalColor, green = new Color(0f, 1f, 0f, 0.3f), red = new Color(1f, 0f, 0f, 0.3f);
+        private Vector3? tempWallEndPoint;
+        private bool canPlaceWall = true, isWallPreviewActive;
+        private GameObject previewTower1, previewTower2;
         #region Handle
         public void HandleBuildPreview()
         {
@@ -17,6 +23,19 @@ namespace Building
 
                 if (x < 0 || z < 0 || x + buildSize > duneModel.xResolution + 1 || z + buildSize > duneModel.zResolution + 1)
                     return;
+
+
+                if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints && wallStartPoint.HasValue)
+                {
+                    tempWallEndPoint = point;
+                    PreviewWall();
+                    return;
+                }
+                else
+                {
+                    tempWallEndPoint = null;
+                }
+
 
                 Renderer rend = activePreview.GetComponentInChildren<Renderer>();
                 Bounds bounds = rend.bounds;
@@ -35,7 +54,7 @@ namespace Building
                 {
                     for (int zj = zMin; zj <= zMax; zj++)
                     {
-                        if (constructionGrid[xi, zj] > 0) // ← asegúrate que `true` signifique libre
+                        if (constructionGrid[xi, zj] > 0)
                             canBuild = false;
 
                         float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrainShadow[xi, zj]);
@@ -48,8 +67,7 @@ namespace Building
 
                 activePreview.transform.position = new UnityEngine.Vector3(avgX, maxY + 0.5f, avgZ);
 
-
-                Color color = canBuild ? new Color(0f, 1f, 0f, 0.3f) : new Color(1f, 0f, 0f, 0.3f);
+                Color color = canBuild ? green : red;
                 foreach (var rend_ in activePreview.GetComponentsInChildren<Renderer>())
                 {
                     if (rend_.material.HasProperty("_Color"))
@@ -72,7 +90,7 @@ namespace Building
                     Debug.Log("Start point set.");
                     return false;
                 }
-                else if (!wallEndPoint.HasValue)
+                else if (!wallEndPoint.HasValue && canPlaceWall)
                 {
                     wallEndPoint = hit1.point;
                     Debug.Log("End point set.");
@@ -126,8 +144,6 @@ namespace Building
         #endregion
 
         #region Manage Previews
-
-
         public void UpdateBuildPreviewVisual()
         {
             shovelPreviewGO.SetActive(false);
@@ -186,39 +202,59 @@ namespace Building
 
         public void PreviewWall()
         {
-            if (!wallStartPoint.HasValue || !wallEndPoint.HasValue) return;
+            ClearWallPreview();
+            canPlaceWall = true;
+
+            if (!wallStartPoint.HasValue || !tempWallEndPoint.HasValue) return;
 
             Vector3 p1 = wallStartPoint.Value;
-            Vector3 p2 = wallEndPoint.Value;
+            Vector3 p2 = tempWallEndPoint.Value;
             float cellSize = duneModel.size / duneModel.xResolution;
-
+            
             Vector3 dir = (p2 - p1).normalized;
-            float length = Vector3.Distance(p1, p2);
-            int segments = Mathf.FloorToInt(length / wallPrefabLength); // Define wallPrefabLength en unidades del mundo
+            float distance = Vector3.Distance(p1, p2);
+            int segments = Mathf.Max(1, Mathf.FloorToInt(distance / wallPrefabLength));
+            float adjustedLength = distance / segments;
+            Vector3 step = dir * adjustedLength;
 
             for (int i = 0; i <= segments; i++)
             {
-                Vector3 pos = p1 + dir * i * wallPrefabLength;
-                int x = Mathf.FloorToInt(pos.x / cellSize);
-                int z = Mathf.FloorToInt(pos.z / cellSize);
+                Vector3 pos = p1 + step * (i - 0.5f);
+                (int x, int z) = GridIndex(pos);
 
-                if (x < 0 || x >= duneModel.xResolution || z < 0 || z >= duneModel.zResolution) continue;
-
-                float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]);
-
+                float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]);
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
-                GameObject wallSegment = GameObject.Instantiate(wallPreviewGO, adjusted, Quaternion.LookRotation(dir));
+                GameObject wallSegment = GameObject.Instantiate(wallPreviewGO, adjusted, Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0));
                 wallSegment.name = $"WallPreview_{i}";
                 wallSegment.transform.SetParent(wallPreviewParent.transform);
+
+                bool canBuildSegment = constructionGrid[x, z] == 0;
+                Color segmentColor = canBuildSegment ? green : red;
+
+                if (!canBuildSegment) canPlaceWall = false;
+
+                ChangePreviewColor(wallSegment, segmentColor);
+
+                wallSegment.SetActive(true);
             }
 
             // Coloca torres
-            PlaceTowerPreview(p1, dir);
-            PlaceTowerPreview(p2, -dir);
+            PlaceTowerPreview(p1, Vector3.zero);
+            PlaceTowerPreview(p2, Vector3.zero);
 
             isWallPreviewActive = true;
         }
+
+        private void ChangePreviewColor(GameObject preview, Color color)
+        {
+            foreach (var rend in preview.GetComponentsInChildren<Renderer>())
+            {
+                if (rend.material.HasProperty("_Color"))
+                    rend.material.color = color;
+            }
+        }
+
 
         private void PlaceTowerPreview(Vector3 position, Vector3 forward)
         {
@@ -229,24 +265,25 @@ namespace Building
 
             if (x < 0 || x >= duneModel.xResolution || z < 0 || z >= duneModel.zResolution) return;
 
-            float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]);
+            float y = Mathf.Max(
+                duneModel.sand[x, z],
+                wallStartPoint.HasValue ? duneModel.terrain[x, z] : duneModel.terrainShadow[x, z]);
 
             Vector3 finalPos = new Vector3(position.x, y + 0.5f, position.z); // 0.5f para que sobresalga un poco
 
             GameObject previewTower = GameObject.Instantiate(towerPreviewGO, finalPos, Quaternion.LookRotation(forward));
             previewTower.name = "TowerPreview";
             previewTower.transform.SetParent(wallPreviewParent.transform);
+
+            ChangePreviewColor(previewTower, (constructionGrid[x, z] > 0) ? red : green);
         }
         
-        void ClearWallPreview()
+        public void ClearWallPreview()
         {
             if (wallPreviewParent != null)
                 GameObject.Destroy(wallPreviewParent);
             wallPreviewParent = new GameObject("WallPreviewParent");
         }
-
-
-
         #endregion
     }
 }

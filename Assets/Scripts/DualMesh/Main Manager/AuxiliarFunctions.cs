@@ -1,9 +1,4 @@
 using UnityEngine;
-using DunefieldModel_DualMesh;
-using System.Collections.Generic;
-using System;
-using Building;
-using Data;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour

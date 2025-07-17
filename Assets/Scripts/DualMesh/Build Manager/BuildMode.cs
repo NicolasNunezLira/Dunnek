@@ -32,8 +32,6 @@ namespace Building
 
         private Vector3? wallStartPoint = null;
         private Vector3? wallEndPoint = null;
-
-        private bool isWallPreviewActive = false;
         private float wallPrefabLength;
         private GameObject wallPreviewParent;
 

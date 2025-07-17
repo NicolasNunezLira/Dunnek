@@ -10,8 +10,7 @@ namespace DunefieldModel_DualMesh
         #region Destroy buried builds
 
         public void TryToDeleteBuild(int checkX, int checkZ)
-        {
-            
+        {        
             int id = constructionGrid[checkX, checkZ];
             if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
             {

@@ -10,13 +10,13 @@ namespace Building
     public partial class BuildSystem
     {
 
-        public void GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, string name, Vector3? overridePosition = null)
+        public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, string name, Vector3? overridePosition = null)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
 
             float y = Mathf.Max(
                 duneModel.sand[posX, posZ],
-                duneModel.terrainShadow[posX, posZ]
+                name.Contains("Wall") ? duneModel.terrain[posX, posZ] : duneModel.terrainShadow[posX, posZ]
             );
 
             Vector3 centerPos = overridePosition ?? new Vector3(
@@ -88,7 +88,8 @@ namespace Building
                 GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution),
                 floorHeight,
                 targetHeight - floorHeight);
-            return;
+
+            return prefabInstance;
         }
 
         // Helper method to set layer recursively

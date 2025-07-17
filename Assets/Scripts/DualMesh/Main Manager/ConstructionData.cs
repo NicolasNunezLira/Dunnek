@@ -59,7 +59,19 @@ namespace Data
                 needActivate = ErodeBuild(sandElev, constructionGrid, sandChanges);
             }
 
-            return (isBuried, constructionName, int.Parse(Regex.Match(constructionName, @"\d+$").Value), needActivate);
+            var match = Regex.Match(constructionName, @"\d+$");
+            if (match.Success)
+            {
+                int id = int.Parse(match.Value);
+                return (isBuried, constructionName, id, needActivate);
+            }
+            else
+            {
+                Debug.LogWarning($"No se encontró un número válido al final del nombre '{constructionName}'");
+                return (isBuried, constructionName, -1, needActivate); // o lanza excepción personalizada si es crítico
+            }
+
+            //return (isBuried, constructionName, int.Parse(Regex.Match(constructionName, @"\d+$").Value), needActivate);
         }
 
         public List<int2> ErodeBuild(NativeGrid sandElev, int[,] constructionGrid, FrameVisualChanges changes)
