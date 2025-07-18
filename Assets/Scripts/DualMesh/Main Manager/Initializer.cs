@@ -9,7 +9,7 @@ public partial class DualMesh : MonoBehaviour
 {
     public void Initializer()
     {
-                constructions = new Dictionary<int, ConstructionData>();
+        constructions = new Dictionary<int, ConstructionData>();
 
         
         constructionGrid = new int[simXResolution + 1, simZResolution + 1];
@@ -21,7 +21,6 @@ public partial class DualMesh : MonoBehaviour
                 constructionGrid[x, z] = 0;
             }
         }
-
 
         slopeFinder = new FindSlopeMooreDeterministic();
 
@@ -96,4 +95,5 @@ public partial class DualMesh : MonoBehaviour
             constructionGrid,
             planicie);
     }
+
 }

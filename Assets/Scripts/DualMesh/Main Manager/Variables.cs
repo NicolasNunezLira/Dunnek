@@ -36,7 +36,7 @@ public partial class DualMesh : MonoBehaviour
     public enum PlayingMode { Build, Destroy, Simulation };
     private PlayingMode inMode = PlayingMode.Simulation;
     public enum BuildMode
-    { Raise, Dig, PlaceHouse, Flat, AddSand, PlaceWallBetweenPoints };
+    { PlaceHouse, PlaceWallBetweenPoints, Flat, AddSand, Dig};
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 

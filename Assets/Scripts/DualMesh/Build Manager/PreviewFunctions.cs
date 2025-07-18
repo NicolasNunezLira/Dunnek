@@ -1,19 +1,23 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Data;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Building
 {
     public partial class BuildSystem
     {
-        private ConstructionData construction;
-        private Color originalColor, green = new Color(0f, 1f, 0f, 0.3f), red = new Color(1f, 0f, 0f, 0.3f);
+        private ConstructionData construction, actualConstruction;
+        private Color green = new Color(0f, 1f, 0f, 0.3f), red = new Color(1f, 0f, 0f, 0.3f);
+        public Dictionary<Renderer, Material[]> originalTowerMaterials = new();
         private Vector3? tempWallEndPoint;
-        private bool canPlaceWall = true, isWallPreviewActive;
-        private GameObject previewTower1, previewTower2;
+        private bool canPlaceWall = true, isWallPreviewActive, thereIsATower = false;
         #region Handle
         public void HandleBuildPreview()
         {
-            activePreview.SetActive(true);
+            if (!thereIsATower) activePreview.SetActive(true);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain")))
             {
@@ -24,6 +28,15 @@ namespace Building
                 if (x < 0 || z < 0 || x + buildSize > duneModel.xResolution + 1 || z + buildSize > duneModel.zResolution + 1)
                     return;
 
+                if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints)
+                {
+                    thereIsATower = DetectTowerUnderCursor(Color.green);
+                    if (thereIsATower)
+                    {
+                        activePreview.SetActive(false);
+                        return;
+                    }
+                }
 
                 if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints && wallStartPoint.HasValue)
                 {
@@ -57,7 +70,7 @@ namespace Building
                         if (constructionGrid[xi, zj] > 0)
                             canBuild = false;
 
-                        float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrainShadow[xi, zj]);
+                        float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrain[xi, zj]);
                         if (y > maxY) maxY = y;
                     }
                 }
@@ -78,27 +91,6 @@ namespace Building
                 previewZ = z;
             }
         }
-
-        public bool SetPointsForWall()
-        {
-            Ray ray1 = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray1, out RaycastHit hit1, 100f, LayerMask.GetMask("Terrain")))
-            {
-                if (!wallStartPoint.HasValue)
-                {
-                    wallStartPoint = hit1.point;
-                    Debug.Log("Start point set.");
-                    return false;
-                }
-                else if (!wallEndPoint.HasValue && canPlaceWall)
-                {
-                    wallEndPoint = hit1.point;
-                    Debug.Log("End point set.");
-                    return true;
-                }
-            }
-            return false;
-        }
         #endregion
 
         #region Confirm
@@ -114,9 +106,6 @@ namespace Building
             {
                 case DualMesh.BuildMode.PlaceHouse:
                     GameObjectConstruction(housePrefab, previewX, previewZ, prefabRotation, "House");
-                    return true;
-                case DualMesh.BuildMode.Raise:
-                    GameObjectConstruction(wallPrefab, previewX, previewZ, prefabRotation, "Wall");
                     return true;
                 case DualMesh.BuildMode.Dig:
                     DigAction(previewX, previewZ, buildRadius, digDepth);
@@ -152,10 +141,6 @@ namespace Building
 
             switch (currentBuildMode)
             {
-                case DualMesh.BuildMode.Raise:
-                    activePreview = wallPreviewGO;
-                    break;
-
                 case DualMesh.BuildMode.Dig:
                     activePreview = shovelPreviewGO;
                     break;
@@ -174,7 +159,6 @@ namespace Building
 
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
                     activePreview = towerPreviewGO;
-                    //ClearWallPreview();
                     break;
             }
 
@@ -190,6 +174,7 @@ namespace Building
             housePreviewGO?.SetActive(false);
             sweeperPreviewGO?.SetActive(false);
             circlePreviewGO?.SetActive(false);
+            ClearWallPreview();
         }
 
         public void RotateWallPreview()
@@ -210,7 +195,7 @@ namespace Building
             Vector3 p1 = wallStartPoint.Value;
             Vector3 p2 = tempWallEndPoint.Value;
             float cellSize = duneModel.size / duneModel.xResolution;
-            
+
             Vector3 dir = (p2 - p1).normalized;
             float distance = Vector3.Distance(p1, p2);
             int segments = Mathf.Max(1, Mathf.FloorToInt(distance / wallPrefabLength));
@@ -267,7 +252,7 @@ namespace Building
 
             float y = Mathf.Max(
                 duneModel.sand[x, z],
-                wallStartPoint.HasValue ? duneModel.terrain[x, z] : duneModel.terrainShadow[x, z]);
+                duneModel.terrain[x, z]);
 
             Vector3 finalPos = new Vector3(position.x, y + 0.5f, position.z); // 0.5f para que sobresalga un poco
 
@@ -277,12 +262,82 @@ namespace Building
 
             ChangePreviewColor(previewTower, (constructionGrid[x, z] > 0) ? red : green);
         }
-        
+
         public void ClearWallPreview()
         {
             if (wallPreviewParent != null)
                 GameObject.Destroy(wallPreviewParent);
             wallPreviewParent = new GameObject("WallPreviewParent");
+        }
+
+        public bool SetPointsForWall()
+        {
+            Ray ray1 = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray1, out RaycastHit hit1, 100f, LayerMask.GetMask("Terrain")))
+            {
+                if (!wallStartPoint.HasValue)
+                {
+                    wallStartPoint = hit1.point;
+                    Debug.Log("Start point set.");
+                    return false;
+                }
+                else if (!wallEndPoint.HasValue && canPlaceWall)
+                {
+                    wallEndPoint = hit1.point;
+                    Debug.Log("End point set.");
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool DetectTowerUnderCursor(Color color)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            int layerMask = LayerMask.GetMask("Constructions");
+
+            var construccionesParent = GameObject.Find("Construcciones")?.transform;
+            if (construccionesParent == null) { RestoreHoverMaterials(); toDestroy = null; return false; }
+
+
+            if (Physics.Raycast(ray, out hit, 100f, layerMask))
+            {
+                GameObject hitGO = hit.collider.gameObject;
+                if (hitGO.transform.IsChildOf(construccionesParent))
+                {
+                    if (!hitGO.name.Contains("Tower")) { RestoreHoverMaterials(); toDestroy = null; return false; }
+
+                    Transform current = hitGO.transform;
+                    while (current.parent != null && current.parent.name != "Construcciones")
+                    {
+                        current = current.parent;
+                    }
+
+                    GameObject target = current.gameObject;
+
+                    if (toDestroy != target)
+                    {
+                        RestoreHoverMaterials();
+                        ChangeColor(target, color);
+                        toDestroy = target;
+                        return true;
+                    }
+                }
+                else
+                {
+                    RestoreHoverMaterials();
+                    toDestroy = null;
+                    return false;
+                }
+            }
+            else
+            {
+                RestoreHoverMaterials();
+                toDestroy = null;
+                return false;
+            }
+            return false;
         }
         #endregion
     }

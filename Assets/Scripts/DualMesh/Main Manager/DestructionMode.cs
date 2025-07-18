@@ -5,7 +5,7 @@ public partial class DualMesh : MonoBehaviour
 {
     public void DestructionMode()
     {
-        builder.DetectConstructionUnderCursor();
+        builder.DetectConstructionUnderCursor(Color.red);
         if (Input.GetMouseButtonDown(0))
         {
             destructed = builder.DestroyConstruction();

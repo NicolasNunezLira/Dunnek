@@ -6,6 +6,7 @@ using System;
 using DunefieldModel_DualMesh;
 using Unity.Collections;
 using DunefieldModel_DualMeshJobs;
+using System.Data.Common;
 
 namespace Data
 {
@@ -14,6 +15,7 @@ namespace Data
     {
         #region Atributos
         public GameObject obj;
+        public int id => int.Parse(Regex.Match(obj.name, @"\d+$").Value);
         public Vector3 position;
         public Quaternion rotation;
         public DualMesh.BuildMode type;

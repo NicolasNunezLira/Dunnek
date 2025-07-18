@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using System.Numerics;
+using Vector3 = UnityEngine.Vector3;
+using Quaternion = UnityEngine.Quaternion;
+
 namespace Building
 {
     public partial class BuildSystem
@@ -9,13 +13,14 @@ namespace Building
         {
             // Coloca las torres en los extremos
             (int x, int z) = GridIndex(p1);
+            //int idTower1 = currentConstructionID;
             GameObjectConstruction(towerPrefab, x, z,
                 Quaternion.LookRotation(Vector3.zero), "Tower", new Vector3(p1.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p1.z));
-            int idTower1 = duneModel.constructionGrid[x, z];
             (x, z) = GridIndex(p2);
+            int idTower2 = currentConstructionID;
             GameObjectConstruction(towerPrefab, x, z,
                 Quaternion.LookRotation(Vector3.zero), "Tower", new Vector3(p2.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p2.z));
-            int idTower2 = duneModel.constructionGrid[x, z];
+            
 
             Vector3 dir = (p2 - p1).normalized;
             float distance = Vector3.Distance(p1, p2);
@@ -39,10 +44,10 @@ namespace Building
                     if (count > 0) return;
                     count++;
                 }
-                float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]);
+                float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]) - 0.1f;
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
-                Quaternion rotation = Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0);
+                Quaternion rotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z)) * Quaternion.Euler(0, 90, 0);
                 GameObject wall = GameObjectConstruction(wallPrefab, x, z, rotation, "Wall", adjusted);
 
                 if (wall != null)
@@ -56,7 +61,7 @@ namespace Building
                 allSupport.Add(new int2(x, z));
             }
         }
-        
+
         private (int x, int z) GridIndex(Vector3 pos)
         {
             float cellSize = duneModel.size / duneModel.xResolution;

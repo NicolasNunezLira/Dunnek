@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Linq;
 using Data;
+using System.Runtime.InteropServices;
 //using System.Numerics;
 
 namespace Building
@@ -16,7 +17,7 @@ namespace Building
 
             float y = Mathf.Max(
                 duneModel.sand[posX, posZ],
-                name.Contains("Wall") ? duneModel.terrain[posX, posZ] : duneModel.terrainShadow[posX, posZ]
+                (name.Contains("Wall") || name.Contains("Tower")) ? duneModel.terrain[posX, posZ] : duneModel.terrainShadow[posX, posZ]
             );
 
             Vector3 centerPos = overridePosition ?? new Vector3(
@@ -150,7 +151,7 @@ namespace Building
         {
             switch (mode)
             {
-                case DualMesh.BuildMode.Raise: return wallPrefab;
+                //case DualMesh.BuildMode.Raise: return wallPrefab;
                 case DualMesh.BuildMode.Dig: return shovelPreviewGO;
                 case DualMesh.BuildMode.PlaceHouse: return housePrefab;
                 default: return null;

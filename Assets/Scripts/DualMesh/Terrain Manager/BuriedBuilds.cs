@@ -10,22 +10,25 @@ namespace DunefieldModel_DualMesh
         #region Destroy buried builds
 
         public void TryToDeleteBuild(int checkX, int checkZ)
-        {        
+        {
             int id = constructionGrid[checkX, checkZ];
-            if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
+            if (id > 0)
             {
-                Debug.LogWarning($"ID {id} no encontrado en constructions.");
-                return;
-            }
+                if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
+                {
+                    Debug.LogWarning($"ID {id} no encontrado en constructions.");
+                    return;
+                }
 
-            (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sand, constructionGrid, sandChanges);
-            if (isBuried) { Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
+                (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sand, constructionGrid, sandChanges);
+                if (isBuried) { Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
 
-            DeleteBuild(idToDestroy);
+                DeleteBuild(idToDestroy);
 
-            foreach (var cell in needActivate)
-            {
-                ActivateCell(cell.x, cell.y);
+                foreach (var cell in needActivate)
+                {
+                    ActivateCell(cell.x, cell.y);
+                }
             }
         }
 

@@ -14,7 +14,7 @@ namespace Building
         public int idToDestroy = -1;
 
         public Dictionary<Renderer, Material[]> originalMaterials = new();
-        public void DetectConstructionUnderCursor()
+        public void DetectConstructionUnderCursor(Color color)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -40,7 +40,7 @@ namespace Building
                     if (toDestroy != target)
                     {
                         RestoreHoverMaterials();
-                        MakeRed(target);
+                        ChangeColor(target, color);
                         toDestroy = target;
                     }
 
@@ -110,7 +110,7 @@ namespace Building
             return true;
         }
 
-        private void MakeRed(GameObject obj)
+        private void ChangeColor(GameObject obj, Color color)
         {
             currentHoverObject = obj;
 
@@ -122,7 +122,7 @@ namespace Building
                 }
 
                 Material newMat = new Material(rend.material); // copiar material original
-                Color c = Color.red;
+                Color c = color;
                 c.a = 0.3f;
                 newMat.color = c;
 

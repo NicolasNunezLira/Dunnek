@@ -7,7 +7,15 @@ public partial class DualMesh : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            {
+                currentBuildMode = (BuildMode)(((int)currentBuildMode - 1 + System.Enum.GetValues(typeof(BuildMode)).Length) % System.Enum.GetValues(typeof(BuildMode)).Length);
+            }
+            else
+            {
+                currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
+            }
+
             builder.currentBuildMode = currentBuildMode;
             builder.UpdateBuildPreviewVisual();
             builder.HideAllPreviews();
@@ -16,9 +24,9 @@ public partial class DualMesh : MonoBehaviour
         builder.HandleBuildPreview();
 
         if (Input.GetKeyDown(KeyCode.R))
-            {
-                builder.RotateWallPreview();
-            }
+        {
+            builder.RotateWallPreview();
+        }
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -44,7 +52,6 @@ public partial class DualMesh : MonoBehaviour
                     builder.PreviewWall();
                 }
             }
-        ;
         }
     }
 }
