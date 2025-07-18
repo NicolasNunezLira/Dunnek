@@ -30,10 +30,9 @@ namespace Building
 
                 if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints)
                 {
-                    thereIsATower = DetectTowerUnderCursor(Color.green);
+                    //thereIsATower = DetectTowerUnderCursor(Color.green);
                     if (thereIsATower)
                     {
-                        activePreview.SetActive(false);
                         return;
                     }
                 }
@@ -42,6 +41,7 @@ namespace Building
                 {
                     tempWallEndPoint = point;
                     PreviewWall();
+                    towerPreviewGO?.SetActive(false);
                     return;
                 }
                 else
@@ -93,44 +93,7 @@ namespace Building
         }
         #endregion
 
-        #region Confirm
-
-        public bool ConfirmBuild()
-        {
-            if (!canBuild) return false;
-
-            activePreview.SetActive(false);
-
-
-            switch (currentBuildMode)
-            {
-                case DualMesh.BuildMode.PlaceHouse:
-                    GameObjectConstruction(housePrefab, previewX, previewZ, prefabRotation, "House");
-                    return true;
-                case DualMesh.BuildMode.Dig:
-                    DigAction(previewX, previewZ, buildRadius, digDepth);
-                    return true;
-                case DualMesh.BuildMode.Flat:
-                    FlatSand(previewX, previewZ, 3 * buildRadius);
-                    return true;
-                case DualMesh.BuildMode.AddSand:
-                    AddSandCone(previewX, previewZ, 0.5f * buildRadius, 6f * buildRadius);
-                    return true;
-                case DualMesh.BuildMode.PlaceWallBetweenPoints:
-                    if (wallStartPoint.HasValue && wallEndPoint.HasValue)
-                    {
-                        BuildWallBetween(wallStartPoint.Value, wallEndPoint.Value);
-                        wallStartPoint = null;
-                        wallEndPoint = null;
-                        isWallPreviewActive = false;
-                        return true;
-                    }
-                    break;
-            }
-            return false;
-        }
-
-        #endregion
+        
 
         #region Manage Previews
         public void UpdateBuildPreviewVisual()
@@ -194,7 +157,7 @@ namespace Building
 
             Vector3 p1 = wallStartPoint.Value;
             Vector3 p2 = tempWallEndPoint.Value;
-            float cellSize = duneModel.size / duneModel.xResolution;
+            //float cellSize = duneModel.size / duneModel.xResolution;
 
             Vector3 dir = (p2 - p1).normalized;
             float distance = Vector3.Distance(p1, p2);
@@ -207,7 +170,7 @@ namespace Building
                 Vector3 pos = p1 + step * (i - 0.5f);
                 (int x, int z) = GridIndex(pos);
 
-                float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]);
+                float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]) - 0.1f;
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
                 GameObject wallSegment = GameObject.Instantiate(wallPreviewGO, adjusted, Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0));
@@ -254,10 +217,10 @@ namespace Building
                 duneModel.sand[x, z],
                 duneModel.terrain[x, z]);
 
-            Vector3 finalPos = new Vector3(position.x, y + 0.5f, position.z); // 0.5f para que sobresalga un poco
+            Vector3 finalPos = new Vector3(position.x, y - 0.1f, position.z); // 0.5f para que sobresalga un poco
 
             GameObject previewTower = GameObject.Instantiate(towerPreviewGO, finalPos, Quaternion.LookRotation(forward));
-            previewTower.name = "TowerPreview";
+            previewTower.name = "TowerPreview" + (wallStartPoint.HasValue ? "1" : "2");
             previewTower.transform.SetParent(wallPreviewParent.transform);
 
             ChangePreviewColor(previewTower, (constructionGrid[x, z] > 0) ? red : green);

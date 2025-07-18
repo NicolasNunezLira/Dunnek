@@ -11,13 +11,13 @@ namespace Building
     public partial class BuildSystem
     {
 
-        public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, string name, Vector3? overridePosition = null)
+        public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, ConstructionType constructionType, Vector3? overridePosition = null)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
 
             float y = Mathf.Max(
                 duneModel.sand[posX, posZ],
-                (name.Contains("Wall") || name.Contains("Tower")) ? duneModel.terrain[posX, posZ] : duneModel.terrainShadow[posX, posZ]
+                duneModel.terrain[posX, posZ]
             );
 
             Vector3 centerPos = overridePosition ?? new Vector3(
@@ -36,7 +36,7 @@ namespace Building
             // Instanciar el prefab con el objeto padre
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = name + currentConstructionID;
+            prefabInstance.name = constructionType.ToString() + currentConstructionID;
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
@@ -84,7 +84,7 @@ namespace Building
                 prefabInstance,
                 centerPos,
                 prefabRotation,
-                currentBuildMode,
+                constructionType,
                 support,
                 GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution),
                 floorHeight,
@@ -111,7 +111,7 @@ namespace Building
             GameObject obj,
             UnityEngine.Vector3 position,
             UnityEngine.Quaternion rotation,
-            DualMesh.BuildMode currentType,
+            ConstructionType currentType,
             List<int2> support,
             List<int2> boundarySupport,
             float floorHeight,

@@ -86,7 +86,7 @@ namespace Building
             {
                 previewX = duneModel.xResolution / 2;
                 previewZ = duneModel.zResolution / 2;
-                GameObjectConstruction(housePrefab, previewX, previewZ, Quaternion.identity, "House");
+                GameObjectConstruction(housePrefab, previewX, previewZ, Quaternion.identity, ConstructionType.House);
             }
         }
         #endregion

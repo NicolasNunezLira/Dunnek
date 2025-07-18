@@ -11,6 +11,10 @@ using System.Data.Common;
 namespace Data
 {
     [System.Serializable]
+    public enum ConstructionType
+    { House, Wall, Tower };
+
+    [System.Serializable]
     public class ConstructionData
     {
         #region Atributos
@@ -18,7 +22,7 @@ namespace Data
         public int id => int.Parse(Regex.Match(obj.name, @"\d+$").Value);
         public Vector3 position;
         public Quaternion rotation;
-        public DualMesh.BuildMode type;
+        public ConstructionType type;
         public List<int2> support;
         public List<int2> boundarySupport;
         public float floorHeight;
@@ -96,7 +100,7 @@ namespace Data
             {
                 constructionGrid[cell.x, cell.y] = 0;
                 needActivate.Add(cell);
-            }            
+            }
 
             return needActivate;
         }
@@ -185,6 +189,7 @@ namespace Data
 
         #endregion
     }
+
     
 
 }
