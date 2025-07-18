@@ -35,7 +35,9 @@ namespace Data
 
         #region Metodos
         public (bool, string, int, List<int2>) IsBuried(
-            NativeGrid sandElev, int[,] constructionGrid, FrameVisualChanges sandChanges,
+            NativeGrid sandElev,
+            ConstructionGrid constructionGrid,
+            FrameVisualChanges sandChanges,
             float tolerance = 0.05f, float supportThreshold = 0.6f, float boundaryThreshold = 0.3f)
         {
             int buriedSupport = 0;
@@ -80,7 +82,10 @@ namespace Data
             //return (isBuried, constructionName, int.Parse(Regex.Match(constructionName, @"\d+$").Value), needActivate);
         }
 
-        public List<int2> ErodeBuild(NativeGrid sandElev, int[,] constructionGrid, FrameVisualChanges changes)
+        public List<int2> ErodeBuild(
+            NativeGrid sandElev,
+            ConstructionGrid constructionGrid,
+            FrameVisualChanges changes)
         {
             List<int2> needActivate = new List<int2>();
             foreach (var cell in support)
@@ -93,12 +98,14 @@ namespace Data
                     sandElev[cell.x, cell.y] = Math.Max(buildHeight + floorHeight, sandHeight);
                 }
 
-                constructionGrid[cell.x, cell.y] = 0;
+                //constructionGrid[cell.x, cell.y] = 0;
+                constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
                 changes.AddChanges(cell.x, cell.y);
             }
             foreach (var cell in boundarySupport)
             {
-                constructionGrid[cell.x, cell.y] = 0;
+                //constructionGrid[cell.x, cell.y] = 0;
+                constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
                 needActivate.Add(cell);
             }
 

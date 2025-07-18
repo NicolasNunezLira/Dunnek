@@ -11,8 +11,8 @@ namespace DunefieldModel_DualMesh
 
         public void TryToDeleteBuild(int checkX, int checkZ)
         {
-            int id = constructionGrid[checkX, checkZ];
-            if (id > 0)
+            List<int> ids = constructionGrid[checkX, checkZ];
+            foreach (int id in ids)
             {
                 if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
                 {
@@ -44,13 +44,14 @@ namespace DunefieldModel_DualMesh
 
             foreach (var cell in data.support)
             {
-                constructionGrid[cell.x, cell.y] = 0;
+                //constructionGrid[cell.x, cell.y] = 0;
+                constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
                 terrainShadow[cell.x, cell.y] = terrain[cell.x, cell.y];
-                //AddChanges(terrainShadowChanges, cell.x, cell.y);
             }
             foreach (var cell in data.boundarySupport)
             {
-                constructionGrid[cell.x, cell.y] = 0;
+                //constructionGrid[cell.x, cell.y] = 0;
+                constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
                 terrainShadow[cell.x, cell.y] = terrain[cell.x, cell.y];
                 //AddChanges(terrainShadowChanges, cell.x, cell.y);
             }

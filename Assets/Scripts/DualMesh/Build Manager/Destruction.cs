@@ -73,9 +73,10 @@ namespace Building
                 int cx = coord.x;
                 int cz = coord.y;
 
-                if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
+                if (constructionGrid.IsValid(cx, cz)) continue;
 
-                constructionGrid[cx, cz] = 0;
+                //constructionGrid[cx, cz] = 0;
+                constructionGrid.TryRemoveConstruction(cx, cz, idToDestroy);
                 
                 if (duneModel.sand[cx, cz] >= data.buildHeight + data.floorHeight)
                 {
@@ -91,9 +92,10 @@ namespace Building
                 int cx = coord.x;
                 int cz = coord.y;
 
-                if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
+                if (constructionGrid.IsValid(cx, cz)) continue;
 
-                constructionGrid[cx, cz] = 0;
+                //constructionGrid[cx, cz] = 0;
+                constructionGrid.TryRemoveConstruction(cx, cz, idToDestroy);
 
                 duneModel.terrainShadow[cx, cz] = terrain[cx, cz]; // restaura altura original
                 duneModel.ActivateCell(cx, cz);

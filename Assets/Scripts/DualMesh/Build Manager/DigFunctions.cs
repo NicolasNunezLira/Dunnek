@@ -51,7 +51,7 @@ namespace Building
 
                     if (dist <= radius - 0.5f)
                     {
-                        if (terrain[nx, nz] >= sandElev[nx, nz] || constructionGrid[nx, nz] > 0) continue;
+                        if (terrain[nx, nz] >= sandElev[nx, nz] || constructionGrid[nx, nz].Count > 0) continue;
                         float original = sandElev[nx, nz];
                         float newHeight = original - digDepth;
                         newHeight = newHeight > terrain[nx, nz] ? newHeight : terrain[nx, nz];
@@ -82,7 +82,7 @@ namespace Building
                     float dist = Mathf.Sqrt(dx * dx + dz * dz);
                     if (dist > radius && dist <= radius + extraSpreadRadius)
                     {
-                        if (constructionGrid[nx, nz] > 0) continue;
+                        if (constructionGrid[nx, nz].Count > 0) continue;
                         // Peso inverso a la distancia (más cerca → más arena)
                         float weight = 1f / (dist + 0.01f);
                         ringCells.Add((nx, nz, weight));

@@ -1,12 +1,13 @@
-using Unity.Collections;
 using Unity.Mathematics;
 
 namespace DunefieldModel_DualMesh
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using Data;
     using Unity.Collections;
-    using Unity.VisualScripting;
-    using UnityEngine;
 
+    #region Native Grid
     public struct NativeGrid
     {
         public NativeArray<float> data;
@@ -91,7 +92,7 @@ namespace DunefieldModel_DualMesh
 
         public void ForEachVisibleCell(System.Action<int, int, float> action)
         {
-            /*
+            /* How to use
             grid.ForEachVisibleCell((x, z, value) =>
             {
                 int meshIndex = x + z * grid.VisualWidth;
@@ -116,7 +117,9 @@ namespace DunefieldModel_DualMesh
                 data.Dispose();
         }
     }
+    #endregion
 
+    #region Frame Visual Changes
     public struct FrameVisualChanges
     {
         public NativeHashSet<int2> changes;
@@ -148,5 +151,80 @@ namespace DunefieldModel_DualMesh
                 changes.Dispose();
         }
     }
+    #endregion
 
+    #region ConstructionGrid
+    public struct ConstructionGrid
+    {
+        public Dictionary<int2, Dictionary<int, ConstructionType>> data;
+
+        private int width;
+        private int length;
+
+        public int Width => width;
+        public int Length => length;
+
+        public ConstructionGrid(int width, int length)
+        {
+            data = new Dictionary<int2, Dictionary<int, Data.ConstructionType>>();
+            this.width = width;
+            this.length = length;
+        }
+
+        public List<int> this[int x, int z]
+        {
+            get
+            {
+                var key = new int2(x, z);
+                if (data.TryGetValue(key, out var innerDict))
+                    return innerDict.Keys.ToList<int>();
+                return new List<int>();
+            }
+        }
+
+        public void AddConstruction(int x, int z, int id, Data.ConstructionType type)
+        {
+            var key = new int2(x, z);
+            if (!data.ContainsKey(key))
+                data[key] = new Dictionary<int, Data.ConstructionType>();
+
+            data[key][id] = type;
+        }
+
+        public bool TryRemoveConstruction(int x, int z, int id)
+        {
+            int2 key = new int2(x, z);
+            if (!data.ContainsKey(key))
+            {
+                return false;
+            }
+
+            return data[key].Remove(id);
+        }
+
+        public bool IsValid(int x, int z)
+        {
+            return x < 0 || z < 0 || x >= Width || z >= Length;
+        }
+
+        public bool TryGetType(int x, int z, ConstructionType constructionType, out List<int> ids)
+        {
+            ids = new List<int>();
+            var key = new int2(x, z);
+
+            if (data.TryGetValue(key, out var innerDict))
+            {
+                foreach (var kvp in innerDict)
+                {
+                    if (kvp.Value == constructionType)
+                        ids.Add(kvp.Key);
+                }
+
+                return ids.Count > 0;
+            }
+
+            return false;
+        }
+    }
+    #endregion
 }

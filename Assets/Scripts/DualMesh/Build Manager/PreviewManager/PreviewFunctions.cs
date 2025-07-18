@@ -67,7 +67,7 @@ namespace Building
                 {
                     for (int zj = zMin; zj <= zMax; zj++)
                     {
-                        if (constructionGrid[xi, zj] > 0)
+                        if (constructionGrid[xi, zj].Count > 0)
                             canBuild = false;
 
                         float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrain[xi, zj]);
@@ -177,7 +177,7 @@ namespace Building
                 wallSegment.name = $"WallPreview_{i}";
                 wallSegment.transform.SetParent(wallPreviewParent.transform);
 
-                bool canBuildSegment = constructionGrid[x, z] == 0;
+                bool canBuildSegment = constructionGrid[x, z].Count == 0;
                 Color segmentColor = canBuildSegment ? green : red;
 
                 if (!canBuildSegment) canPlaceWall = false;
@@ -223,7 +223,7 @@ namespace Building
             previewTower.name = "TowerPreview" + (wallStartPoint.HasValue ? "1" : "2");
             previewTower.transform.SetParent(wallPreviewParent.transform);
 
-            ChangePreviewColor(previewTower, (constructionGrid[x, z] > 0) ? red : green);
+            ChangePreviewColor(previewTower, (constructionGrid[x, z].Count > 0) ? red : green);
         }
 
         public void ClearWallPreview()

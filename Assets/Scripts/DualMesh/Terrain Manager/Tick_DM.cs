@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Data;
 
 namespace DunefieldModel_DualMesh
@@ -67,11 +68,13 @@ namespace DunefieldModel_DualMesh
                     int checkX = xCurr + s * stepX + dx;
                     int checkZ = zCurr + s * stepZ + dz;
 
-                    if (checkX >= 0 && checkX < constructionGrid.GetLength(0) &&
-                        checkZ >= 0 && checkZ < constructionGrid.GetLength(1))
+                    //if (checkX >= 0 && checkX < constructionGrid.GetLength(0) &&
+                    //    checkZ >= 0 && checkZ < constructionGrid.GetLength(1))
+                    if (constructionGrid.IsValid(checkX, checkZ))
                     {
-                        int id = constructionGrid[checkX, checkZ];
-                        if (id > 0)
+                        List<int> ids = constructionGrid[checkX, checkZ];
+                        //if (id > 0)
+                        foreach (int id in ids)
                         {
                             constructions.TryGetValue(id, out ConstructionData currentConstruction);
                             ;

@@ -11,16 +11,7 @@ public partial class DualMesh : MonoBehaviour
     {
         constructions = new Dictionary<int, ConstructionData>();
 
-        
-        constructionGrid = new int[simXResolution + 1, simZResolution + 1];
-
-        for (int x = 0; x < constructionGrid.GetLength(0); x++)
-        {
-            for (int z = 0; z < constructionGrid.GetLength(1); z++)
-            {
-                constructionGrid[x, z] = 0;
-            }
-        }
+        constructionGrid = new ConstructionGrid(xResolution + 1, zResolution + 1);
 
         slopeFinder = new FindSlopeMooreDeterministic();
 

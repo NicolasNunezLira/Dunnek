@@ -39,7 +39,7 @@ namespace Building
             {
                 Vector3 pos = p1 + step * (i - 0.5f);  // Centrado en cada tramo
                 (x, z) = GridIndex(pos);
-                if (constructionGrid[x, z] == idTower2)
+                if (constructionGrid[x, z].Contains(idTower2))
                 {
                     if (count > 0) return;
                     count++;

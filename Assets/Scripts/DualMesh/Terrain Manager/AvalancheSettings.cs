@@ -212,7 +212,7 @@ namespace DunefieldModel_DualMesh
                         sand[nx, nz] = Math.Max(sand[nx, nz], terrainShadow[nx, nz]) + transfer;
                         sandChanges.AddChanges(nx, nz);
 
-                        if (constructionGrid[nx, nz] > 0)
+                        if (constructionGrid[nx, nz].Count > 0)
                         {
                             TryToDeleteBuild(nx, nz);
                         }

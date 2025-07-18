@@ -17,7 +17,7 @@ namespace DunefieldModel_DualMesh
     {
         #region Variables
         public NativeGrid sand, terrainShadow, shadow, terrain;
-        public int[,] constructionGrid;
+        public ConstructionGrid constructionGrid;
 
         public int xResolution, zResolution;
         public int HopLength = 1;
@@ -60,7 +60,7 @@ namespace DunefieldModel_DualMesh
         public ModelDM(
             IFindSlope SlopeFinder,
             NativeGrid sand, NativeGrid terrainShadow, ref NativeGrid terrain,
-            int[,] constructionGrid,
+            ConstructionGrid constructionGrid,
             float size,
             int xResolution, int zResolution,
             float slope,

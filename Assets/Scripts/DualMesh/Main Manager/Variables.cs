@@ -3,6 +3,7 @@ using DunefieldModel_DualMesh;
 using System.Collections.Generic;
 using Building;
 using Data;
+using Unity.Mathematics;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
@@ -18,7 +19,7 @@ public partial class DualMesh : MonoBehaviour
     // Native arrays for simulation
     public NativeGrid sand, terrain, terrainShadow;
 
-    public int[,] constructionGrid;
+    public ConstructionGrid constructionGrid;
 
     private ModelDM duneModel;
     private FindSlopeMooreDeterministic slopeFinder;

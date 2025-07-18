@@ -19,7 +19,7 @@ namespace Building
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
         public NativeGrid terrain;
-        public int[,] constructionGrid;
+        ConstructionGrid constructionGrid;
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
 
         private Dictionary<int, ConstructionData> constructions;
@@ -55,7 +55,7 @@ namespace Building
             DualMesh.BuildMode currentBuildMode,
             NativeGrid terrain,
             GameObject activePreview,
-            int[,] constructionGrid,
+            ConstructionGrid constructionGrid,
             bool planicie
         )
         {

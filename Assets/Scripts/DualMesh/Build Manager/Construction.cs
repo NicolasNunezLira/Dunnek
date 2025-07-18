@@ -136,12 +136,14 @@ namespace Building
 
             foreach (var cell in support)
             {
-                constructionGrid[cell.x, cell.y] = currentConstructionID;
+                //constructionGrid[cell.x, cell.y] = currentConstructionID;
+                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
             }
 
             foreach (var cell in boundarySupport)
             {
-                constructionGrid[cell.x, cell.y] = currentConstructionID;
+                //constructionGrid[cell.x, cell.y] = currentConstructionID;
+                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
             }
 
             currentConstructionID++;
