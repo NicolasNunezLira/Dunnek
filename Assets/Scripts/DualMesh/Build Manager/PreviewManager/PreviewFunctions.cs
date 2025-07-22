@@ -27,16 +27,17 @@ namespace Building
                     return;
 
                 if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints && wallStartPoint.HasValue)
-                    {
-                        tempWallEndPoint = point;
-                        PreviewWall();
-                        towerPreviewGO?.SetActive(false);
-                        return;
-                    }
-                    else
-                    {
-                        tempWallEndPoint = null;
-                    }
+                {
+                    tempWallEndPoint = point;
+                    PreviewWall();
+                    towerPreviewGO?.SetActive(false);
+                    return;
+                }
+                else
+                {
+                    towerPreviewGO?.SetActive(true);
+                    tempWallEndPoint = null;
+                }
 
 
                 Renderer rend = activePreview.GetComponentInChildren<Renderer>();
@@ -113,8 +114,8 @@ namespace Building
                     break;
             }
 
-            if (activePreview != null)
-                activePreview.SetActive(true);
+            
+            activePreview?.SetActive(true);
         }
 
         public void HideAllPreviews()

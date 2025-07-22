@@ -69,10 +69,9 @@ namespace Building
             Vector3 finalPos = new Vector3(position.x, y - 0.1f, position.z);
 
             GameObject existingTower = GetExistingTowerAt(x, z);
-            towerPreviewGO.SetActive(false);
             if (existingTower != null)
             {
-                ChangePreviewColor(existingTower, green, true);
+                //ChangePreviewColor(existingTower, green, true);
                 // Asigna según si ya existe la torre inicial
                 if (existingStartTower == null)
                     existingStartTower = existingTower;

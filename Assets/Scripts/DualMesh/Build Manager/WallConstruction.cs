@@ -4,8 +4,6 @@ using Unity.Mathematics;
 using Data;
 using Vector3 = UnityEngine.Vector3;
 using Quaternion = UnityEngine.Quaternion;
-using UnityEngine.Experimental.AI;
-using System.Numerics;
 
 namespace Building
 {
@@ -54,6 +52,8 @@ namespace Building
                 allSupport.Add(new int2(x, z));
             }
             currentCompositeConstructionID++;
+            activePreview = towerPreviewGO;
+            activePreview.SetActive(false);
 
             //RestoreAllPreviews();
         }
