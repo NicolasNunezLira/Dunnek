@@ -11,6 +11,8 @@ public partial class DualMesh : MonoBehaviour
     {
         constructions = new Dictionary<int, ConstructionData>();
 
+        compositeConstructions = new Dictionary<int, CompositeConstruction>();
+
         constructionGrid = new ConstructionGrid(xResolution + 1, zResolution + 1);
 
         slopeFinder = new FindSlopeMooreDeterministic();
@@ -46,6 +48,7 @@ public partial class DualMesh : MonoBehaviour
             (int)windDirection.x, (int)windDirection.y,
             ref constructions,
             ref currentConstructionID,
+            ref currentCompositeConstructionID,
             heightVariation, heightVariation,
             hopLength, shadowSlope, avalancheSlope,
             maxCellsPerFrame,
@@ -70,6 +73,7 @@ public partial class DualMesh : MonoBehaviour
             dualMeshConstructor,
             constructions,
             currentConstructionID,
+            currentCompositeConstructionID,
             pulledDownTime,
             housePrefabGO,
             wallPrefabGO,

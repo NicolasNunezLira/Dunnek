@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using System.Numerics;
+using Data;
 using Vector3 = UnityEngine.Vector3;
 using Quaternion = UnityEngine.Quaternion;
 
@@ -11,16 +11,20 @@ namespace Building
     {
         public void BuildWallBetween(Vector3 p1, Vector3 p2)
         {
+            CompositeConstruction Wall = new CompositeConstruction(currentCompositeConstructionID, CompositeConstruction.CompositeType.Wall);
+
             // Coloca las torres en los extremos
             (int x, int z) = GridIndex(p1);
-            //int idTower1 = currentConstructionID;
             GameObjectConstruction(towerPrefab, x, z,
                 Quaternion.LookRotation(Vector3.zero), Data.ConstructionType.Tower, new Vector3(p1.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p1.z));
+            AddPartToWall(Wall);
+
             (x, z) = GridIndex(p2);
             int idTower2 = currentConstructionID;
             GameObjectConstruction(towerPrefab, x, z,
                 Quaternion.LookRotation(Vector3.zero), Data.ConstructionType.Tower, new Vector3(p2.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p2.z));
-            
+            AddPartToWall(Wall);
+
 
             Vector3 dir = (p2 - p1).normalized;
             float distance = Vector3.Distance(p1, p2);
@@ -41,7 +45,7 @@ namespace Building
                 (x, z) = GridIndex(pos);
                 if (constructionGrid[x, z].Contains(idTower2))
                 {
-                    if (count > 0) return;
+                    if (count > 0) { currentCompositeConstructionID++; return; }
                     count++;
                 }
                 float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]) - 0.1f;
@@ -58,8 +62,11 @@ namespace Building
                     wall.transform.localScale = localScale;
                 }
 
+                AddPartToWall(Wall);
+
                 allSupport.Add(new int2(x, z));
             }
+            currentCompositeConstructionID++;
         }
 
         private (int x, int z) GridIndex(Vector3 pos)
@@ -68,6 +75,12 @@ namespace Building
             int x = Mathf.Clamp(Mathf.FloorToInt(pos.x / cellSize), 0, duneModel.xResolution - 1);
             int z = Mathf.Clamp(Mathf.FloorToInt(pos.z / cellSize), 0, duneModel.zResolution - 1);
             return (x, z);
+        }
+
+        private void AddPartToWall(CompositeConstruction wall)
+        {
+            wall.AddPart(constructions[currentConstructionID - 1]);
+            constructions[currentConstructionID - 1].groupID = currentCompositeConstructionID;
         }
     }
 }

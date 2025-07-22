@@ -26,7 +26,7 @@ namespace DunefieldModel_DualMesh
             this.visualWidth = visualWidth; // Dof visual x axis
             this.visualHeight = visualHeight; // Dof visual z axis
             data = new NativeArray<float>(width * height, allocator, NativeArrayOptions.ClearMemory);
-            visualIndex = new NativeArray<int>(visualWidth * visualHeight, Allocator.Persistent); ;
+            visualIndex = new NativeArray<int>(visualWidth * visualHeight, Allocator.Persistent);
             GenerateVisualIndex();
         }
 
@@ -207,7 +207,7 @@ namespace DunefieldModel_DualMesh
             return x < 0 || z < 0 || x >= Width || z >= Length;
         }
 
-        public bool TryGetType(int x, int z, ConstructionType constructionType, out List<int> ids)
+        public bool TryGetTypesAt(int x, int z, ConstructionType constructionType, out List<int> ids)
         {
             ids = new List<int>();
             var key = new int2(x, z);
@@ -224,6 +224,11 @@ namespace DunefieldModel_DualMesh
             }
 
             return false;
+        }
+
+        public bool TryGetConstructionTypesAt(int x, int z, out Dictionary<int, ConstructionType> innerDict)
+        {
+            return data.TryGetValue(new int2(x, z), out innerDict);
         }
     }
     #endregion

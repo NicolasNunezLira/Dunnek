@@ -46,7 +46,7 @@ namespace DunefieldModel_DualMesh
 
         public Dictionary<int, ConstructionData> constructions;
 
-        public int currentConstructionID;
+        public int currentConstructionID, currentCompositeConstructionID;
 
         public bool verbose, isPaused;
 
@@ -67,6 +67,7 @@ namespace DunefieldModel_DualMesh
             int dx, int dz,
             ref Dictionary<int, ConstructionData> constructions,
             ref int currentConstructionID,
+            ref int currentCompositeConstructionID,
             float depositeHeight, float erosionHeight,
             int hopLength, float shadowSlope, float avalancheSlope,
             float maxCellsPerFrame,
@@ -83,6 +84,7 @@ namespace DunefieldModel_DualMesh
             this.constructionGrid = constructionGrid;
             this.constructions = constructions;
             this.currentConstructionID = currentConstructionID;
+            this.currentCompositeConstructionID = currentCompositeConstructionID;
             this.size = size;
             this.maxCellsPerFrame = maxCellsPerFrame;
             this.avalancheTrasnferRate = avalancheTrasnferRate;

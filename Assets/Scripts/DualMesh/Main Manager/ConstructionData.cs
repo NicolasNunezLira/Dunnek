@@ -4,9 +4,6 @@ using Unity.Mathematics;
 using System.Text.RegularExpressions;
 using System;
 using DunefieldModel_DualMesh;
-using Unity.Collections;
-using DunefieldModel_DualMeshJobs;
-using System.Data.Common;
 
 namespace Data
 {
@@ -29,8 +26,8 @@ namespace Data
         public float buildHeight;
         public float duration;
         public float timeBuilt;
-
         public bool isBuried = false;
+        public int? groupID = null;
         #endregion
 
         #region Metodos
@@ -193,10 +190,65 @@ namespace Data
                 grid[cell.x, cell.y] = id;
             }
         }
-
-        #endregion
     }
+    #endregion
 
-    
+    #region Composite Builds
+    [System.Serializable]
+    public class CompositeConstruction
+    {
+        public enum CompositeType
+        {
+            Wall,
+            Road,
+            Fence,
+            Custom
+        }
 
+        public CompositeType Type;
+        public List<ConstructionData> Parts = new();
+        public int GroupId; // Un identificador único para esta construcción compuesta
+
+        public CompositeConstruction(int groupId, CompositeType type)
+        {
+            GroupId = groupId;
+            Type = type;
+        }
+
+        public void AddPart(ConstructionData part)
+        {
+            Parts.Add(part);
+        }
+
+        public bool IsBuried(NativeGrid sandElev, ConstructionGrid constructionGrid, FrameVisualChanges sandChanges)
+        {
+            bool allBuried = true;
+            foreach (var part in Parts)
+            {
+                var (buried, _, _, _) = part.IsBuried(sandElev, constructionGrid, sandChanges);
+                if (!buried) allBuried = false;
+            }
+            return allBuried;
+        }
+
+        public List<int2> ErodeAll(NativeGrid sandElev, ConstructionGrid constructionGrid, FrameVisualChanges changes)
+        {
+            var allCells = new List<int2>();
+            foreach (var part in Parts)
+            {
+                allCells.AddRange(part.ErodeBuild(sandElev, constructionGrid, changes));
+            }
+            return allCells;
+        }
+
+        public void Destroy()
+        {
+            foreach (var part in Parts)
+            {
+                GameObject.Destroy(part.obj);
+            }
+            Parts.Clear();
+        }
+    }
+    #endregion
 }

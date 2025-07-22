@@ -3,7 +3,6 @@ using DunefieldModel_DualMesh;
 using System.Collections.Generic;
 using Building;
 using Data;
-using Unity.Mathematics;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
@@ -42,7 +41,8 @@ public partial class DualMesh : MonoBehaviour
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
 
     private Dictionary<int, ConstructionData> constructions;
-    private int currentConstructionID = 1;
+    private Dictionary<int, CompositeConstruction> compositeConstructions;
+    private int currentConstructionID = 1, currentCompositeConstructionID = 1;
 
     private bool isPaused = false, isWallReadyForConstruction = false;
 

@@ -23,7 +23,7 @@ namespace Building
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
 
         private Dictionary<int, ConstructionData> constructions;
-        private int currentConstructionID;
+        private int currentConstructionID, currentCompositeConstructionID;
 
         private Coroutine shakeCoroutine;
 
@@ -42,6 +42,7 @@ namespace Building
             DualMeshConstructor constructor,
             Dictionary<int, ConstructionData> constructions,
             int currentConstructionID,
+            int currentCompositeConstructionID,
             float pulledDownTime,
             GameObject housePrefab,
             GameObject wallPrefab,
@@ -64,6 +65,7 @@ namespace Building
             this.constructions = constructions;
             this.durationBuild = pulledDownTime;
             this.currentConstructionID = currentConstructionID;
+            this.currentCompositeConstructionID = currentCompositeConstructionID;
             this.housePrefab = housePrefab;
             this.wallPrefab = wallPrefab;
             this.towerPrefab = towerPrefab;
