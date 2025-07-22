@@ -9,7 +9,7 @@ namespace Data
 {
     [System.Serializable]
     public enum ConstructionType
-    { House, Wall, Tower };
+    { House, SegmentWall, Wall, Tower };
 
     [System.Serializable]
     public class ConstructionData

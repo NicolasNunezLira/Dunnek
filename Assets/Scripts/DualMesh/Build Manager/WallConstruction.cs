@@ -4,6 +4,8 @@ using Unity.Mathematics;
 using Data;
 using Vector3 = UnityEngine.Vector3;
 using Quaternion = UnityEngine.Quaternion;
+using UnityEngine.Experimental.AI;
+using System.Numerics;
 
 namespace Building
 {
@@ -12,19 +14,10 @@ namespace Building
         public void BuildWallBetween(Vector3 p1, Vector3 p2)
         {
             CompositeConstruction Wall = new CompositeConstruction(currentCompositeConstructionID, CompositeConstruction.CompositeType.Wall);
-
+            int x, z, idTower2;
             // Coloca las torres en los extremos
-            (int x, int z) = GridIndex(p1);
-            GameObjectConstruction(towerPrefab, x, z,
-                Quaternion.LookRotation(Vector3.zero), Data.ConstructionType.Tower, new Vector3(p1.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p1.z));
-            AddPartToWall(Wall);
-
-            (x, z) = GridIndex(p2);
-            int idTower2 = currentConstructionID;
-            GameObjectConstruction(towerPrefab, x, z,
-                Quaternion.LookRotation(Vector3.zero), Data.ConstructionType.Tower, new Vector3(p2.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p2.z));
-            AddPartToWall(Wall);
-
+            (p1, _, _, _) = TryBuildATower(p1, Wall);
+            (p2, x, z, idTower2) = TryBuildATower(p2, Wall);
 
             Vector3 dir = (p2 - p1).normalized;
             float distance = Vector3.Distance(p1, p2);
@@ -38,21 +31,15 @@ namespace Building
 
             List<int2> allSupport = new();
 
-            int count = 0;
-            for (int i = 0; i < segments; i++)
+            for (int i = 2; i < segments; i++)
             {
                 Vector3 pos = p1 + step * (i - 0.5f);  // Centrado en cada tramo
                 (x, z) = GridIndex(pos);
-                if (constructionGrid[x, z].Contains(idTower2))
-                {
-                    if (count > 0) { currentCompositeConstructionID++; return; }
-                    count++;
-                }
                 float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]) - 0.1f;
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
                 Quaternion rotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z)) * Quaternion.Euler(0, 90, 0);
-                GameObject wall = GameObjectConstruction(wallPrefab, x, z, rotation, Data.ConstructionType.Tower, adjusted);
+                GameObject wall = GameObjectConstruction(wallPrefab, x, z, rotation, Data.ConstructionType.SegmentWall, adjusted);
 
                 if (wall != null)
                 {
@@ -67,6 +54,8 @@ namespace Building
                 allSupport.Add(new int2(x, z));
             }
             currentCompositeConstructionID++;
+
+            //RestoreAllPreviews();
         }
 
         private (int x, int z) GridIndex(Vector3 pos)
@@ -81,6 +70,26 @@ namespace Building
         {
             wall.AddPart(constructions[currentConstructionID - 1]);
             constructions[currentConstructionID - 1].groupID = currentCompositeConstructionID;
+        }
+
+        private (Vector3, int, int, int) TryBuildATower(Vector3 p, CompositeConstruction Wall)
+        {
+            int id;
+            (int x, int z) = GridIndex(p);
+            if (!constructionGrid.TryGetTypesAt(x, z, ConstructionType.Tower, out List<int> ids))
+            {
+                id = currentConstructionID;
+                GameObjectConstruction(towerPrefab, x, z,
+                    Quaternion.LookRotation(Vector3.zero),
+                    Data.ConstructionType.Tower, new Vector3(p.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p.z));
+                AddPartToWall(Wall);
+            }
+            else
+            {
+                id = ids[0];
+                p = constructions[id].position;
+            }
+            return (p, x, z, id);
         }
     }
 }

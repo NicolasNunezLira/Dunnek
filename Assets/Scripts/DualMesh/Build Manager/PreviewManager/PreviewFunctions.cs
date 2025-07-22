@@ -11,6 +11,7 @@ namespace Building
         public Dictionary<Renderer, Material[]> originalTowerMaterials = new();
         private Vector3? tempWallEndPoint;
         private bool canPlaceWall = true, isWallPreviewActive, thereIsATower = false;
+        
         #region Handle
         public void HandleBuildPreview()
         {
@@ -55,7 +56,8 @@ namespace Building
                 {
                     for (int zj = zMin; zj <= zMax; zj++)
                     {
-                        if (constructionGrid[xi, zj].Count > 0)
+                        //if (constructionGrid[xi, zj].Count > 0)
+                        if (!(constructionGrid[x, z].Count == 0 || constructionGrid.IsOnlyTowerAt(x, z)))
                             canBuild = false;
 
                         float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrain[xi, zj]);
@@ -124,6 +126,7 @@ namespace Building
             sweeperPreviewGO?.SetActive(false);
             circlePreviewGO?.SetActive(false);
             ClearWallPreview();
+            ClearPoints();
         }
 
         public void RotateWallPreview()

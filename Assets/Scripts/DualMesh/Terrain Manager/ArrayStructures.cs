@@ -230,6 +230,19 @@ namespace DunefieldModel_DualMesh
         {
             return data.TryGetValue(new int2(x, z), out innerDict);
         }
+
+        public bool IsOnlyTowerAt(int x, int z)
+        {
+            var key = new int2(x, z);
+
+            if (data.TryGetValue(key, out var innerDict))
+            {
+                // Si hay construcciones, revisa que todas sean del tipo Tower
+                return innerDict.Count > 0 && innerDict.Values.All(type => type == ConstructionType.Tower);
+            }
+
+            return false; // No hay construcciones en la celda
+        }
     }
     #endregion
 }
