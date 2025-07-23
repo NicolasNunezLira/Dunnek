@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Linq;
 using Data;
-using System.Runtime.InteropServices;
-//using System.Numerics;
 
 namespace Building
 {
@@ -147,17 +145,6 @@ namespace Building
             }
 
             currentConstructionID++;
-        }
-
-        public GameObject GetPrefabForType(DualMesh.BuildMode mode)
-        {
-            switch (mode)
-            {
-                //case DualMesh.BuildMode.Raise: return wallPrefab;
-                case DualMesh.BuildMode.Dig: return shovelPreviewGO;
-                case DualMesh.BuildMode.PlaceHouse: return housePrefab;
-                default: return null;
-            }
         }
         #endregion
 

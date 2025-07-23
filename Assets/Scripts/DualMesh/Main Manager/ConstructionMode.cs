@@ -5,6 +5,8 @@ public partial class DualMesh : MonoBehaviour
 {
     public void ConstructionMode()
     {
+        if (!builder.wallStartPoint.HasValue) builder.HideAllPreviews();
+        
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))

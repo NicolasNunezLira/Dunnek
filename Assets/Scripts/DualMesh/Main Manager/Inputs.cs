@@ -9,22 +9,54 @@ public partial class DualMesh : MonoBehaviour
         // Enter/Exit Build Mode
         if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
         {
-            inMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
-            sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh;
-            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
+            PlayingMode newMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
+            SetMode(newMode);
         }
 
         if (Input.GetKeyDown(KeyCode.X) && inMode != PlayingMode.Build)
         {
-            inMode = (inMode == PlayingMode.Destroy) ? PlayingMode.Simulation : PlayingMode.Destroy;
-            sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh; 
-            terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
-
-            if (inMode == PlayingMode.Simulation)
-            {
-                builder.RestoreHoverMaterials();
-            }
+            PlayingMode newMode = (inMode == PlayingMode.Destroy) ? PlayingMode.Simulation : PlayingMode.Destroy;
+            SetMode(newMode);
         }
+
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            PlayingMode newMode = (inMode == PlayingMode.Action) ? PlayingMode.Simulation : PlayingMode.Action;
+            SetMode(newMode);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape) && inMode != PlayingMode.Simulation)
+            {
+                SetMode(PlayingMode.Simulation);
+            }
         #endregion
     }
+
+    #region Methods for inputs
+    public void SetMode(PlayingMode newMode)
+    {
+        if (inMode == newMode)
+        {
+            inMode = PlayingMode.Simulation;
+        }
+        else
+        {
+            inMode = newMode;
+        }
+
+        // Notifica al UIController para actualizar visuales
+        if (uiController != null)
+        {
+            uiController.UpdateButtonVisuals(inMode);
+        }
+
+        UpdateMeshColliders();
+    }
+
+    void UpdateMeshColliders()
+    {
+        sandGO.GetComponent<MeshCollider>().sharedMesh = sandGO.GetComponent<MeshFilter>().mesh;
+        terrainGO.GetComponent<MeshCollider>().sharedMesh = terrainGO.GetComponent<MeshFilter>().mesh;
+    }
+    #endregion
 }

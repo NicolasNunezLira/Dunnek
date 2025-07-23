@@ -18,6 +18,8 @@ namespace Building
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
+        public DualMesh.ActionMode currentActionMode;
+        public DualMesh.PlayingMode inMode;
         public NativeGrid terrain;
         ConstructionGrid constructionGrid;
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
@@ -29,7 +31,7 @@ namespace Building
 
         bool canBuild;
 
-        private Vector3? wallStartPoint = null;
+        public Vector3? wallStartPoint = null;
         private Vector3? wallEndPoint = null;
         private float wallPrefabLength;
         private GameObject wallPreviewParent;
@@ -53,7 +55,9 @@ namespace Building
             GameObject towerPreviewGO,
             GameObject sweeperPreviewGO,
             GameObject circlePreviewGO,
+            DualMesh.PlayingMode inMode,
             DualMesh.BuildMode currentBuildMode,
+            DualMesh.ActionMode currentActionMode,
             NativeGrid terrain,
             GameObject activePreview,
             ConstructionGrid constructionGrid,
@@ -61,6 +65,7 @@ namespace Building
         )
         {
             duneModel = model;
+            this.inMode = inMode;
             dualMeshConstructor = constructor;
             this.constructions = constructions;
             this.durationBuild = pulledDownTime;
