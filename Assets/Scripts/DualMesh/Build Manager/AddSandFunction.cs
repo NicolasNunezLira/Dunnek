@@ -17,6 +17,8 @@ namespace Building
             int zMin = Mathf.Max(0, Mathf.FloorToInt(centerZ - radius));
             int zMax = Mathf.Min(duneModel.zResolution - 1, Mathf.CeilToInt(centerZ + radius));
 
+            float mean = duneModel.sand[centerX, centerZ];
+
             for (int x = xMin; x <= xMax; x++)
             {
                 for (int z = zMin; z <= zMax; z++)
@@ -29,7 +31,8 @@ namespace Building
                     // Perfil cónico
                     float height = maxHeight * (1 - (dist / radius));
                     //float height = maxHeight * Mathf.Exp(- (dist * dist) / (2 * sigma * sigma));
-                    duneModel.sandElev[x, z] += height;
+                    duneModel.sand[x, z] = Math.Max(duneModel.terrain[x, z], duneModel.sand[x, z]) + height;
+                    duneModel.sandChanges.AddChanges(x, z);
 
                     duneModel.ActivateCell(x, z);
                     duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);

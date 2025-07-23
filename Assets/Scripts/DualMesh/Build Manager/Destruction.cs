@@ -14,7 +14,7 @@ namespace Building
         public int idToDestroy = -1;
 
         public Dictionary<Renderer, Material[]> originalMaterials = new();
-        public void DetectConstructionUnderCursor()
+        public void DetectConstructionUnderCursor(Color color)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -40,7 +40,7 @@ namespace Building
                     if (toDestroy != target)
                     {
                         RestoreHoverMaterials();
-                        MakeRed(target);
+                        ChangeColor(target, color);
                         toDestroy = target;
                     }
 
@@ -73,16 +73,17 @@ namespace Building
                 int cx = coord.x;
                 int cz = coord.y;
 
-                if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
+                if (constructionGrid.IsValid(cx, cz)) continue;
 
-                constructionGrid[cx, cz] = 0;
-
-                if (duneModel.sandElev[cx, cz] >= data.buildHeight)
+                //constructionGrid[cx, cz] = 0;
+                constructionGrid.TryRemoveConstruction(cx, cz, idToDestroy);
+                
+                if (duneModel.sand[cx, cz] >= data.buildHeight + data.floorHeight)
                 {
-                    duneModel.sandElev[cx, cz] -= data.buildHeight;
+                    duneModel.sand[cx, cz] -= data.buildHeight;
                 }
 
-                duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+                duneModel.terrainShadow[cx, cz] = terrain[cx, cz]; // restaura altura original
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
@@ -91,11 +92,12 @@ namespace Building
                 int cx = coord.x;
                 int cz = coord.y;
 
-                if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
+                if (constructionGrid.IsValid(cx, cz)) continue;
 
-                constructionGrid[cx, cz] = 0;
+                //constructionGrid[cx, cz] = 0;
+                constructionGrid.TryRemoveConstruction(cx, cz, idToDestroy);
 
-                duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+                duneModel.terrainShadow[cx, cz] = terrain[cx, cz]; // restaura altura original
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
@@ -110,7 +112,7 @@ namespace Building
             return true;
         }
 
-        private void MakeRed(GameObject obj)
+        private void ChangeColor(GameObject obj, Color color)
         {
             currentHoverObject = obj;
 
@@ -122,7 +124,7 @@ namespace Building
                 }
 
                 Material newMat = new Material(rend.material); // copiar material original
-                Color c = Color.red;
+                Color c = color;
                 c.a = 0.3f;
                 newMat.color = c;
 
@@ -140,7 +142,7 @@ namespace Building
         }
         
         
-        private void RestoreHoverMaterials()
+        public void RestoreHoverMaterials()
         {
             if (currentHoverObject == null) return;
 

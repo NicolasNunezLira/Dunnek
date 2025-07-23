@@ -1,18 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Data;
-using TMPro;
-using Unity.Mathematics;
-using UnityEngine.Rendering;
-using ue = UnityEngine;
 
 namespace DunefieldModel_DualMesh
 {
     public partial class ModelDM
     {
         #region Tick
-        public virtual void Tick(int grainsPerStep, int dx, int dz, float erosionHeight, float depositeHeight, bool verbose = false)
+        public virtual void Tick(int grainsPerStep, int dx, int dz, float erosionHeight, float depositeHeight)
         {
             /// <summary> 
             /// Función que simula un tick del modelo de dunas.
@@ -22,251 +17,307 @@ namespace DunefieldModel_DualMesh
             /// <param name="dz">Componente z del viento</param>
             /// <param name="erosionHeight">Altura máxima de erosión por grano.</param>
             /// <param name="depositeHeight">Altura de deposición por grano.</param>
-            /// <param name="verbose">Si es verdadero, imprime información detallada sobre el proceso.</param>
             /// <returns>void</returns>
 
-            // Información para debug 
-            if (verbose)
-            {
-                int count1 = 0;
-                int count2 = 0;
-                int count3 = 0;
-                for (int i = 0; i < sandElev.GetLength(0); i++)
-                {
-                    for (int j = 0; j < sandElev.GetLength(1); j++)
-                    {
-                        if ((sandElev[i, j] - terrainElev[i, j]) > 0) count1++;
-                        if (Shadow[i, j] <= 0) count2++;
-                        if ((sandElev[i, j] - terrainElev[i, j] > 0) && Shadow[i, j] <= 0) count3++;
-                    }
-                }
-                ue.Debug.Log("Cantidad de nodos erosionables:" + count1);
-                ue.Debug.Log("Cantidad de nodos sin sombra:" + count2);
-                ue.Debug.Log("Cantidad de nodos erosionables sin sombra:" + count3);
-            }
-
             // Ciclo para el movimiento de granos
-            int count = 0;
             for (int subticks = grainsPerStep; subticks > 0; subticks--)
             {
-                if (isPaused) return;
+                int x = rnd.Next(0, sand.Width);
+                int z = rnd.Next(0, sand.Height);
 
-                // Elección aleatoria de un grano
-                int x = rnd.Next(0, xResolution);
-                int z = rnd.Next(0, zResolution);
-
-                if (Shadow[x, z] > 0 || terrainElev[x, z] >= sandElev[x, z]) // Si el grano está en sombra o no hay arena sobre el terreno, saltar
+                if (shadow[x, z] > 0 || terrainShadow[x, z] >= sand[x, z]) // Si el grano está en sombra o no hay arena sobre el terreno, saltar
                 {
-                    if (verbose) { ue.Debug.Log("Grano (" + x + "," + z + ") en sombra o terreno elevado."); }
-                    ;
                     continue;
                 }
 
-                // Erosión del grano
-                if (verbose) { ue.Debug.Log("Grano a erosionar en (" + x + "," + z + ")."); }
                 depositeH = ErodeGrain(x, z, dx, dz, erosionHeight);
 
                 if (depositeH <= 0f) continue;
 
-                count++;
-
-                AlgorithmDeposit(x, z, dx, dz, depositeH, verbose);
-
-                if (verbose) { ue.Debug.Log("Granos erosionados en este tick:" + count + "/" + grainsPerStep); }
+                AlgorithmDeposit(x, z, dx, dz, depositeH);
             }
         }
 
         #region Deposit
-        public void AlgorithmDeposit(int x, int z, int dx, int dz, float depositeH, bool verbose = false)
+        public void AlgorithmDeposit(int x, int z, int dx, int dz, float depositeH)
         {
             int i = HopLength;
             int xCurr = x;
             int zCurr = z;
 
-            // Conteo de celdas de terreno en las posibles deposiciones del grano
+            // Conteo de celdas de terreno en el camino
             int countTerrain = 0;
             for (int j = 1; j <= i; j++)
             {
-                (int xAUx, int zAux) = WrapCoords(xCurr + j * dx, zCurr + j * dz);
-                if (terrainElev[xAUx, zAux] >= sandElev[xAUx, zAux])
-                {
+                int xAux = xCurr + j * dx;
+                int zAux = zCurr + j * dz;
+
+                if (terrainShadow[xAux, zAux] >= sand[xAux, zAux])
                     countTerrain++;
-                }
             }
 
             while (true)
             {
                 #region Barlovento behaviour with structures
                 int steps = Math.Max(Math.Abs(dx), Math.Abs(dz));
-                int stepX = dx / steps;  // dirección normalizada
+                int stepX = dx / steps;
                 int stepZ = dz / steps;
 
                 for (int s = 1; s <= steps; s++)
                 {
-                    int checkX = openEnded ? xCurr + s * stepX + dx : (xCurr + s * stepX + dx + xResolution) % xResolution;
-                    int checkZ = openEnded ? zCurr + s * stepZ + dz : (zCurr + s * stepZ + dz + zResolution) % zResolution;
+                    int checkX = xCurr + s * stepX + dx;
+                    int checkZ = zCurr + s * stepZ + dz;
 
-                    if (constructionGrid[checkX, checkZ] > 0)
+                    //if (checkX >= 0 && checkX < constructionGrid.GetLength(0) &&
+                    //    checkZ >= 0 && checkZ < constructionGrid.GetLength(1))
+                    if (constructionGrid.IsValid(checkX, checkZ))
                     {
-                        // Celda inmediatamente anterior (en barlovento)
-                        int xPrev = openEnded ? checkX - dx : (checkX - dx + xResolution) % xResolution;
-                        int zPrev = openEnded ? checkX - dx : (checkZ - dz + zResolution) % zResolution;
-
-                        // Verificar acumulación de arena frente a la construcción
-                        float acumulacionBarlovento = terrainElev[checkX, checkZ] - sandElev[xPrev, zPrev];
-
-                        if (acumulacionBarlovento <= 0.2f) // umbralBarlovento = 0.2f
+                        List<int> ids = constructionGrid[checkX, checkZ];
+                        //if (id > 0)
+                        foreach (int id in ids)
                         {
-                            // Se permite depósito sobre construcción por acumulación barlovento
-                            DepositGrain(checkX, checkZ, dx, dz, depositeH);
-                            if (verbose) ue.Debug.Log($"Acumulación barlovento permite depósito en construcción ({checkX}, {checkZ})");
-                            TryToDeleteBuild(checkX, checkZ);
-                            return;
+                            constructions.TryGetValue(id, out ConstructionData currentConstruction);
+                            ;
+                            int xPrev = checkX - dx;
+                            int zPrev = checkZ - dz;
+
+                            float acumulacionBarlovento = terrainShadow[checkX, checkZ] - sand[xPrev, zPrev];
+
+                            if (acumulacionBarlovento <= currentConstruction.buildHeight * 0.2f)
+                            {
+                                DepositGrain(checkX, checkZ, dx, dz, depositeH);
+                                sandChanges.AddChanges(checkX, checkZ);
+                                TryToDeleteBuild(checkX, checkZ);
+                                return;
+                            }
+                            else
+                            {
+                                int stopX = xCurr + (s - 1) * stepX;
+                                int stopZ = zCurr + (s - 1) * stepZ;
+                                DepositGrain(stopX, stopZ, dx, dz, depositeH);
+                                sandChanges.AddChanges(checkX, checkZ);
+                                TryToDeleteBuild(checkX, checkZ);
+                                return;
+                            }
                         }
-                        else
-                        {
-                            // Depositar justo antes de la construcción
-                            int stopX = xCurr + (s - 1) * stepX;
-                            int stopZ = zCurr + (s - 1) * stepZ;
-                            DepositGrain(stopX, stopZ, dx, dz, depositeH);
-                            if (verbose) ue.Debug.Log($"Construcción bloquea paso en ({checkX}, {checkZ}), sin acumulación barlovento. Deposita en ({stopX}, {stopZ})");
-                            TryToDeleteBuild(checkX, checkZ);
-                            return;
-                        }
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
                 #endregion
 
                 #region Open field behaviour
-                // Cálculo de la posición actual del grano considerando comportamiento toroidal
-                xCurr = openEnded ? xCurr + dx : (xCurr + dx + xResolution) % xResolution;
-                zCurr = openEnded ? zCurr + dz : (zCurr + dx + zResolution) % zResolution;
+                xCurr += dx;
+                zCurr += dz;
 
-                // Si el grano sale del dominio en campo abierto, detener la deposición
-                if (openEnded && !IsInside(xCurr, zCurr))
-                    return;
-
-                // Si el grano está en sombra, depositar y salir del ciclo
-                if (Shadow[xCurr, zCurr] > 0 && sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr])
+                if (shadow[xCurr, zCurr] > 0 && sand[xCurr, zCurr] > terrainShadow[xCurr, zCurr])
                 {
-                    if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
                     DepositGrain(xCurr, zCurr, dx, dz, depositeH);
+                    sandChanges.AddChanges(xCurr, zCurr);
                     return;
                 }
 
-
-                if (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr] &&
-                    terrainElev[xCurr, zCurr] >= sandElev[x, z])
+                if (terrainShadow[xCurr, zCurr] >= sand[xCurr, zCurr] &&
+                    terrainShadow[xCurr, zCurr] >= sand[x, z])
                 {
-                    countTerrain -= (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr]) ? 1 : 0;
+                    countTerrain -= (terrainShadow[xCurr, zCurr] >= sand[xCurr, zCurr]) ? 1 : 0;
                     continue;
                 }
 
-
                 if (countTerrain >= i - 1)
                 {
-                    // Direcciones laterales (perpendiculares al viento)
                     int[] dxLateral = { -dz, dz };
                     int[] dzLateral = { dx, -dx };
 
-                    bool deposited = false;
-
-                    for (int j = 0; j < 2 && !deposited; j++)
+                    for (int j = 0; j < 2; j++)
                     {
-                        int k = 1;
-                        while (k <= i)
+                        for (int k = 1; k <= i; k++)
                         {
-                            int lx = openEnded ? xCurr + dxLateral[j] : (xCurr + dxLateral[j] * k + xResolution) % xResolution;
-                            int lz = openEnded ? zCurr + dzLateral[j] : (zCurr + dzLateral[j] * k + zResolution) % zResolution;
+                            int lx = xCurr + dxLateral[j] * k;
+                            int lz = zCurr + dzLateral[j] * k;
 
-                            if (Math.Max(terrainElev[lx, lz], sandElev[lx, lz]) < Math.Max(terrainElev[xCurr, zCurr], sandElev[xCurr, zCurr]) - slopeThreshold)
+                            if (Math.Max(terrainShadow[lx, lz], sand[lx, lz]) <
+                                Math.Max(terrainShadow[xCurr, zCurr], sand[xCurr, zCurr]) - slopeThreshold)
                             {
                                 DepositGrain(lx, lz, dxLateral[j], dzLateral[j], depositeH);
-                                if (verbose) ue.Debug.Log($"Grano redirigido lateralmente a ({lx}, {lz})");
+                                sandChanges.AddChanges(lx, lz);
                                 return;
                             }
-                            k++;
                         }
                     }
-                    //break;
                 }
-                countTerrain -= (terrainElev[xCurr, zCurr] >= sandElev[xCurr, zCurr]) ? 1 : 0;
 
-                // Si el grano no está en sombra, verificar si se debe depositar
+                countTerrain -= (terrainShadow[xCurr, zCurr] >= sand[xCurr, zCurr]) ? 1 : 0;
+
                 if (--i <= 0)
-                {// Si el terreno es más alto que la arena, reiniciar posición
-
-
-                    // Verificar si el grano debe depositarse basado en la altura de arena y terreno
-                    if (rnd.NextDouble() < (sandElev[xCurr, zCurr] > terrainElev[xCurr, zCurr] ? pSand : pNoSand))
+                {
+                    if (rnd.NextDouble() < (sand[xCurr, zCurr] > terrainShadow[xCurr, zCurr] ? pSand : pNoSand))
                     {
                         DepositGrain(xCurr, zCurr, dx, dz, depositeH);
-                        if (verbose) { ue.Debug.Log("Grano a depositar en (" + xCurr + "," + zCurr + ")."); }
+                        sandChanges.AddChanges(xCurr, zCurr);
                         return;
                     }
                     i = HopLength;
                 }
-
+                #endregion
             }
-            #endregion
-
         }
         #endregion
 
         #endregion
-
-        #region Total sand amount
-
-        public float TotalSand()
+    
+    
+    /*
+        public virtual void Tick(int grainsPerStep, int dx, int dz, float erosionHeight, float depositeHeight)
         {
-            float total = 0f;
-            for (int i = 0; i < xResolution; i++)
-                for (int j = 0; j < zResolution; j++)
-                    total += sandElev[i, j] - terrainElev[i, j];
-            return total;
+            for (int subticks = grainsPerStep; subticks > 0; subticks--)
+            {
+                int x = rnd.Next(0, sand.Width);
+                int z = rnd.Next(0, sand.Height);
+
+                if (shadow[x, z] > 0 || terrainShadow[x, z] >= sand[x, z])
+                    continue;
+
+                depositeH = ErodeGrain(x, z, dx, dz, erosionHeight);
+
+                if (depositeH <= 0f)
+                    continue;
+
+                if (TryFindDepositLocation(x, z, dx, dz, out int xFinal, out int zFinal, out bool shouldTryDelete))
+                {
+                    DepositGrain(xFinal, zFinal, dx, dz, depositeH);
+                    AddChanges(sandChanges, xFinal, zFinal);
+                    if (shouldTryDelete && IsVisual(xFinal, zFinal))
+                    {
+                        TryToDeleteBuild(xFinal, zFinal); // si es relevante aquí
+                    }
+                }
+            }
         }
+    
+    public bool TryFindDepositLocation(
+        int x, int z, int dx, int dz,
+        out int xFinal, out int zFinal, out bool shouldTryDelete)
+    {
+        xFinal = x;
+        zFinal = z;
+        shouldTryDelete = false;
 
-        #endregion
+        int i = HopLength;
+        int xCurr = x;
+        int zCurr = z;
+        int countTerrain = 0;
 
-        #region Destroy buried builds
-
-        public void TryToDeleteBuild(int checkX, int checkZ)
+        for (int j = 1; j <= i; j++)
         {
-            int id = constructionGrid[checkX, checkZ];
-            if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
-            {
-                ue.Debug.LogWarning($"ID {id} no encontrado en constructions.");
-                return;
-            }
+            int xAux = xCurr + j * dx;
+            int zAux = zCurr + j * dz;
 
-            (bool isBuried, string toDestroyName, int idToDestroy, List<int2> needActivate) = currentConstruction.IsBuried(sandElev, constructionGrid);
-            if (isBuried) { ue.Debug.Log($"Construcción {toDestroyName} enterrada. No utilizable."); }
-
-            foreach (var cell in needActivate)
-            {
-                ActivateCell(cell.x, cell.y);
-            }
-
-            DeleteBuild(idToDestroy);
+            if (terrainShadow[xAux, zAux] >= sand[xAux, zAux])
+                countTerrain++;
         }
 
-        public void DeleteBuild(int id)
+        while (true)
         {
-            if (!constructions.TryGetValue(id, out ConstructionData data))
+            int steps = Math.Max(Math.Abs(dx), Math.Abs(dz));
+            int stepX = dx / steps;
+            int stepZ = dz / steps;
+
+            for (int s = 1; s <= steps; s++)
             {
-                ue.Debug.LogWarning($"ID {id} no encontrado al intentar eliminar construcción.");
-                return;
+                int checkX = xCurr + s * stepX + dx;
+                int checkZ = zCurr + s * stepZ + dz;
+
+                if (checkX >= 0 && checkX < constructionGrid.GetLength(0) &&
+                    checkZ >= 0 && checkZ < constructionGrid.GetLength(1))
+                {
+                    int id = constructionGrid[checkX, checkZ];
+                    if (id > 0)
+                    {
+                        constructions.TryGetValue(id, out ConstructionData currentConstruction);
+
+                        int xPrev = checkX - dx;
+                        int zPrev = checkZ - dz;
+
+                        shouldTryDelete = true;
+
+                        float acumulacionBarlovento = terrainShadow[checkX, checkZ] - sand[xPrev, zPrev];
+
+                        if (acumulacionBarlovento <= Math.Min(currentConstruction.buildHeight * 0.2f, 0.2f))
+                        {
+                            xFinal = checkX;
+                            zFinal = checkZ;
+                            return true;
+                        }
+                        else
+                        {
+                            xFinal = xCurr + (s - 1) * stepX;
+                            zFinal = zCurr + (s - 1) * stepZ;
+                            return true;
+                        }
+                    }
+                }
             }
 
-            if (!data.isBuried) return;
+            // Campo abierto
+            xCurr += dx;
+            zCurr += dz;
 
-            if (data.obj != null)
+            if (shadow[xCurr, zCurr] > 0 && sand[xCurr, zCurr] > terrainShadow[xCurr, zCurr])
             {
-                UnityEngine.Object.Destroy(data.obj);
+                xFinal = xCurr;
+                zFinal = zCurr;
+                return true;
             }
 
-            constructions.Remove(id);
+            if (terrainShadow[xCurr, zCurr] >= sand[xCurr, zCurr] &&
+                terrainShadow[xCurr, zCurr] >= sand[x, z])
+            {
+                countTerrain -= (terrainShadow[xCurr, zCurr] >= sand[xCurr, zCurr]) ? 1 : 0;
+                continue;
+            }
+
+            if (countTerrain >= i - 1)
+            {
+                int[] dxLateral = { -dz, dz };
+                int[] dzLateral = { dx, -dx };
+
+                for (int j = 0; j < 2; j++)
+                {
+                    for (int k = 1; k <= i; k++)
+                    {
+                        int lx = xCurr + dxLateral[j] * k;
+                        int lz = zCurr + dzLateral[j] * k;
+
+                        if (Math.Max(terrainShadow[lx, lz], sand[lx, lz]) <
+                            Math.Max(terrainShadow[xCurr, zCurr], sand[xCurr, zCurr]) - slopeThreshold)
+                        {
+                            xFinal = lx;
+                            zFinal = lz;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            countTerrain -= (terrainShadow[xCurr, zCurr] >= sand[xCurr, zCurr]) ? 1 : 0;
+
+            if (--i <= 0)
+            {
+                if (rnd.NextDouble() < (sand[xCurr, zCurr] > terrainShadow[xCurr, zCurr] ? pSand : pNoSand))
+                {
+                    xFinal = xCurr;
+                    zFinal = zCurr;
+                    return true;
+                }
+                i = HopLength;
+            }
         }
-        #endregion
+    }
+    */
+
+
     }
 }

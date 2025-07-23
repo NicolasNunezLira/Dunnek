@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using ue = UnityEngine;
 
 namespace DunefieldModel_DualMesh
@@ -22,29 +23,30 @@ namespace DunefieldModel_DualMesh
             // Busqueda del punto más alto en la vecindad del grano
             while (FindSlope.Upslope(x, z, dx, dz, out int xSteep, out int zSteep) >= 2)
             {
-                // Si se sale del dominio en campo abierto
+                /*
                 if (openEnded && IsOutside(xSteep, zSteep))
                     return 0f;
+                */
 
                 x = xSteep;
                 z = zSteep;
             }
 
             // Si el grano no tiene altura, no se erosiona
-            if (terrainElev[x, z] >= sandElev[x, z]) return 0f;
+            if (terrainShadow[x, z] >= sand[x, z]) return 0f;
 
             // Áltura de erosión
-            erosionH = Math.Min(erosionHeight, sandElev[x, z] - terrainElev[x, z]);
+            erosionH = Math.Min(erosionHeight, sand[x, z] - terrainShadow[x, z]);
 
             // Erosión
-            sandElev[x, z] -= erosionH;
-            
+            sand[x, z] -= erosionH;
+            AddChanges(sandChanges, x, z);
+
             UpdateShadow(x, z, dx, dz);
 
             ActivateCell(x, z);
             return erosionH;
         }
         #endregion
-
     }
 }

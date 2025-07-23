@@ -1,58 +1,83 @@
-using System.Collections.Generic;
 using UnityEngine;
+using Unity.Collections;
 
 namespace DunefieldModel_DualMesh
 {
     public partial class DualMeshConstructor
     {
         #region Perlings Meshes
-        Mesh GenerateMesh(float scale1, float amplitude1, float scale2, float amplitude2, float scale3, float amplitude3, bool cube = false, string materialCube = null)
-        {
-            // Generate the terrain mesh
-            Mesh mesh = new Mesh();
-            Vector3[] vertices = new Vector3[(resolution + 1) * (resolution + 1)];
-            Vector2[] uv = new Vector2[vertices.Length];
-            int[] triangles = new int[resolution * resolution * 6];
 
-            for (int i = 0, z = 0; z <= resolution; z++)
+        public NativeGrid CreateSimulationMeshes
+        (
+            float scale1, float amplitude1,
+            float scale2, float amplitude2,
+            float scale3, float amplitude3,
+            bool cube = false,
+            string materialCube = null
+        )
+        {
+            NativeGrid mesh = new NativeGrid(simXDOF, simZDOF, xDOF, zDOF, Allocator.Persistent);
+            for (int x = 0; x < mesh.Width; x++)
             {
-                for (int x = 0; x <= resolution; x++, i++)
+                for (int z = 0; z < mesh.Height; z++)
                 {
-                    float xPos = (float)x / resolution * size;
-                    float yPos = 2 * GetMultiScalePerlinHeight(x, z, scale1, amplitude1, scale2, amplitude2, scale3, amplitude3);/// resolution * size;
                     if (cube && materialCube == "terrain" && z > 150 - 40 && z < 170 - 40 && x > 100 && x < 120)
                     {
-                        yPos = 25;
+                        mesh[x, z] = 25; continue;
                     }
 
                     if (cube && materialCube == "sand" && z > 150 - 40 && z < 270 - 40 && x > 100 && x < 220)
                     {
-                        yPos = 5;
+                        mesh[x, z] = 5; continue;
                     }
+                    
+                    mesh[x, z] = 2 * GetMultiScalePerlinHeight(
+                        x, z,
+                        scale1, amplitude1,
+                        scale2, amplitude2,
+                        scale3, amplitude3
+                    );
+                }
+            }
+            return mesh;
+        }
+        Mesh GenerateMesh(NativeGrid grid)
+        {
+            // Generate the terrain mesh
+            Mesh mesh = new Mesh();
+            Vector3[] vertices = new Vector3[xDOF * zDOF];
+            Vector2[] uv = new Vector2[vertices.Length];
+            int[] triangles = new int[xResolution * zResolution * 6];
 
-                    float zPos = (float)z / resolution * size;
+            for (int i = 0, z = 0; z < zDOF; z++)
+            {
+                for (int x = 0; x < xDOF; x++, i++)
+                {
+                    float xPos = (float)x / xResolution * size;
+                    float yPos = grid.data[grid.visualIndex[i]];
+                    float zPos = (float)z / zResolution * size;
                     vertices[i] = new Vector3(xPos, yPos, zPos);
-                    uv[i] = new Vector2((float)x / resolution,
-                        (float)z / resolution);
+                    uv[i] = new Vector2((float)x / xResolution,
+                        (float)z / zResolution);
                 }
             }
 
-            for (int ti = 0, vi = 0, z = 0; z < resolution; z++)
+            for (int ti = 0, vi = 0, z = 0; z < zResolution; z++)
             {
-                for (int x = 0; x < resolution; x++, ti += 6, vi++)
+                for (int x = 0; x < xResolution; x++, ti += 6, vi++)
                 {
                     triangles[ti] = vi;
-                    triangles[ti + 1] = vi + resolution + 1;
+                    triangles[ti + 1] = vi + zResolution + 1;
                     triangles[ti + 2] = vi + 1;
 
                     triangles[ti + 3] = vi + 1;
-                    triangles[ti + 4] = vi + resolution + 1;
-                    triangles[ti + 5] = vi + resolution + 2;
+                    triangles[ti + 4] = vi + zResolution + 1;
+                    triangles[ti + 5] = vi + zResolution + 2;
                 }
                 vi++;
             }
 
-            if ((resolution + 1) * (resolution + 1) > 65000)
+            if (xDOF * zDOF > 65000)
             {
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             }
@@ -70,57 +95,23 @@ namespace DunefieldModel_DualMesh
 
         #region Truncated cone Meshes
 
-        Mesh GenerateMountain()
+        NativeGrid GenerateMountain()
         {
-            // Generate the terrain mesh
-            Mesh mesh = new Mesh();
-            Vector3[] vertices = new Vector3[(resolution + 1) * (resolution + 1)];
-            Vector2[] uv = new Vector2[vertices.Length];
-            int[] triangles = new int[resolution * resolution * 6];
             float xCenter = size / 2;
             float zCenter = size / 2;
 
-            for (int i = 0, z = 0; z <= resolution; z++)
+            NativeGrid grid = new NativeGrid(simXDOF, simZDOF, xDOF, zDOF, Allocator.Persistent);
+            for (int x = 0; x < simXDOF; x++)
             {
-                for (int x = 0; x <= resolution; x++, i++)
+                for (int z = 0; z < simZDOF; z++)
                 {
-                    float xPos = (float)x / resolution * size;
-                    float zPos = (float)z / resolution * size;
-                    float yPos = GetTruncatedConeHeight(xPos, zPos, xCenter, zCenter, size / 3, size / 8, 5f);
-                    vertices[i] = new Vector3(xPos, yPos, zPos);
-                    uv[i] = new Vector2((float)x / resolution,
-                        (float)z / resolution);
+                    float xPos = (float)x / (simXResolution - 1) * size;
+                    float zPos = (float)z / (simZResolution - 1) * size;
+                    grid[x, z] = GetTruncatedConeHeight(xPos, zPos, xCenter, zCenter, size / 3, size / 8, 5f);
                 }
             }
 
-            for (int ti = 0, vi = 0, z = 0; z < resolution; z++)
-            {
-                for (int x = 0; x < resolution; x++, ti += 6, vi++)
-                {
-                    triangles[ti] = vi;
-                    triangles[ti + 1] = vi + resolution + 1;
-                    triangles[ti + 2] = vi + 1;
-
-                    triangles[ti + 3] = vi + 1;
-                    triangles[ti + 4] = vi + resolution + 1;
-                    triangles[ti + 5] = vi + resolution + 2;
-                }
-                vi++;
-            }
-
-            if ((resolution + 1) * (resolution + 1) > 65000)
-            {
-                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            }
-
-
-            mesh.vertices = vertices;
-            mesh.uv = uv;
-            mesh.triangles = triangles;
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-
-            return mesh;
+            return grid;                    
         }
 
         float GetTruncatedConeHeight(float x, float z, float xCenter, float zCenter, float radius, float flatRadius, float maxHeight)

@@ -13,12 +13,12 @@ namespace Building
 
         public void DigAction(int centerX, int centerZ, int radius, float digDepth)
         {
-            if (terrainElev[centerX, centerZ] >= duneModel.sandElev[centerX, centerZ]) return;
+            if (terrain[centerX, centerZ] >= duneModel.sand[centerX, centerZ]) return;
 
-            float[,] sandElev = duneModel.sandElev;
+            NativeGrid sandElev = duneModel.sand;
 
-            int width = sandElev.GetLength(0);
-            int height = sandElev.GetLength(1);
+            int width = sandElev.Width;
+            int height = sandElev.Height;
 
             float maxHeight = float.MinValue;
 
@@ -31,7 +31,7 @@ namespace Building
                     int nz = centerZ + dz;
                     if (nx < 0 || nx >= width || nz < 0 || nz >= height) continue;
 
-                    float h = Mathf.Max(sandElev[nx, nz], terrainElev[nx, nz]);
+                    float h = Mathf.Max(sandElev[nx, nz], terrain[nx, nz]);
                     if (h > maxHeight) maxHeight = h;
                 }
             }
@@ -51,15 +51,16 @@ namespace Building
 
                     if (dist <= radius - 0.5f)
                     {
-                        if (terrainElev[nx, nz] >= sandElev[nx, nz] || constructionGrid[nx, nz] > 0) continue;
+                        if (terrain[nx, nz] >= sandElev[nx, nz] || constructionGrid[nx, nz].Count > 0) continue;
                         float original = sandElev[nx, nz];
                         float newHeight = original - digDepth;
-                        newHeight = newHeight > terrainElev[nx, nz] ? newHeight : terrainElev[nx, nz];
+                        newHeight = newHeight > terrain[nx, nz] ? newHeight : terrain[nx, nz];
                         float removed = original - newHeight;
                         totalRemoved += removed;
 
                         //terrainElev[nx, nz] = newHeight;
                         sandElev[nx, nz] = newHeight;
+                        duneModel.sandChanges.AddChanges(nx, nz);
                     }
                 }
             }
@@ -81,7 +82,7 @@ namespace Building
                     float dist = Mathf.Sqrt(dx * dx + dz * dz);
                     if (dist > radius && dist <= radius + extraSpreadRadius)
                     {
-                        if (constructionGrid[nx, nz] > 0) continue;
+                        if (constructionGrid[nx, nz].Count > 0) continue;
                         // Peso inverso a la distancia (más cerca → más arena)
                         float weight = 1f / (dist + 0.01f);
                         ringCells.Add((nx, nz, weight));
@@ -95,6 +96,7 @@ namespace Building
             {
                 float amount = totalRemoved * (weight / weightSum);
                 sandElev[x, z] += amount;
+                duneModel.sandChanges.AddChanges(x, z);
 
                 duneModel.ActivateCell(x, z);
                 duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);

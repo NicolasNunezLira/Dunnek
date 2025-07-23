@@ -1,6 +1,3 @@
-using System;
-using ue = UnityEngine;
-
 namespace DunefieldModel_DualMesh
 {
     public partial class ModelDM
@@ -19,24 +16,24 @@ namespace DunefieldModel_DualMesh
             // Buscar el punto más bajo en la dirección del viento
             while (FindSlope.Downslope(x, z, dx, dz, out int xLow, out int zLow) >= 1)
             {
-                if (openEnded &&
-                    ((xLow == xDOF && x == 0) || (xLow == 0 && x == xDOF) ||
-                    (zLow == zDOF && z == 0) || (zLow == 0 && z == zDOF)))
+                /*
+                if (openEnded && IsOutside(xLow, zLow))
                     break;
+                */
 
                 x = xLow;
                 z = zLow;
             }
 
 
-            if (terrainElev[x, z] >= sandElev[x, z])
+            if (terrainShadow[x, z] >= sand[x, z])
             {
                 // Si el terreno es más alto que la arena más la altura de deposición, depositar encima del terreno
-                sandElev[x, z] = terrainElev[x, z] + depositeHeight;
+                sand[x, z] = terrainShadow[x, z] + depositeHeight;
             }
             else
             {
-                sandElev[x, z] += depositeHeight;
+                sand[x, z] += depositeHeight;
             }
 
             UpdateShadow(x, z, dx, dz);

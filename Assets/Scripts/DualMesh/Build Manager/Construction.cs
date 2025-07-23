@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Linq;
 using Data;
+using System.Runtime.InteropServices;
 //using System.Numerics;
 
 namespace Building
@@ -10,19 +11,19 @@ namespace Building
     public partial class BuildSystem
     {
 
-        public void GameObjectConstruction(GameObject prefab, UnityEngine.Quaternion rotation, string name)
+        public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, ConstructionType constructionType, Vector3? overridePosition = null)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
 
             float y = Mathf.Max(
-                duneModel.sandElev[previewX, previewZ],
-                duneModel.terrainElev[previewX, previewZ]
+                duneModel.sand[posX, posZ],
+                duneModel.terrain[posX, posZ]
             );
 
-            UnityEngine.Vector3 centerPos = new UnityEngine.Vector3(
-                (previewX + 0.5f) * cellSize,
+            Vector3 centerPos = overridePosition ?? new Vector3(
+                (posX + 0.5f) * cellSize,
                 y,
-                (previewZ + 0.5f) * cellSize
+                (posZ + 0.5f) * cellSize
             );
 
             GameObject parentGO = GameObject.Find("Construcciones");
@@ -35,7 +36,7 @@ namespace Building
             // Instanciar el prefab con el objeto padre
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = name + currentConstructionID;//+ System.DateTime.Now.ToString("HHmmss");
+            prefabInstance.name = constructionType.ToString() + currentConstructionID;
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
@@ -69,9 +70,10 @@ namespace Building
                     // Verificamos si está dentro del local bounds
                     if (localBounds.Contains(localPoint))
                     {
-                        duneModel.terrainElev[x, z] = targetHeight;
-                        duneModel.sandElev[x, z] = floorHeight;
-                        //isConstruible[x, z] = false;
+                        duneModel.terrainShadow[x, z] = targetHeight;
+                        duneModel.terrainShadowChanges.AddChanges(x, z);
+                        duneModel.sand[x, z] = floorHeight;
+                        duneModel.sandChanges.AddChanges(x, z);
                         support.Add(new int2(x, z));
                         duneModel.ActivateCell(x, z);
                         duneModel.UpdateShadow(x, z, duneModel.dx, duneModel.dz);
@@ -82,12 +84,13 @@ namespace Building
                 prefabInstance,
                 centerPos,
                 prefabRotation,
-                currentBuildMode,
+                constructionType,
                 support,
                 GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution),
                 floorHeight,
                 targetHeight - floorHeight);
-            return;
+
+            return prefabInstance;
         }
 
         // Helper method to set layer recursively
@@ -108,7 +111,7 @@ namespace Building
             GameObject obj,
             UnityEngine.Vector3 position,
             UnityEngine.Quaternion rotation,
-            DualMesh.BuildMode currentType,
+            ConstructionType currentType,
             List<int2> support,
             List<int2> boundarySupport,
             float floorHeight,
@@ -133,12 +136,14 @@ namespace Building
 
             foreach (var cell in support)
             {
-                constructionGrid[cell.x, cell.y] = currentConstructionID;
+                //constructionGrid[cell.x, cell.y] = currentConstructionID;
+                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
             }
 
             foreach (var cell in boundarySupport)
             {
-                constructionGrid[cell.x, cell.y] = currentConstructionID;
+                //constructionGrid[cell.x, cell.y] = currentConstructionID;
+                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
             }
 
             currentConstructionID++;
@@ -148,7 +153,7 @@ namespace Building
         {
             switch (mode)
             {
-                case DualMesh.BuildMode.Raise: return wallPrefab;
+                //case DualMesh.BuildMode.Raise: return wallPrefab;
                 case DualMesh.BuildMode.Dig: return shovelPreviewGO;
                 case DualMesh.BuildMode.PlaceHouse: return housePrefab;
                 default: return null;

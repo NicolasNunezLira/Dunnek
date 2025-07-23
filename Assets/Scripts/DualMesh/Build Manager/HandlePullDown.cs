@@ -41,7 +41,7 @@ public partial class DualMesh
 
         yield return new WaitForSeconds(0.5f);
 
-        yield return construction.InitPulledDownCoroutine(duneModel.sandElev);
+        yield return construction.InitPulledDownCoroutine(duneModel.sand, duneModel.sandChanges);
 
         yield return new WaitForSeconds(0.5f);
 
@@ -62,19 +62,12 @@ public partial class DualMesh
             int cx = coord.x;
             int cz = coord.y;
 
-            if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
+            if (cx < 0 || cz < 0 || cx >= constructionGrid.Width || cz >= constructionGrid.Length) continue;
 
-            constructionGrid[cx, cz] = 0;
-            //duneModel.constructionGrid[cx, cz] = 0;
+            //constructionGrid[cx, cz] = 0;
+            constructionGrid.TryRemoveConstruction(cx, cz, id);
 
-            /*
-            if (duneModel.sandElev[cx, cz] >= data.buildHeight)
-            {
-                duneModel.sandElev[cx, cz] -= data.buildHeight;
-            }
-            */
-
-            duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+            duneModel.terrainShadow[cx, cz] = terrainShadow[cx, cz]; // restaura altura original
             duneModel.ActivateCell(cx, cz);
             duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
         }
@@ -83,12 +76,12 @@ public partial class DualMesh
             int cx = coord.x;
             int cz = coord.y;
 
-            if (cx < 0 || cz < 0 || cx >= constructionGrid.GetLength(0) || cz >= constructionGrid.GetLength(1)) continue;
+            if (!constructionGrid.IsValid(cx, cz)) continue;
 
-            constructionGrid[cx, cz] = 0;
-            //duneModel.constructionGrid[cx, cz] = 0;
+            //constructionGrid[cx, cz] = 0;
+            constructionGrid.TryRemoveConstruction(cx, cz, id);
 
-            duneModel.terrainElev[cx, cz] = terrainElev[cx, cz]; // restaura altura original
+            duneModel.terrainShadow[cx, cz] = terrainShadow[cx, cz]; // restaura altura original
             duneModel.ActivateCell(cx, cz);
             duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
         }
