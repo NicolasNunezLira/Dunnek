@@ -73,17 +73,14 @@ namespace Building
                 int cx = coord.x;
                 int cz = coord.y;
 
-                if (constructionGrid.IsValid(cx, cz)) continue;
-
-                //constructionGrid[cx, cz] = 0;
-                constructionGrid.TryRemoveConstruction(cx, cz, idToDestroy);
+                if (!constructionGrid.IsValid(cx, cz)) continue;
                 
                 if (duneModel.sand[cx, cz] >= data.buildHeight + data.floorHeight)
                 {
                     duneModel.sand[cx, cz] -= data.buildHeight;
                 }
 
-                duneModel.terrainShadow[cx, cz] = terrain[cx, cz]; // restaura altura original
+                duneModel.terrainShadow[cx, cz] = duneModel.terrain[cx, cz];
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
@@ -92,15 +89,14 @@ namespace Building
                 int cx = coord.x;
                 int cz = coord.y;
 
-                if (constructionGrid.IsValid(cx, cz)) continue;
+                if (!constructionGrid.IsValid(cx, cz)) continue;
 
-                //constructionGrid[cx, cz] = 0;
-                constructionGrid.TryRemoveConstruction(cx, cz, idToDestroy);
-
-                duneModel.terrainShadow[cx, cz] = terrain[cx, cz]; // restaura altura original
+                duneModel.terrainShadow[cx, cz] = duneModel.terrain[cx, cz]; // restaura altura original
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
+
+            constructionGrid.RemoveConstructionById(idToDestroy);
 
             constructions.Remove(idToDestroy);
             string name = toDestroy.name;

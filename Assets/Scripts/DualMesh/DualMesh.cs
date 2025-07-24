@@ -23,6 +23,7 @@ public partial class DualMesh : MonoBehaviour
     void Update()
     {
         //float before = duneModel.TotalSand();
+        
         if (!isPaused)
         {
             HandleInput();

@@ -26,9 +26,9 @@ public partial class DualMesh : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.Escape) && inMode != PlayingMode.Simulation)
-            {
-                SetMode(PlayingMode.Simulation);
-            }
+        {
+            SetMode(PlayingMode.Simulation);
+        }
         #endregion
     }
 
@@ -45,10 +45,17 @@ public partial class DualMesh : MonoBehaviour
             inMode = newMode;
         }
 
-        if (uiController != null)
+        if (inMode == PlayingMode.Simulation)
         {
-            uiController.UpdateButtonVisuals(inMode);
+            builder.HideAllPreviews();
+            builder.ClearWallPreview();
+            builder.ClearPoints();
         }
+
+        if (uiController != null)
+            {
+                uiController.UpdateButtonVisuals(inMode);
+            }
 
         UpdateMeshColliders();
     }

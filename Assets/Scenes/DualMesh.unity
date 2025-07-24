@@ -303,6 +303,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5354862a98581c4b98a89307dab78fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  previewParentGO: {fileID: 0}
   uiController: {fileID: 755058212}
   xResolution: 255
   zResolution: 255
@@ -323,14 +324,14 @@ MonoBehaviour:
   sandAmplitude2: 0.8
   sandScale3: 0.1
   sandAmplitude3: 0.3
-  heightVariation: 0.08
+  heightVariation: 0.02
   slope: 0.15
   hopLength: 5
   shadowSlope: 0.02
   windDirection: {x: 1, y: 1}
-  grainsPerStep: 300
-  avalancheSlope: 0.5
-  criticalSlopeThreshold: 2
+  grainsPerStep: 3000
+  avalancheSlope: 0.1
+  criticalSlopeThreshold: 1
   maxCellsPerFrame: 100
   avalancheTransferRate: 0.7
   conicShapeFactor: 1
@@ -510,7 +511,7 @@ Transform:
   m_GameObject: {fileID: 203844586}
   serializedVersion: 2
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 49, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1736,7 +1737,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 364, y: -214}
+  m_AnchoredPosition: {x: 416, y: -214}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &755058210

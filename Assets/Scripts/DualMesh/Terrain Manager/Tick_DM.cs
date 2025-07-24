@@ -25,7 +25,7 @@ namespace DunefieldModel_DualMesh
                 int x = rnd.Next(0, sand.Width);
                 int z = rnd.Next(0, sand.Height);
 
-                if (shadow[x, z] > 0 || terrainShadow[x, z] >= sand[x, z]) // Si el grano está en sombra o no hay arena sobre el terreno, saltar
+                if (shadow[x, z] > 0 || terrainShadow[x, z] >= sand[x, z] - erosionHeight * 0.1f) // Si el grano está en sombra o no hay arena sobre el terreno, saltar
                 {
                     continue;
                 }
@@ -68,22 +68,19 @@ namespace DunefieldModel_DualMesh
                     int checkX = xCurr + s * stepX + dx;
                     int checkZ = zCurr + s * stepZ + dz;
 
-                    //if (checkX >= 0 && checkX < constructionGrid.GetLength(0) &&
-                    //    checkZ >= 0 && checkZ < constructionGrid.GetLength(1))
-                    if (constructionGrid.IsValid(checkX, checkZ))
+                    if (constructionGrid[checkX, checkZ].Count > 0)
                     {
                         List<int> ids = constructionGrid[checkX, checkZ];
-                        //if (id > 0)
+                        
                         foreach (int id in ids)
                         {
-                            constructions.TryGetValue(id, out ConstructionData currentConstruction);
-                            ;
+                            constructions.TryGetValue(id, out ConstructionData currentConstruction);;
                             int xPrev = checkX - dx;
                             int zPrev = checkZ - dz;
 
                             float acumulacionBarlovento = terrainShadow[checkX, checkZ] - sand[xPrev, zPrev];
 
-                            if (acumulacionBarlovento <= currentConstruction.buildHeight * 0.2f)
+                            if (acumulacionBarlovento <= currentConstruction.buildHeight * 0.1f)
                             {
                                 DepositGrain(checkX, checkZ, dx, dz, depositeH);
                                 sandChanges.AddChanges(checkX, checkZ);

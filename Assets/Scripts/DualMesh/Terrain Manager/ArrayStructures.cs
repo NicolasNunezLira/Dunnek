@@ -202,9 +202,34 @@ namespace DunefieldModel_DualMesh
             return data[key].Remove(id);
         }
 
+        public void RemoveConstructionById(int id)
+        {
+            var keysToClean = new List<int2>();
+
+            foreach (var kvp in data)
+            {
+                var key = kvp.Key;
+                var innerDict = kvp.Value;
+
+                if (innerDict.ContainsKey(id))
+                {
+                    innerDict.Remove(id);
+
+                    if (innerDict.Count == 0)
+                        keysToClean.Add(key);
+                }
+            }
+            
+            foreach (var key in keysToClean)
+            {
+                data.Remove(key);
+            }
+        }
+
+
         public bool IsValid(int x, int z)
         {
-            return x < 0 || z < 0 || x >= Width || z >= Length;
+            return !(x < 0 || z < 0 || x >= Width || z >= Length);
         }
 
         public bool TryGetTypesAt(int x, int z, ConstructionType constructionType, out List<int> ids)
