@@ -12,6 +12,7 @@ namespace Building
         #region Preview Wall
         public void PreviewWall()
         {
+            towerPreviewGO?.SetActive(false);
             ClearWallPreview();
             canPlaceWall = true;
 
@@ -41,7 +42,7 @@ namespace Building
                 bool canBuildSegment = constructionGrid[x, z].Count == 0 || constructionGrid.IsOnlyTowerAt(x, z);
                 Color segmentColor = canBuildSegment ? green : red;
 
-                if (!canBuildSegment) canPlaceWall = false;
+                canPlaceWall = canPlaceWall && canBuildSegment;
 
                 ChangePreviewColor(wallSegment, segmentColor, false);
 
@@ -71,8 +72,6 @@ namespace Building
             GameObject existingTower = GetExistingTowerAt(x, z);
             if (existingTower != null)
             {
-                //ChangePreviewColor(existingTower, green, true);
-                // Asigna según si ya existe la torre inicial
                 if (existingStartTower == null)
                     existingStartTower = existingTower;
                 else
@@ -81,8 +80,9 @@ namespace Building
                 return;
             }
 
-            towerPreviewGO?.SetActive(true);
+            towerPreviewGO?.SetActive(false);
             GameObject previewTower = GameObject.Instantiate(towerPreviewGO, finalPos, Quaternion.identity);
+            previewTower.SetActive(true);
             previewTower.name = "TowerPreview" + (wallStartPoint.HasValue ? "Start" : "End");
             previewTower.transform.SetParent(wallPreviewParent.transform);
             ChangePreviewColor(previewTower, green, false);
@@ -121,13 +121,11 @@ namespace Building
                 {
                     wallStartPoint = clickedPoint;
                     thereIsATower = towerHit != null;
-                    Debug.Log("Start point set.");
                     return false;
                 }
                 else if (!wallEndPoint.HasValue)
                 {
                     wallEndPoint = clickedPoint;
-                    Debug.Log("End point set.");
                     return true;
                 }
             }

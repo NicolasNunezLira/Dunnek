@@ -1,15 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Data;
-using Unity.VisualScripting;
-using UnityEngine;
 
 namespace Building
 {
     public partial class BuildSystem
     {
-        #region Confirm
+        #region Confirm build
 
         public bool ConfirmBuild()
         {
@@ -17,20 +12,10 @@ namespace Building
 
             activePreview.SetActive(false);
 
-
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceHouse:
                     GameObjectConstruction(housePrefab, previewX, previewZ, prefabRotation, ConstructionType.House);
-                    return true;
-                case DualMesh.BuildMode.Dig:
-                    DigAction(previewX, previewZ, buildRadius, digDepth);
-                    return true;
-                case DualMesh.BuildMode.Flat:
-                    FlatSand(previewX, previewZ, 3 * buildRadius);
-                    return true;
-                case DualMesh.BuildMode.AddSand:
-                    AddSandCone(previewX, previewZ, 0.5f * buildRadius, 6f * buildRadius);
                     return true;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
                     if (wallStartPoint.HasValue && wallEndPoint.HasValue)
@@ -45,7 +30,28 @@ namespace Building
             }
             return false;
         }
-
         #endregion
+
+        public bool ConfirmAction()
+        {
+            if (!canBuild) return false;
+
+            activePreview.SetActive(false);
+
+
+            switch (currentActionMode)
+            {
+                case DualMesh.ActionMode.Dig:
+                    DigAction(previewX, previewZ, buildRadius, digDepth);
+                    return true;
+                case DualMesh.ActionMode.Flat:
+                    FlatSand(previewX, previewZ, 3 * buildRadius);
+                    return true;
+                case DualMesh.ActionMode.AddSand:
+                    AddSandCone(previewX, previewZ, 0.5f * buildRadius, 6f * buildRadius);
+                    return true;
+            }
+            return false;
+        }
     }
 }

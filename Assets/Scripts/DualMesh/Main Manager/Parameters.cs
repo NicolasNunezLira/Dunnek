@@ -4,6 +4,10 @@ using UnityEngine;
 public partial class DualMesh : MonoBehaviour
 {
     #region Program Parameters
+    [Header("User Interface controllers")]
+    [Tooltip("Construction UI controller")]
+    public UIController uiController;
+
     [Header("Plane Settings")]
     [Range(31, 511)]
     [Tooltip("The number of subdivisions of visual mesh along each axis.")]

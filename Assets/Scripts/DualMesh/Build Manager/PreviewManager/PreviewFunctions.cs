@@ -1,22 +1,20 @@
 using System.Collections.Generic;
-using Data;
 using UnityEngine;
 
 namespace Building
 {
     public partial class BuildSystem
     {
-        private ConstructionData construction, actualConstruction;
         private Color green = new Color(0f, 1f, 0f, 0.3f), red = new Color(1f, 0f, 0f, 0.3f);
         public Dictionary<Renderer, Material[]> originalTowerMaterials = new();
         private Vector3? tempWallEndPoint;
-        private bool canPlaceWall = true, isWallPreviewActive, thereIsATower = false;
+        public bool canPlaceWall = true, isWallPreviewActive, thereIsATower = false;
         
         #region Handle
         public void HandleBuildPreview()
         {
-            if (!thereIsATower) activePreview.SetActive(true);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain")))
             {
                 point = hit.point;
@@ -26,19 +24,21 @@ namespace Building
                 if (x < 0 || z < 0 || x + buildSize > duneModel.xResolution + 1 || z + buildSize > duneModel.zResolution + 1)
                     return;
 
-                if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints && wallStartPoint.HasValue)
+                if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints)
                 {
-                    tempWallEndPoint = point;
-                    PreviewWall();
-                    towerPreviewGO?.SetActive(false);
-                    return;
+                    if (wallStartPoint.HasValue)
+                    {
+                        tempWallEndPoint = point;
+                        PreviewWall();
+                        towerPreviewGO?.SetActive(false);
+                        return;
+                    }
+                    else
+                    {
+                        towerPreviewGO?.SetActive(DualMesh.instance.inMode == DualMesh.PlayingMode.Build);
+                        tempWallEndPoint = null;
+                    }
                 }
-                else
-                {
-                    towerPreviewGO?.SetActive(true);
-                    tempWallEndPoint = null;
-                }
-
 
                 Renderer rend = activePreview.GetComponentInChildren<Renderer>();
                 Bounds bounds = rend.bounds;
@@ -87,26 +87,12 @@ namespace Building
         #region Manage Previews
         public void UpdateBuildPreviewVisual()
         {
-            shovelPreviewGO.SetActive(false);
-            wallPreviewGO.SetActive(false);
-            housePreviewGO.SetActive(false);
+            HideAllPreviews();
 
             switch (currentBuildMode)
             {
-                case DualMesh.BuildMode.Dig:
-                    activePreview = shovelPreviewGO;
-                    break;
-
                 case DualMesh.BuildMode.PlaceHouse:
                     activePreview = housePreviewGO;
-                    break;
-
-                case DualMesh.BuildMode.Flat:
-                    activePreview = sweeperPreviewGO;
-                    break;
-
-                case DualMesh.BuildMode.AddSand:
-                    activePreview = circlePreviewGO;
                     break;
 
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
@@ -118,6 +104,28 @@ namespace Building
             activePreview?.SetActive(true);
         }
 
+        public void UpdateActionPreviewVisual()
+        {
+            HideAllPreviews();
+
+            switch (currentActionMode)
+            {
+                case DualMesh.ActionMode.Dig:
+                    activePreview = shovelPreviewGO;
+                    break;
+
+                case DualMesh.ActionMode.Flat:
+                    activePreview = sweeperPreviewGO;
+                    break;
+
+                case DualMesh.ActionMode.AddSand:
+                    activePreview = circlePreviewGO;
+                    break;
+            }
+           
+            activePreview.SetActive(true);
+        }
+
         public void HideAllPreviews()
         {
             shovelPreviewGO?.SetActive(false);
@@ -126,13 +134,26 @@ namespace Building
             housePreviewGO?.SetActive(false);
             sweeperPreviewGO?.SetActive(false);
             circlePreviewGO?.SetActive(false);
+        }
+
+        public void HideAllActionsPreviews()
+        {
+            shovelPreviewGO?.SetActive(false);
+            sweeperPreviewGO?.SetActive(false);
+            circlePreviewGO?.SetActive(false);
+        }
+
+        public void HideAllBuildsPreviews()
+        {
+            wallPreviewGO?.SetActive(false);
+            towerPreviewGO?.SetActive(false);
             ClearWallPreview();
             ClearPoints();
         }
 
         public void RotateWallPreview()
         {
-            if (currentBuildMode == DualMesh.BuildMode.Dig) return;
+            if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints) return;
 
             prefabRotation *= UnityEngine.Quaternion.Euler(0, 45f, 0);
             activePreview.transform.rotation = prefabRotation;

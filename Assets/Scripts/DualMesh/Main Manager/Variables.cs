@@ -13,9 +13,7 @@ public partial class DualMesh : MonoBehaviour
     public int simZResolution => openEnded ? zResolution + 40 : zResolution;
 
     private GameObject terrainGO, sandGO;
-
-    //public float[,] terrainElev, sandElev, terrainShadow;
-    // Native arrays for simulation
+    
     public NativeGrid sand, terrain, terrainShadow;
 
     public ConstructionGrid constructionGrid;
@@ -33,12 +31,19 @@ public partial class DualMesh : MonoBehaviour
     private GameObject housePreviewGO, wallPreviewGO, towerPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
 
 
-    public enum PlayingMode { Build, Destroy, Simulation };
-    private PlayingMode inMode = PlayingMode.Simulation;
+    public enum PlayingMode { Simulation, Build, Destroy, Action};
+    public PlayingMode inMode { get; set; } = PlayingMode.Simulation;
+    
+    [SerializeField]
     public enum BuildMode
-    { PlaceHouse, PlaceWallBetweenPoints, Flat, AddSand, Dig};
+    { PlaceHouse, PlaceWallBetweenPoints};
+
+    [SerializeField]
+    public enum ActionMode
+    { Flat, AddSand, Dig};
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
+    private ActionMode currentActionMode = ActionMode.Dig;
 
     private Dictionary<int, ConstructionData> constructions;
     private Dictionary<int, CompositeConstruction> compositeConstructions;

@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
 {
+    public GameObject previewParentGO;
     #region Auxiliar Functions
     void MakePreviewTransparent(GameObject obj)
     {
@@ -28,62 +29,34 @@ public partial class DualMesh : MonoBehaviour
         }
     }
 
-    void AddCollidersToPrefabs()
-    {
-        /*
-        housePrefabGO.AddComponent<MeshCollider>().convex = true;
-        wallPrefabGO.AddComponent<MeshCollider>().convex = true;
-        */
-        /*
-        AddFittedBoxCollider(housePrefabGO);
-        AddFittedBoxCollider(wallPrefabGO);
-        */
-    }
-
-    /*
-    void AddFittedBoxCollider(GameObject go)
-    {
-        var coll = go.AddComponent<BoxCollider>();
-
-        Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
-        if (renderers.Length == 0) return;
-
-        Bounds combinedBounds = renderers[0].bounds;
-        for (int i = 1; i < renderers.Length; i++)
-        {
-            combinedBounds.Encapsulate(renderers[i].bounds);
-        }
-
-        coll.center = go.transform.InverseTransformPoint(combinedBounds.center);
-        coll.size = combinedBounds.size;
-    }
-    */
-
     void CreatePreviews()
     {
-        shovelPreviewGO = Instantiate(shovelPrefabGO);
-        shovelPreviewGO.SetActive(false);
-        //MakePreviewTransparent(shovelPreviewGO);
+        if (previewParentGO == null)
+        {
+            previewParentGO = new GameObject("PreviewObjects");
+        }
 
-        housePreviewGO = Instantiate(housePrefabGO);
+        shovelPreviewGO = Instantiate(shovelPrefabGO, previewParentGO.transform);
+        shovelPreviewGO.SetActive(false);
+
+        housePreviewGO = Instantiate(housePrefabGO, previewParentGO.transform);
         housePreviewGO.SetActive(false);
         MakePreviewTransparent(housePreviewGO);
 
-        wallPreviewGO = Instantiate(wallPrefabGO);
+        wallPreviewGO = Instantiate(wallPrefabGO, previewParentGO.transform);
         wallPreviewGO.SetActive(false);
         MakePreviewTransparent(wallPreviewGO);
 
-        towerPreviewGO = Instantiate(towerPrefabGO);
+        towerPreviewGO = Instantiate(towerPrefabGO, previewParentGO.transform);
         towerPreviewGO.SetActive(false);
         MakePreviewTransparent(towerPreviewGO);
 
-        sweeperPreviewGO = Instantiate(sweeperPrefabGO);
+        sweeperPreviewGO = Instantiate(sweeperPrefabGO, previewParentGO.transform);
         sweeperPreviewGO.SetActive(false);
         MakePreviewTransparent(sweeperPreviewGO);
 
-        circlePreviewGO = Instantiate(circlePrefabGO);
+        circlePreviewGO = Instantiate(circlePrefabGO, previewParentGO.transform);
         circlePreviewGO.SetActive(false);
-        //MakePreviewTransparent(circlePreviewGO);
     }
     #endregion
 }

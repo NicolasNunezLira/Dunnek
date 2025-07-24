@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using Data;
 
 namespace DunefieldModel_DualMesh
 {
@@ -12,8 +11,6 @@ namespace DunefieldModel_DualMesh
         // Cola de celdas activas
         public Queue<Vector2Int> avalancheQueue;
         private HashSet<Vector2Int> inQueue;
-
-        //private int avalancheChecksPerFrame = 500; // o ajustable públicamente
         #endregion
 
         #region IsValidCell
@@ -25,9 +22,6 @@ namespace DunefieldModel_DualMesh
 
 
         #region Initialize Queues
-        /// <summary>
-        /// Inicializa la cola reactiva de avalanchas
-        /// </summary>
         public void InitAvalancheQueue()
         {
             if (avalancheQueue == null) avalancheQueue = new Queue<Vector2Int>();
@@ -70,7 +64,6 @@ namespace DunefieldModel_DualMesh
                 }
             }
 
-            // Ordenar por pendiente de mayor a menor
             critical.Sort((a, b) => b.slope.CompareTo(a.slope));
 
             foreach (var (pos, _) in critical)
@@ -118,9 +111,6 @@ namespace DunefieldModel_DualMesh
         #endregion
 
         #region ActivateCells
-        /// <summary>
-        /// Activa una celda para evaluación de avalancha
-        /// </summary>
         public void ActivateCell(int x, int z)
         {
             Vector2Int cell = new Vector2Int(x, z);
@@ -224,11 +214,10 @@ namespace DunefieldModel_DualMesh
                             inQueue.Add(neighbor);
                         }
 
-                        localStack.Push(neighbor); // 💡 propagación rápida en bloque
+                        localStack.Push(neighbor);
                     }
                 }
 
-                // Reinsertar el colapsador si sigue inestable
                 float slopeNow = GetMaxSlopeAt(x, z);
                 if (slopeNow > avalancheSlope)
                     localStack.Push(cell);

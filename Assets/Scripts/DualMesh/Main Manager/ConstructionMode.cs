@@ -1,10 +1,15 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
 {
     public void ConstructionMode()
     {
+        if (!builder.wallStartPoint.HasValue) builder.UpdateBuildPreviewVisual();
+
+        SetBuildType(currentBuildMode);
+
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
@@ -16,12 +21,21 @@ public partial class DualMesh : MonoBehaviour
                 currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
             }
 
-            builder.currentBuildMode = currentBuildMode;
-            builder.UpdateBuildPreviewVisual();
+            SetBuildType(currentBuildMode);
+        }
+
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
             builder.HideAllPreviews();
+            return;
         }
 
         builder.HandleBuildPreview();
+
+        if (currentBuildMode == BuildMode.PlaceWallBetweenPoints && builder.wallStartPoint.HasValue)
+        {
+            builder.PreviewWall();
+        }
 
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -34,10 +48,11 @@ public partial class DualMesh : MonoBehaviour
             {
                 constructed = builder.ConfirmBuild();
                 inMode = !constructed ? inMode : PlayingMode.Simulation;
+                uiController.UpdateButtonVisuals(inMode);
             }
             else
             {
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0) && builder.canPlaceWall)
                 {
                     isWallReadyForConstruction = builder.SetPointsForWall();
                     if (isWallReadyForConstruction)
@@ -45,11 +60,8 @@ public partial class DualMesh : MonoBehaviour
                         builder.ClearWallPreview();
                         constructed = builder.ConfirmBuild();
                         inMode = !constructed ? inMode : PlayingMode.Simulation;
+                        uiController.UpdateButtonVisuals(inMode);
                     }
-                }
-                else
-                {
-                    builder.PreviewWall();
                 }
             }
         }

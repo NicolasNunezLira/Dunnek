@@ -62,8 +62,6 @@ public partial class DualMesh : MonoBehaviour
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
 
-        // Prefabs and previews
-        AddCollidersToPrefabs();
         CreatePreviews();
 
         activePreview = housePreviewGO;
@@ -84,7 +82,9 @@ public partial class DualMesh : MonoBehaviour
             towerPreviewGO,
             sweeperPreviewGO,
             circlePreviewGO,
+            inMode,
             currentBuildMode,
+            currentActionMode,
             terrain,
             activePreview,
             constructionGrid,

@@ -3,6 +3,14 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
 {
+    #region Awake
+    public static DualMesh instance;
+    void Awake()
+    {
+        instance = this;
+    }
+    #endregion
+
     #region Start
 
     void Start()
@@ -12,15 +20,14 @@ public partial class DualMesh : MonoBehaviour
     #endregion
 
     #region Update
-
-
     void Update()
     {
         //float before = duneModel.TotalSand();
+        
         if (!isPaused)
         {
             HandleInput();
-            
+
             switch (inMode)
             {
                 #region Build Mode
@@ -35,6 +42,14 @@ public partial class DualMesh : MonoBehaviour
                 case PlayingMode.Destroy:
                     {
                         DestructionMode();
+                        break;
+                    }
+                #endregion
+
+                #region Action Mode
+                case PlayingMode.Action:
+                    {
+                        ActionsMode();
                         break;
                     }
                 #endregion
@@ -56,8 +71,7 @@ public partial class DualMesh : MonoBehaviour
         }
 
         CheckForPullDowns();
-
-        //dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sand);
+        
         dualMeshConstructor.ApplyChanges(sandGO.GetComponent<MeshFilter>().mesh, sand, sandChanges);
         terrainShadowChanges.ClearChanges();
 
@@ -75,6 +89,6 @@ public partial class DualMesh : MonoBehaviour
         terrainShadow.Dispose();
         duneModel.shadow.Dispose();
         sandChanges.Dispose();
-        terrainShadowChanges.Dispose(); 
+        terrainShadowChanges.Dispose();
     }
 }

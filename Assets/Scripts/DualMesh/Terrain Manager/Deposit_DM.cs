@@ -4,31 +4,14 @@ namespace DunefieldModel_DualMesh
     {
         public virtual void DepositGrain(int x, int z, int dx, int dz, float depositeHeight)
         {
-            /// <summary>
-            /// Deposita un grano de arena en la posición (x, z) considerando viento con dirección (dx, dz).
-            /// </summary>
-            /// <param name="x">Componente x de la posición donde se intentará depositar el grano.</param>
-            /// <param name="z">Componente z de la posición donde se intentará depositar el grano.</param>
-            /// <param name="dx">Componente x de la dirección del viento.</param>
-            /// <param name="dz">Componente z de la dirección del viento.</param>
-            /// <param name="depositeHeight">Altura de deposición del grano.</param>
-
-            // Buscar el punto más bajo en la dirección del viento
             while (FindSlope.Downslope(x, z, dx, dz, out int xLow, out int zLow) >= 1)
             {
-                /*
-                if (openEnded && IsOutside(xLow, zLow))
-                    break;
-                */
-
                 x = xLow;
                 z = zLow;
             }
 
-
             if (terrainShadow[x, z] >= sand[x, z])
             {
-                // Si el terreno es más alto que la arena más la altura de deposición, depositar encima del terreno
                 sand[x, z] = terrainShadow[x, z] + depositeHeight;
             }
             else
@@ -38,9 +21,7 @@ namespace DunefieldModel_DualMesh
 
             UpdateShadow(x, z, dx, dz);
 
-            ActivateCell(x, z);
-            
-            
+            ActivateCell(x, z);          
         }
 
     }
