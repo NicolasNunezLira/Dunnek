@@ -10,6 +10,7 @@ public partial class DualMesh : MonoBehaviour
         {
             destructed = builder.DestroyConstruction();
             inMode = !destructed ? inMode : PlayingMode.Simulation;
+            SetMode(inMode);
         }
     }
 }

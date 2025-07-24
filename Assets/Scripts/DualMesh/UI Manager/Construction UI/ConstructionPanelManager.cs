@@ -18,6 +18,9 @@ public class UIController : MonoBehaviour
     private Outline destroyOutline;
     private Outline actionOutline;
 
+    private Button selectedBuildButton;
+    private Button selectedActionButton;
+
     void Start()
     {
         buildButton.onClick.AddListener(OnBuildClicked);
@@ -26,12 +29,15 @@ public class UIController : MonoBehaviour
 
         buildOutline = buildButton.GetComponent<Outline>();
         destroyOutline = destroyButton.GetComponent<Outline>();
-        actionOutline = destroyButton.GetComponent<Outline>();
+        actionOutline = actionButton.GetComponent<Outline>();
 
         buildOptionsPanel.SetActive(false);
         actionOptionsPanel.SetActive(false);
 
         StartCoroutine(WaitAndInitialize());
+
+        InitializeActionButtons();
+        InitializeBuildButtons();
     }
 
     void OnBuildClicked()
@@ -46,13 +52,12 @@ public class UIController : MonoBehaviour
 
     void OnActionClicked()
     {
-        DualMesh.instance.SetMode(PlayingMode.Build);
+        DualMesh.instance.SetMode(PlayingMode.Action);
     }
 
     IEnumerator WaitAndInitialize()
     {
         yield return new WaitUntil(() => DualMesh.instance != null);
-        //DualMesh.instance.uiController = this;
         UpdateButtonVisuals(DualMesh.instance.inMode);
     }
 
@@ -67,5 +72,123 @@ public class UIController : MonoBehaviour
 
 
         buildOptionsPanel.SetActive(mode == PlayingMode.Build);
+        actionOptionsPanel.SetActive(mode == PlayingMode.Action);
+    }
+
+    public void UpdateBuildsButtonVisual(BuildMode mode)
+    {
+        Color selectedColor = Color.green;
+        Color defaultColor = new Color(0, 0, 0, 0);
+
+        Button[] buildButtons = buildOptionsPanel.GetComponentsInChildren<Button>();
+
+        foreach (Button btn in buildButtons)
+        {
+            Outline outline = btn.GetComponent<Outline>();
+            if (outline == null) continue;
+
+            // Match button name to BuildMode
+            bool isSelected = false;
+            switch (mode)
+            {
+                case BuildMode.PlaceHouse:
+                    isSelected = btn.name == "HouseButton";
+                    break;
+                case BuildMode.PlaceWallBetweenPoints:
+                    isSelected = btn.name == "WallButton";
+                    break;
+                // Agrega más según tus botones
+            }
+
+            outline.effectColor = isSelected ? selectedColor : defaultColor;
+
+            if (isSelected) selectedBuildButton = btn;
+        }
+    }
+
+    public void UpdateActionsButtonVisual(ActionMode mode)
+    {
+        Color selectedColor = Color.green;
+        Color defaultColor = new Color(0, 0, 0, 0);
+
+        Button[] actionButtons = actionOptionsPanel.GetComponentsInChildren<Button>();
+
+        foreach (Button btn in actionButtons)
+        {
+            Outline outline = btn.GetComponent<Outline>();
+            if (outline == null) continue;
+
+            bool isSelected = false;
+            switch (mode)
+            {
+                case ActionMode.Dig:
+                    isSelected = btn.name == "DigButton";
+                    break;
+                case ActionMode.AddSand:
+                    isSelected = btn.name == "AddButton";
+                    break;
+                case ActionMode.Flat:
+                    isSelected = btn.name == "FlattenButton";
+                    break;
+            }
+
+            outline.effectColor = isSelected ? selectedColor : defaultColor;
+
+            if (isSelected) selectedActionButton = btn;
+        }
+    }
+
+
+    void InitializeBuildButtons()
+    {
+        Button[] buildButtons = buildOptionsPanel.GetComponentsInChildren<Button>();
+
+        foreach (Button btn in buildButtons)
+        {
+            string name = btn.gameObject.name;
+            btn.onClick.AddListener(() => OnBuildOptionClicked(name));
+        }
+    }
+
+    void InitializeActionButtons()
+    {
+        Button[] actionButtons = actionOptionsPanel.GetComponentsInChildren<Button>();
+
+        foreach (Button btn in actionButtons)
+        {
+            string name = btn.gameObject.name;
+            btn.onClick.AddListener(() => OnActionOptionClicked(name));
+        }
+    }
+
+    void OnBuildOptionClicked(string buttonName)
+    {
+        switch (buttonName)
+        {
+            case "HouseButton":
+                DualMesh.instance.SetBuildType(BuildMode.PlaceHouse);
+                UpdateBuildsButtonVisual(BuildMode.PlaceHouse);
+                break;
+            case "WallButton":
+                DualMesh.instance.SetBuildType(BuildMode.PlaceWallBetweenPoints);
+                UpdateBuildsButtonVisual(BuildMode.PlaceWallBetweenPoints);
+                break;
+        }
+    }
+
+    void OnActionOptionClicked(string buttonName)
+    {
+        switch (buttonName)
+        {
+            case "DigButton":
+                DualMesh.instance.SetActionType(ActionMode.Dig);
+                break;
+            case "AddButton":
+                DualMesh.instance.SetActionType(ActionMode.AddSand);
+                break;
+            case "FlattenButton":
+                DualMesh.instance.SetActionType(ActionMode.Flat);
+                break;
+        }
     }
 }

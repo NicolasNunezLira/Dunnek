@@ -35,6 +35,7 @@ public partial class DualMesh : MonoBehaviour
     #region Methods for inputs
     public void SetMode(PlayingMode newMode)
     {
+        builder.HideAllPreviews();
         if (inMode == newMode)
         {
             inMode = PlayingMode.Simulation;
@@ -44,7 +45,6 @@ public partial class DualMesh : MonoBehaviour
             inMode = newMode;
         }
 
-        // Notifica al UIController para actualizar visuales
         if (uiController != null)
         {
             uiController.UpdateButtonVisuals(inMode);

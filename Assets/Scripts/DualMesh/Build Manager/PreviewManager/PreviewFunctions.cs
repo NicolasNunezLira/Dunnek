@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Data;
 using UnityEngine;
 
 namespace Building
@@ -9,13 +8,13 @@ namespace Building
         private Color green = new Color(0f, 1f, 0f, 0.3f), red = new Color(1f, 0f, 0f, 0.3f);
         public Dictionary<Renderer, Material[]> originalTowerMaterials = new();
         private Vector3? tempWallEndPoint;
-        private bool canPlaceWall = true, isWallPreviewActive, thereIsATower = false;
+        public bool canPlaceWall = true, isWallPreviewActive, thereIsATower = false;
         
         #region Handle
         public void HandleBuildPreview()
         {
-            if (!thereIsATower) activePreview.SetActive(true);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain")))
             {
                 point = hit.point;
@@ -25,7 +24,7 @@ namespace Building
                 if (x < 0 || z < 0 || x + buildSize > duneModel.xResolution + 1 || z + buildSize > duneModel.zResolution + 1)
                     return;
 
-                if (inMode == DualMesh.PlayingMode.Build && currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints)
+                if (currentBuildMode == DualMesh.BuildMode.PlaceWallBetweenPoints)
                 {
                     if (wallStartPoint.HasValue)
                     {
@@ -36,7 +35,7 @@ namespace Building
                     }
                     else
                     {
-                        towerPreviewGO?.SetActive(true);
+                        towerPreviewGO?.SetActive(DualMesh.instance.inMode == DualMesh.PlayingMode.Build);
                         tempWallEndPoint = null;
                     }
                 }
@@ -123,9 +122,8 @@ namespace Building
                     activePreview = circlePreviewGO;
                     break;
             }
-
-            
-            activePreview?.SetActive(true);
+           
+            activePreview.SetActive(true);
         }
 
         public void HideAllPreviews()
@@ -136,6 +134,19 @@ namespace Building
             housePreviewGO?.SetActive(false);
             sweeperPreviewGO?.SetActive(false);
             circlePreviewGO?.SetActive(false);
+        }
+
+        public void HideAllActionsPreviews()
+        {
+            shovelPreviewGO?.SetActive(false);
+            sweeperPreviewGO?.SetActive(false);
+            circlePreviewGO?.SetActive(false);
+        }
+
+        public void HideAllBuildsPreviews()
+        {
+            wallPreviewGO?.SetActive(false);
+            towerPreviewGO?.SetActive(false);
             ClearWallPreview();
             ClearPoints();
         }

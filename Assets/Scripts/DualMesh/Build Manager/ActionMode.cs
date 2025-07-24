@@ -1,4 +1,4 @@
-using System;
+using UnityEngine.EventSystems;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -6,8 +6,9 @@ public partial class DualMesh : MonoBehaviour
 {
     public void ActionsMode()
     {
-        builder.HideAllPreviews();
-        
+        builder.UpdateActionPreviewVisual();
+        SetActionType(builder.currentActionMode);
+
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
@@ -19,8 +20,13 @@ public partial class DualMesh : MonoBehaviour
                 currentActionMode = (ActionMode)(((int)currentActionMode + 1) % System.Enum.GetValues(typeof(ActionMode)).Length);
             }
 
-            builder.currentActionMode = currentActionMode;
-            builder.UpdateActionPreviewVisual();
+            SetActionType(currentActionMode);
+        }
+
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            builder.HideAllPreviews();
+            return;
         }
 
         builder.HandleBuildPreview();
@@ -28,7 +34,8 @@ public partial class DualMesh : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             constructed = builder.ConfirmAction();
-            inMode = !constructed ? inMode : PlayingMode.Simulation;        
+            inMode = !constructed ? inMode : PlayingMode.Simulation;
+            uiController.UpdateButtonVisuals(inMode);      
         }
     }
 }

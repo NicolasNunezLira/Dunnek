@@ -32,7 +32,7 @@ public partial class DualMesh : MonoBehaviour
 
 
     public enum PlayingMode { Simulation, Build, Destroy, Action};
-    public PlayingMode inMode { get; private set; } = PlayingMode.Simulation;
+    public PlayingMode inMode { get; set; } = PlayingMode.Simulation;
     
     [SerializeField]
     public enum BuildMode

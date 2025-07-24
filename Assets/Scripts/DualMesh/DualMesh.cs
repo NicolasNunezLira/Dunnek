@@ -20,8 +20,6 @@ public partial class DualMesh : MonoBehaviour
     #endregion
 
     #region Update
-
-
     void Update()
     {
         //float before = duneModel.TotalSand();
@@ -72,8 +70,7 @@ public partial class DualMesh : MonoBehaviour
         }
 
         CheckForPullDowns();
-
-        //dualMeshConstructor.ApplyHeightMapToMesh(sandGO.GetComponent<MeshFilter>().mesh, sand);
+        
         dualMeshConstructor.ApplyChanges(sandGO.GetComponent<MeshFilter>().mesh, sand, sandChanges);
         terrainShadowChanges.ClearChanges();
 
