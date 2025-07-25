@@ -8,7 +8,6 @@ namespace Building
 {
     public partial class BuildSystem
     {
-
         public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, ConstructionType constructionType, Vector3? overridePosition = null)
         {
             float cellSize = duneModel.size / duneModel.xResolution;

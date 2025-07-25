@@ -1,0 +1,37 @@
+{
+  "constructions": [
+    {
+        "type": "House",
+        "cost": {
+            "Workers": 2,
+            "Sand": 10
+        },
+        "production": {
+            "Workers": [2, 0],
+            "Sand": [0, 0]
+        }
+    },
+    {
+        "type": "SegmentWall",
+        "cost": {
+            "Workers": 1,
+            "Sand": 5
+        },
+        "production": {
+            "Workers": [0, 0],
+            "Sand": [0, 0]
+        }
+    },
+    {
+        "type": "Tower",
+        "cost": {
+            "Workers": 2,
+            "Sand": 10
+        },
+        "production": {
+            "Workers": [0, 0],
+            "Sand": [0, 0]
+        }
+    }
+  ]
+}

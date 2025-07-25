@@ -13,7 +13,7 @@ public partial class DualMesh : MonoBehaviour
     public int simZResolution => openEnded ? zResolution + 40 : zResolution;
 
     private GameObject terrainGO, sandGO;
-    
+
     public NativeGrid sand, terrain, terrainShadow;
 
     public ConstructionGrid constructionGrid;
@@ -31,16 +31,16 @@ public partial class DualMesh : MonoBehaviour
     private GameObject housePreviewGO, wallPreviewGO, towerPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
 
 
-    public enum PlayingMode { Simulation, Build, Destroy, Action};
+    public enum PlayingMode { Simulation, Build, Destroy, Action };
     public PlayingMode inMode { get; set; } = PlayingMode.Simulation;
-    
+
     [SerializeField]
     public enum BuildMode
-    { PlaceHouse, PlaceWallBetweenPoints};
+    { PlaceHouse, PlaceWallBetweenPoints };
 
     [SerializeField]
     public enum ActionMode
-    { Flat, AddSand, Dig};
+    { Flat, AddSand, Dig };
 
     private BuildMode currentBuildMode = BuildMode.PlaceHouse;
     private ActionMode currentActionMode = ActionMode.Dig;
@@ -52,6 +52,7 @@ public partial class DualMesh : MonoBehaviour
     private bool isPaused = false, isWallReadyForConstruction = false;
 
     private FrameVisualChanges sandChanges, terrainShadowChanges;
-    
+
+    private ResourceSystem.ResourceManager resourceManager;
     #endregion
 }

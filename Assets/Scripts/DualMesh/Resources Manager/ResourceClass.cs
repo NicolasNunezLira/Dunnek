@@ -6,22 +6,22 @@ namespace ResourceSystem
     public class Resource
     {
         public string Name { get; private set; }
-        public int Amount { get; private set; }
-        public int Flux { get; private set; }
+        public float Amount { get; private set; }
+        public float Flux { get; private set; }
 
-        public Resource(string name, int initialAmount = 0, int flux = 0)
+        public Resource(string name, float initialAmount = 0, float flux = 0)
         {
             Name = name;
             Amount = initialAmount;
             Flux = flux;
         }
 
-        public void Add(int amount)
+        public void Add(float amount)
         {
             Amount += amount;
         }
 
-        public bool TryConsume(int amount)
+        public bool TryConsume(float amount)
         {
             if (Amount >= amount)
             {
@@ -31,7 +31,7 @@ namespace ResourceSystem
             return false;
         }
 
-        public void UpdateFlux(int delta)
+        public void UpdateFlux(float delta)
         {
             Flux += delta;
         }

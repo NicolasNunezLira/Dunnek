@@ -1,12 +1,21 @@
 using System.Collections.Generic;
+using Utils;
 using UnityEngine;
 
 namespace ResourceSystem {
-    public class ResourceManager : MonoBehaviour
+    public class ResourceManager : Singleton<ResourceManager>
     {
         private Dictionary<string, Resource> resources = new Dictionary<string, Resource>();
 
-        public void RegisterResource(string name, int initialAmount)
+        protected override void Awake()
+        {
+            base.Awake();
+
+            RegisterResource("Workers", 0f);
+            RegisterResource("Construction sand", 100f);
+        }
+
+        public void RegisterResource(string name, float initialAmount)
         {
             if (!resources.ContainsKey(name))
             {
@@ -14,7 +23,7 @@ namespace ResourceSystem {
             }
         }
 
-        public void AddResource(string name, int amount)
+        public void AddResource(string name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
             {
@@ -22,11 +31,11 @@ namespace ResourceSystem {
             }
             else
             {
-                Debug.LogWarning($"Tryinh to add to unregistered resource: {name}");
+                Debug.LogWarning($"Trying to add to unregistered resource: {name}");
             }
         }
 
-        public bool TryConsumeResource(string name, int amount)
+        public bool TryConsumeResource(string name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
             {

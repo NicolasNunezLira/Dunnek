@@ -54,6 +54,8 @@ namespace DunefieldModel_DualMesh
 
         public FrameVisualChanges sandChanges, terrainShadowChanges;
 
+        private ResourceSystem.ResourceManager resourceManager;
+
         #endregion
 
         #region Init model
@@ -108,6 +110,8 @@ namespace DunefieldModel_DualMesh
             FindSlope.Init(
                 ref sand, ref terrainShadow, this.sand.Width, this.sand.Height, this.slope
             );
+
+            resourceManager = ResourceSystem.ResourceManager.TryGetInstance();
         }
         #endregion
 

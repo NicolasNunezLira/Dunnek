@@ -251,4 +251,22 @@ namespace Data
         }
     }
     #endregion
+
+    #region Constructions Properties
+    public class ConstructionProperties
+    {
+        public ConstructionType Type;
+        public float RequiredWorkers;
+        public float RequiredSand;
+        public float AddedWorkers;
+
+        public ConstructionProperties(ConstructionType type, float requiredWorkers, float requiredSand, float addedWorkers)
+        {
+            Type = type;
+            RequiredWorkers = requiredWorkers;
+            RequiredSand = requiredSand;
+            AddedWorkers = addedWorkers;
+        }
+    }
+    #endregion
 }

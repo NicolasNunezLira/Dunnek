@@ -29,6 +29,8 @@ namespace DunefieldModel_DualMesh
 
         public Dictionary<(int, int), Vector2Int> criticalSlopes;
 
+        public ResourceSystem.ResourceManager resourceManager;
+
         public DualMeshConstructor(
             int xResolution, int zResolution, // Visual Mesh resolutions
             int simXResolution, int simZResolution, // Simulation mesh resolution
@@ -67,11 +69,13 @@ namespace DunefieldModel_DualMesh
             this.sandMaterial = sandMaterial;
 
             this.parentTransform = parentTransform;
-            
+
             this.planicie = planicie;
 
             this.criticalSlopes = criticalSlopes;
             this.criticalSlopeThreshold = criticalSlopeThreshold;
+
+            resourceManager = ResourceSystem.ResourceManager.TryGetInstance();
         }
 
         public void Initialize(out GameObject terrainGO, out GameObject sandGO,

@@ -36,6 +36,8 @@ namespace Building
         private float wallPrefabLength;
         private GameObject wallPreviewParent;
 
+        private ResourceSystem.ResourceManager resourceManager;
+
         #endregion
 
         #region Init Build System
@@ -89,11 +91,14 @@ namespace Building
             wallPreviewParent = new GameObject();
             wallPreviewParent.name = "Wall Previews";
 
+            resourceManager = ResourceSystem.ResourceManager.TryGetInstance();
+
             if (planicie)
             {
                 previewX = duneModel.xResolution / 2;
                 previewZ = duneModel.zResolution / 2;
                 GameObjectConstruction(housePrefab, previewX, previewZ, Quaternion.identity, ConstructionType.House);
+                resourceManager.AddResource("Workers", 1);
             }
         }
         #endregion

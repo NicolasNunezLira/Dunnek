@@ -1,4 +1,5 @@
 using UnityEngine;
+using ResourceSystem;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
@@ -8,6 +9,7 @@ public partial class DualMesh : MonoBehaviour
     void Awake()
     {
         instance = this;
+        resourceManager = ResourceManager.TryGetInstance();
     }
     #endregion
 
