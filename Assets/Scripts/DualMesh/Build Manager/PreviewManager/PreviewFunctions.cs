@@ -49,8 +49,8 @@ namespace Building
                 int xMax = Mathf.Clamp(Mathf.CeilToInt(bounds.max.x / cellSize), 0, duneModel.xResolution - 1);
                 int zMin = Mathf.Clamp(Mathf.FloorToInt(bounds.min.z / cellSize), 0, duneModel.zResolution - 1);
                 int zMax = Mathf.Clamp(Mathf.CeilToInt(bounds.max.z / cellSize), 0, duneModel.zResolution - 1);
-
-                canBuild = true;
+                
+                canBuild = inMode == DualMesh.PlayingMode.Build ? HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { Data.ConstructionType.House, 1 } }) : true;
                 float maxY = float.MinValue;
 
                 for (int xi = xMin; xi <= xMax; xi++)

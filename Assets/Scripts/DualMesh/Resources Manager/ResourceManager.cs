@@ -11,8 +11,10 @@ namespace ResourceSystem {
         {
             base.Awake();
 
-            RegisterResource("Workers", 0f);
-            RegisterResource("Construction sand", 100f);
+            RegisterResource("Workers", 1f);
+            RegisterResource("Available Workers", 1f);
+            RegisterResource("Work Force", 1f);
+            RegisterResource("Sand", 0f);
         }
 
         public void RegisterResource(string name, float initialAmount)
@@ -53,6 +55,11 @@ namespace ResourceSystem {
         public Dictionary<string, Resource> GetAllResources()
         {
             return resources;
+        }
+
+        public void UpdateWorkForce()
+        {
+            resources["Work Force"].Add(resources["Available Workers"].Amount);
         }
     }
 }

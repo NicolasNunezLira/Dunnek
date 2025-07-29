@@ -9,8 +9,19 @@ namespace Building
     public partial class BuildSystem
     {
         #region Constructions of Game Object
-        public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, ConstructionType constructionType, Vector3? overridePosition = null)
+        public GameObject GameObjectConstruction(
+            ConstructionType type, int posX, int posZ, Quaternion rotation, ConstructionType constructionType,
+            Vector3? overridePosition = null, bool verify = true)
         {
+            Dictionary<ConstructionType, int> constructionDict = new Dictionary<ConstructionType, int> { { type, 1 } };
+            if (verify)
+            {
+                if (!HasEnoughResources(constructionDict))
+                {
+                    return null;
+                }
+            }
+
             float cellSize = duneModel.size / duneModel.xResolution;
 
             float y = Mathf.Max(
@@ -32,6 +43,7 @@ namespace Building
             }
 
             // Instanciar el prefab con el objeto padre
+            GameObject prefab = constructionsConfigs.constructionConfig[type].loadedPrefab;
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
             prefabInstance.name = constructionType.ToString() + currentConstructionID;
@@ -88,6 +100,7 @@ namespace Building
                 floorHeight,
                 targetHeight - floorHeight);
 
+            UpdateResources(constructionDict);
             return prefabInstance;
         }
         #endregion
@@ -197,17 +210,17 @@ namespace Building
                 var config = constructionsConfigs.constructionConfig[type];
                 var cost = config.cost;
 
-                necessarySand += cost.Sand;
+                necessarySand += cost.Sand * amount;
                 necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
             }
 
-            return resourceManager.GetAmount("Workers") >= necessaryWorkers &&
+            return resourceManager.GetAmount("Work Force") >= necessaryWorkers &&
                     resourceManager.GetAmount("Sand") >= necessarySand;
         }
         #endregion
 
         #region Consume resources
-        private void ConsumeResources(Dictionary<ConstructionType, int> amounts)
+        private void UpdateResources(Dictionary<ConstructionType, int> amounts)
         {
             float necessaryWorkers = 0;
             foreach (var (type, amount) in amounts)
@@ -217,6 +230,11 @@ namespace Building
                 resourceManager.TryConsumeResource("Sand", cost.Sand * amount);
 
                 necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
+
+                var production = constructionsConfigs.constructionConfig[type].production;
+
+                resourceManager.AddResource("Workers", production.Workers[0]);
+                resourceManager.AddResource("Sand", production.Sand[0]);
             }
 
             //resourceManager.TryConsumeResource("Workers", necessaryWorkers);

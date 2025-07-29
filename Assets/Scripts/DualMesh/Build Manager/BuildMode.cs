@@ -13,7 +13,7 @@ namespace Building
         public ModelDM duneModel;
         public DualMeshConstructor dualMeshConstructor;
         public int buildRadius = 4;
-        public int buildSize = 2; // puede ser 2 o 3d
+        public int buildSize = 2; 
         public float digDepth = 1f, durationBuild = 5f;
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
@@ -67,6 +67,9 @@ namespace Building
             bool planicie
         )
         {
+            resourceManager = ResourceSystem.ResourceManager.TryGetInstance();
+            constructionsConfigs = ConstructionConfig.TryGetInstance();
+            
             duneModel = model;
             this.inMode = inMode;
             dualMeshConstructor = constructor;
@@ -92,15 +95,12 @@ namespace Building
             wallPreviewParent = new GameObject();
             wallPreviewParent.name = "Wall Previews";
 
-            resourceManager = ResourceSystem.ResourceManager.TryGetInstance();
-            constructionsConfigs = ConstructionConfig.TryGetInstance();
-
             if (planicie)
             {
                 previewX = duneModel.xResolution / 2;
                 previewZ = duneModel.zResolution / 2;
-                GameObjectConstruction(housePrefab, previewX, previewZ, Quaternion.identity, ConstructionType.House);
-                resourceManager.AddResource("Workers", 1);
+                GameObjectConstruction(ConstructionType.House, previewX, previewZ, Quaternion.identity, ConstructionType.House, verify: false);
+                resourceManager.AddResource("Workers", -1);
             }
         }
         #endregion

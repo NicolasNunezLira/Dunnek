@@ -7,6 +7,7 @@ namespace Building
     public partial class BuildSystem
     {
         private GameObject existingStartTower = null, existingEndTower = null;
+        private Color wallPreviewColor;
         public Dictionary<GameObject, Dictionary<Renderer, Material[]>> previewChanges = new();
 
         #region Preview Wall
@@ -14,7 +15,6 @@ namespace Building
         {
             towerPreviewGO?.SetActive(false);
             ClearWallPreview();
-            canPlaceWall = true;
 
             if (!wallStartPoint.HasValue || !tempWallEndPoint.HasValue) return;
 
@@ -26,6 +26,13 @@ namespace Building
             int segments = Mathf.Max(1, Mathf.FloorToInt(distance / wallPrefabLength));
             float adjustedLength = distance / segments;
             Vector3 step = dir * adjustedLength;
+
+            canPlaceWall = HasEnoughResources(new Dictionary<ConstructionType, int>
+            {
+                {ConstructionType.Tower, 2},
+                {ConstructionType.SegmentWall, segments - 2}
+            });
+            wallPreviewColor = canPlaceWall ? Color.green : Color.red;
 
             for (int i = 2; i <= segments; i++)
             {
@@ -40,7 +47,7 @@ namespace Building
                 wallSegment.transform.SetParent(wallPreviewParent.transform);
 
                 bool canBuildSegment = constructionGrid[x, z].Count == 0 || constructionGrid.IsOnlyTowerAt(x, z);
-                Color segmentColor = canBuildSegment ? green : red;
+                Color segmentColor = (canBuildSegment && canPlaceWall) ? green : red;
 
                 canPlaceWall = canPlaceWall && canBuildSegment;
 
@@ -50,15 +57,15 @@ namespace Building
             }
 
             // Coloca torres
-            PlaceTowerPreview(p1);
-            PlaceTowerPreview(p2);
+            PlaceTowerPreview(p1, wallPreviewColor);
+            PlaceTowerPreview(p2, wallPreviewColor);
 
             isWallPreviewActive = true;
         }
         #endregion
         
         #region Place Tower Previews
-        private void PlaceTowerPreview(Vector3 position)
+        private void PlaceTowerPreview(Vector3 position, Color color)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
             int x = Mathf.FloorToInt(position.x / cellSize);
@@ -85,7 +92,7 @@ namespace Building
             previewTower.SetActive(true);
             previewTower.name = "TowerPreview" + (wallStartPoint.HasValue ? "Start" : "End");
             previewTower.transform.SetParent(wallPreviewParent.transform);
-            ChangePreviewColor(previewTower, green, false);
+            ChangePreviewColor(previewTower, color, false);
         }
         #endregion
 

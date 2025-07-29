@@ -7,8 +7,12 @@
             "Sand": 10
         },
         "production": {
-            "Workers": [2, 0],
+            "Workers": [1, 0],
             "Sand": [0, 0]
+        },
+        "requirements": {
+            "Workers": 0,
+            "Sand": 0
         },
         "prefab": "Prefabs/Dunek01"
     },
@@ -22,6 +26,10 @@
             "Workers": [0, 0],
             "Sand": [0, 0]
         },
+        "requirements": {
+            "Workers": 0,
+            "Sand": 0
+        },
         "prefab": "Prefabs/wall2"
     },
     {
@@ -33,6 +41,10 @@
         "production": {
             "Workers": [0, 0],
             "Sand": [0, 0]
+        },
+        "requirements": {
+            "Workers": 0,
+            "Sand": 0
         },
         "prefab": "Prefabs/tower"
     }

@@ -67,6 +67,9 @@ namespace Building
 
             ConstructionData data = constructions[idToDestroy];
 
+            resourceManager.AddResource("Workers", -constructionsConfigs.constructionConfig[data.type].production.Workers[0]);
+            resourceManager.AddResource("Sand", Mathf.Floor(constructionsConfigs.constructionConfig[data.type].cost.Sand / 2));
+
             // Liberar celdas ocupadas
             foreach (int2 coord in data.support)
             {
@@ -74,7 +77,7 @@ namespace Building
                 int cz = coord.y;
 
                 if (!constructionGrid.IsValid(cx, cz)) continue;
-                
+
                 if (duneModel.sand[cx, cz] >= data.buildHeight + data.floorHeight)
                 {
                     duneModel.sand[cx, cz] -= data.buildHeight;

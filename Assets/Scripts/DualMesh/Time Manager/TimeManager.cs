@@ -5,9 +5,9 @@ public class TimeManager : Singleton<TimeManager>
 {
     public float turnDuration = 1f;
     public float multiplicator = 2f;
+    public int turn = 1;
     public bool paused = false;
     public bool fastForward = false;
-
     public delegate void OnTimeAdvanceHandler();
     public event OnTimeAdvanceHandler OnTimeAdvance;
     private float advancedTime;
@@ -29,6 +29,8 @@ public class TimeManager : Singleton<TimeManager>
             {
                 advancedTime += turnDuration;
                 OnTimeAdvance?.Invoke();
+                turn++;
+                ResourceSystem.ResourceManager.Instance.UpdateWorkForce();
                 //GlobalVariablesManager.UpdateVariableProduction();
             }
         }

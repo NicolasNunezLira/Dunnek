@@ -33,6 +33,7 @@ public class ConstructionConfig : Singleton<ConstructionConfig>
         public string type;
         public ResourceCost cost;
         public ResourceProduction production;
+        public ResourceCost requirements;
         public string prefab;
         [System.NonSerialized]
         public GameObject loadedPrefab;
