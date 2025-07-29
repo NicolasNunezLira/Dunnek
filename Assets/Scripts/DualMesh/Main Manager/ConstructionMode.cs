@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Data;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
@@ -65,5 +67,5 @@ public partial class DualMesh : MonoBehaviour
                 }
             }
         }
-    }
+    }  
 }

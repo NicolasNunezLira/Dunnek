@@ -8,6 +8,7 @@ namespace Building
 {
     public partial class BuildSystem
     {
+        #region Constructions of Game Object
         public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, ConstructionType constructionType, Vector3? overridePosition = null)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
@@ -89,6 +90,7 @@ namespace Building
 
             return prefabInstance;
         }
+        #endregion
 
         // Helper method to set layer recursively
         private void SetLayerRecursively(GameObject obj, int newLayer)
@@ -186,5 +188,39 @@ namespace Building
         }
         #endregion
 
-    }
+        #region Verificate resources for constructions
+        private bool HasEnoughResources(Dictionary<ConstructionType, int> amounts)
+        {
+            float necessarySand = 0, necessaryWorkers = 0;
+            foreach (var (type, amount) in amounts)
+            {
+                var config = constructionsConfigs.constructionConfig[type];
+                var cost = config.cost;
+
+                necessarySand += cost.Sand;
+                necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
+            }
+
+            return resourceManager.GetAmount("Workers") >= necessaryWorkers &&
+                    resourceManager.GetAmount("Sand") >= necessarySand;
+        }
+        #endregion
+
+        #region Consume resources
+        private void ConsumeResources(Dictionary<ConstructionType, int> amounts)
+        {
+            float necessaryWorkers = 0;
+            foreach (var (type, amount) in amounts)
+            {
+                var cost = constructionsConfigs.constructionConfig[type].cost;
+
+                resourceManager.TryConsumeResource("Sand", cost.Sand * amount);
+
+                necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
+            }
+
+            //resourceManager.TryConsumeResource("Workers", necessaryWorkers);
+        }
+        #endregion
+    }    
 }

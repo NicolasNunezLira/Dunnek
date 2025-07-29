@@ -10,6 +10,7 @@ public partial class DualMesh : MonoBehaviour
     {
         instance = this;
         resourceManager = ResourceManager.TryGetInstance();
+        constructionsConfigs = ConstructionConfig.TryGetInstance();
     }
     #endregion
 

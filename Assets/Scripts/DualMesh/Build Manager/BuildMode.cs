@@ -37,6 +37,7 @@ namespace Building
         private GameObject wallPreviewParent;
 
         private ResourceSystem.ResourceManager resourceManager;
+        private ConstructionConfig constructionsConfigs;
 
         #endregion
 
@@ -92,6 +93,7 @@ namespace Building
             wallPreviewParent.name = "Wall Previews";
 
             resourceManager = ResourceSystem.ResourceManager.TryGetInstance();
+            constructionsConfigs = ConstructionConfig.TryGetInstance();
 
             if (planicie)
             {

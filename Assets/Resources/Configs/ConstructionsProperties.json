@@ -1,5 +1,5 @@
 {
-  "constructions": [
+  "configs": [
     {
         "type": "House",
         "cost": {
@@ -9,7 +9,8 @@
         "production": {
             "Workers": [2, 0],
             "Sand": [0, 0]
-        }
+        },
+        "prefab": "Prefabs/Dunek01"
     },
     {
         "type": "SegmentWall",
@@ -20,7 +21,8 @@
         "production": {
             "Workers": [0, 0],
             "Sand": [0, 0]
-        }
+        },
+        "prefab": "Prefabs/wall2"
     },
     {
         "type": "Tower",
@@ -31,7 +33,8 @@
         "production": {
             "Workers": [0, 0],
             "Sand": [0, 0]
-        }
+        },
+        "prefab": "Prefabs/tower"
     }
   ]
 }
