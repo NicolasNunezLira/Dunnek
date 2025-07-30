@@ -36,7 +36,7 @@ public partial class DualMesh : MonoBehaviour
 
     [SerializeField]
     public enum BuildMode
-    { PlaceHouse, PlaceWallBetweenPoints };
+    { PlaceHouse, PlaceWallBetweenPoints, PlaceCantera };
 
     [SerializeField]
     public enum ActionMode
@@ -55,5 +55,7 @@ public partial class DualMesh : MonoBehaviour
 
     private ResourceSystem.ResourceManager resourceManager;
     private ConstructionConfig constructionsConfigs;
+    private TimeManager timeManager;
+    private ActionConfig actionConfig;
     #endregion
 }

@@ -15,7 +15,10 @@ namespace Building
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceHouse:
-                    GameObjectConstruction(ConstructionType.House, previewX, previewZ, prefabRotation, ConstructionType.House);
+                    GameObjectConstruction(ConstructionType.House, previewX, previewZ, prefabRotation);
+                    return true;
+                case DualMesh.BuildMode.PlaceCantera:
+                    GameObjectConstruction(ConstructionType.Cantera, previewX, previewZ, prefabRotation);
                     return true;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
                     if (wallStartPoint.HasValue && wallEndPoint.HasValue)
@@ -38,20 +41,24 @@ namespace Building
 
             activePreview.SetActive(false);
 
-
             switch (currentActionMode)
             {
                 case DualMesh.ActionMode.Dig:
-                    if (resourceManager.GetAmount("Work Force") < 1) return false;
-                    DigAction(previewX, previewZ, buildRadius, digDepth);
-                    resourceManager.TryConsumeResource("Work Force", 2);
-                    return true;
+                    //if (resourceManager.GetAmount(ResourceSystem.ResourceName.WorkForce) < 1) return false;
+                    if (resourceManager.TryConsumeResource(
+                        ResourceSystem.ResourceName.WorkForce,
+                        ActionConfig.Instance.actionsConfig[DualMesh.ActionMode.Dig].cost.WorkForce))
+                    {
+                        DigAction(previewX, previewZ, buildRadius, digDepth);
+                        return true;
+                    }
+                    return false;
                 case DualMesh.ActionMode.Flat:
-                    if (resourceManager.GetAmount("Work Force") < 4) return false;
+                    if (resourceManager.GetAmount(ResourceSystem.ResourceName.WorkForce) < 4) return false;
                     FlatSand(previewX, previewZ, 3 * buildRadius);
                     return true;
                 case DualMesh.ActionMode.AddSand:
-                    if (resourceManager.GetAmount("Work Force") < 2) return false;
+                    if (resourceManager.GetAmount(ResourceSystem.ResourceName.WorkForce) < 2) return false;
                     AddSandCone(previewX, previewZ, 0.5f * buildRadius, 6f * buildRadius);
                     return true;
             }

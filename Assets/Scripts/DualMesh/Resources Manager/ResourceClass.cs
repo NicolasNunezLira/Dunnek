@@ -3,13 +3,17 @@ using UnityEngine;
 namespace ResourceSystem
 {
     [System.Serializable]
+    public enum ResourceName
+    { Workers, AvailableWorkers, WorkForce, Sand}
+
+    [System.Serializable]
     public class Resource
     {
-        public string Name { get; private set; }
+        public ResourceName Name { get; private set; }
         public float Amount { get; private set; }
         public float Flux { get; private set; }
 
-        public Resource(string name, float initialAmount = 0, float flux = 0)
+        public Resource(ResourceName name, float initialAmount = 0, float flux = 0)
         {
             Name = name;
             Amount = initialAmount;

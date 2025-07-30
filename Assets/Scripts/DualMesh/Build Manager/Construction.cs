@@ -10,7 +10,7 @@ namespace Building
     {
         #region Constructions of Game Object
         public GameObject GameObjectConstruction(
-            ConstructionType type, int posX, int posZ, Quaternion rotation, ConstructionType constructionType,
+            ConstructionType type, int posX, int posZ, Quaternion rotation,
             Vector3? overridePosition = null, bool verify = true)
         {
             Dictionary<ConstructionType, int> constructionDict = new Dictionary<ConstructionType, int> { { type, 1 } };
@@ -46,7 +46,7 @@ namespace Building
             GameObject prefab = constructionsConfigs.constructionConfig[type].loadedPrefab;
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = constructionType.ToString() + currentConstructionID;
+            prefabInstance.name = type.ToString() + currentConstructionID;
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
@@ -94,7 +94,7 @@ namespace Building
                 prefabInstance,
                 centerPos,
                 prefabRotation,
-                constructionType,
+                type,
                 support,
                 GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution),
                 floorHeight,
@@ -214,10 +214,20 @@ namespace Building
                 necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
             }
 
-            return resourceManager.GetAmount("Work Force") >= necessaryWorkers &&
-                    resourceManager.GetAmount("Sand") >= necessarySand;
+            return resourceManager.GetAmount(ResourceSystem.ResourceName.Workers) >= necessaryWorkers &&
+                    resourceManager.GetAmount(ResourceSystem.ResourceName.Sand) >= necessarySand;
         }
         #endregion
+
+        #region Verificate resources for actions
+        public bool HasEnoughtResourcesForAction(DualMesh.ActionMode action)
+        {
+            var cost = ActionConfig.Instance.actionsConfig[action].cost;
+
+            return resourceManager.GetAmount(ResourceSystem.ResourceName.WorkForce) >= cost.WorkForce &&
+                    resourceManager.GetAmount(ResourceSystem.ResourceName.Sand) >= cost.Sand;
+        }
+        #endregion  
 
         #region Consume resources
         private void UpdateResources(Dictionary<ConstructionType, int> amounts)
@@ -227,14 +237,14 @@ namespace Building
             {
                 var cost = constructionsConfigs.constructionConfig[type].cost;
 
-                resourceManager.TryConsumeResource("Sand", cost.Sand * amount);
+                resourceManager.TryConsumeResource(ResourceSystem.ResourceName.Sand, cost.Sand * amount);
 
                 necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
 
                 var production = constructionsConfigs.constructionConfig[type].production;
 
-                resourceManager.AddResource("Workers", production.Workers[0]);
-                resourceManager.AddResource("Sand", production.Sand[0]);
+                resourceManager.AddResource(ResourceSystem.ResourceName.Workers, production.Workers[0]);
+                resourceManager.AddResource(ResourceSystem.ResourceName.Sand, production.Sand[0]);
             }
 
             //resourceManager.TryConsumeResource("Workers", necessaryWorkers);

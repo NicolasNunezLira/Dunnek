@@ -47,6 +47,22 @@
             "Sand": 0
         },
         "prefab": "Prefabs/tower"
+    },
+    {
+        "type": "Cantera",
+        "cost": {
+            "Workers": 10,
+            "Sand": 100
+        },
+        "production": {
+            "Workers": [0, 0],
+            "Sand": [0, 2]
+        },
+        "requirements": {
+            "Workers": 3,
+            "Sand": 0
+        },
+        "prefab": "Prefabs/Cantera"
     }
   ]
 }

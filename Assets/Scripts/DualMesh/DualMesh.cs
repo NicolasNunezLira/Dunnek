@@ -11,6 +11,7 @@ public partial class DualMesh : MonoBehaviour
         instance = this;
         resourceManager = ResourceManager.TryGetInstance();
         constructionsConfigs = ConstructionConfig.TryGetInstance();
+        actionConfig = ActionConfig.TryGetInstance();
     }
     #endregion
 
@@ -36,6 +37,7 @@ public partial class DualMesh : MonoBehaviour
                 #region Build Mode
                 case PlayingMode.Build:
                     {
+                        TimeManager.Instance.Pause();
                         ConstructionMode();
                         break;
                     }
@@ -44,6 +46,7 @@ public partial class DualMesh : MonoBehaviour
                 #region Destroy Mode
                 case PlayingMode.Destroy:
                     {
+                        TimeManager.Instance.Pause();
                         DestructionMode();
                         break;
                     }
@@ -52,6 +55,7 @@ public partial class DualMesh : MonoBehaviour
                 #region Action Mode
                 case PlayingMode.Action:
                     {
+                        TimeManager.Instance.Pause();
                         ActionsMode();
                         break;
                     }
@@ -60,6 +64,7 @@ public partial class DualMesh : MonoBehaviour
                 #region Simulation Mode
                 case PlayingMode.Simulation:
                     {
+                        TimeManager.Instance.Play();
                         SimulationMode();
                         break;
                     }

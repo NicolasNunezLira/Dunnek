@@ -35,7 +35,7 @@ public partial class DualMesh : MonoBehaviour
         {
             constructed = builder.ConfirmAction();
             inMode = !constructed ? inMode : PlayingMode.Simulation;
-            uiController.UpdateButtonVisuals(inMode);      
+            uiController.UpdateButtonVisuals(inMode);
         }
     }
 }

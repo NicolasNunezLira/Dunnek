@@ -97,6 +97,9 @@ public class UIController : MonoBehaviour
                 case BuildMode.PlaceWallBetweenPoints:
                     isSelected = btn.name == "WallButton";
                     break;
+                case BuildMode.PlaceCantera:
+                    isSelected = btn.name == "CanteraButton";
+                    break;
                 // Agrega más según tus botones
             }
 
@@ -172,6 +175,10 @@ public class UIController : MonoBehaviour
             case "WallButton":
                 DualMesh.instance.SetBuildType(BuildMode.PlaceWallBetweenPoints);
                 UpdateBuildsButtonVisual(BuildMode.PlaceWallBetweenPoints);
+                break;
+            case "CanteraButton":
+                DualMesh.instance.SetBuildType(BuildMode.PlaceCantera);
+                UpdateBuildsButtonVisual(BuildMode.PlaceCantera);
                 break;
         }
     }

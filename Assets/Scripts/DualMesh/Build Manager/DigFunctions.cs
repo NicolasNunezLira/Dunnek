@@ -1,10 +1,6 @@
 using UnityEngine;
 using DunefieldModel_DualMesh;
-using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using UnityEngine.UIElements;
-//using System.Numerics;
 
 namespace Building
 {
@@ -69,7 +65,7 @@ namespace Building
 
             if (!acumular)
             {
-                resourceManager.AddResource("Sand", 1);
+                resourceManager.AddResource(ResourceSystem.ResourceName.Sand, 1);
                 return;
             }
 

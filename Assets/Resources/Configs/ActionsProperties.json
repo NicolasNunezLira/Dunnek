@@ -1,0 +1,28 @@
+{
+  "configs": [
+    {
+        "type": "Dig",
+        "cost": {
+            "WorkForce": 1,
+            "Sand": 0
+        },
+        "prefab": "Prefabs/PalaDunnek"
+    },
+    {
+        "type": "Flat",
+        "cost": {
+            "WorkForce": 5,
+            "Sand": 0
+        },
+        "prefab": "Prefabs/BuildPreview"
+    },
+    {
+        "type": "AddSand",
+        "cost": {
+            "WorkForce": 5,
+            "Sand": 10
+        },
+        "prefab": "Prefabs/Balde"
+    }
+  ]
+}

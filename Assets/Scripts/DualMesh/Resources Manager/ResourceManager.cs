@@ -5,19 +5,19 @@ using UnityEngine;
 namespace ResourceSystem {
     public class ResourceManager : Singleton<ResourceManager>
     {
-        private Dictionary<string, Resource> resources = new Dictionary<string, Resource>();
+        private Dictionary<ResourceName, Resource> resources = new Dictionary<ResourceName, Resource>();
 
         protected override void Awake()
         {
             base.Awake();
 
-            RegisterResource("Workers", 1f);
-            RegisterResource("Available Workers", 1f);
-            RegisterResource("Work Force", 1f);
-            RegisterResource("Sand", 0f);
+            RegisterResource(ResourceName.Workers, 1f);
+            RegisterResource(ResourceName.AvailableWorkers, 1f);
+            RegisterResource(ResourceName.WorkForce, 1f);
+            RegisterResource(ResourceName.Sand, 0f);
         }
 
-        public void RegisterResource(string name, float initialAmount)
+        public void RegisterResource(ResourceName name, float initialAmount)
         {
             if (!resources.ContainsKey(name))
             {
@@ -25,7 +25,7 @@ namespace ResourceSystem {
             }
         }
 
-        public void AddResource(string name, float amount)
+        public void AddResource(ResourceName name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
             {
@@ -37,7 +37,7 @@ namespace ResourceSystem {
             }
         }
 
-        public bool TryConsumeResource(string name, float amount)
+        public bool TryConsumeResource(ResourceName name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
             {
@@ -47,19 +47,19 @@ namespace ResourceSystem {
             return false;
         }
 
-        public float GetAmount(string name)
+        public float GetAmount(ResourceName name)
         {
             return resources.TryGetValue(name, out var res) ? res.Amount : 0f;
         }
 
-        public Dictionary<string, Resource> GetAllResources()
+        public Dictionary<ResourceName, Resource> GetAllResources()
         {
             return resources;
         }
 
         public void UpdateWorkForce()
         {
-            resources["Work Force"].Add(resources["Available Workers"].Amount);
+            resources[ResourceName.WorkForce].Add(resources[ResourceName.AvailableWorkers].Amount);
         }
     }
 }

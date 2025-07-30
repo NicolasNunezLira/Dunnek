@@ -50,7 +50,15 @@ namespace Building
                 int zMin = Mathf.Clamp(Mathf.FloorToInt(bounds.min.z / cellSize), 0, duneModel.zResolution - 1);
                 int zMax = Mathf.Clamp(Mathf.CeilToInt(bounds.max.z / cellSize), 0, duneModel.zResolution - 1);
                 
-                canBuild = inMode == DualMesh.PlayingMode.Build ? HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { Data.ConstructionType.House, 1 } }) : true;
+                switch (DualMesh.instance.inMode)
+                {
+                    case DualMesh.PlayingMode.Build:
+                        canBuild = HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { Data.ConstructionType.House, 1 } });
+                        break;
+                    case DualMesh.PlayingMode.Action:
+                        canBuild = HasEnoughtResourcesForAction(currentActionMode);
+                        break;
+                }
                 float maxY = float.MinValue;
 
                 for (int xi = xMin; xi <= xMax; xi++)
@@ -108,6 +116,9 @@ namespace Building
         {
             HideAllPreviews();
 
+            activePreview = PreviewManager.Instance.actionPreviews[currentActionMode];
+
+            /*
             switch (currentActionMode)
             {
                 case DualMesh.ActionMode.Dig:
@@ -122,6 +133,7 @@ namespace Building
                     activePreview = circlePreviewGO;
                     break;
             }
+            */
            
             activePreview.SetActive(true);
         }
@@ -138,13 +150,22 @@ namespace Building
 
         public void HideAllActionsPreviews()
         {
+            var actionPreviews = PreviewManager.Instance.actionPreviews;
+
+            foreach (GameObject preview in actionPreviews.Values)
+            {
+                preview?.SetActive(false);
+            }
+            /*
             shovelPreviewGO?.SetActive(false);
             sweeperPreviewGO?.SetActive(false);
             circlePreviewGO?.SetActive(false);
+            */
         }
 
         public void HideAllBuildsPreviews()
         {
+
             wallPreviewGO?.SetActive(false);
             towerPreviewGO?.SetActive(false);
             ClearWallPreview();

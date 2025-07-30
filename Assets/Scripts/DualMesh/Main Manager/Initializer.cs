@@ -64,7 +64,7 @@ public partial class DualMesh : MonoBehaviour
 
         CreatePreviews();
 
-        activePreview = housePreviewGO;
+        activePreview = PreviewManager.Instance.buildPreviews[ConstructionType.House];
 
         builder = new BuildSystem(
             duneModel,

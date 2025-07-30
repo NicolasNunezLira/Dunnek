@@ -99,8 +99,8 @@ namespace Building
             {
                 previewX = duneModel.xResolution / 2;
                 previewZ = duneModel.zResolution / 2;
-                GameObjectConstruction(ConstructionType.House, previewX, previewZ, Quaternion.identity, ConstructionType.House, verify: false);
-                resourceManager.AddResource("Workers", -1);
+                GameObjectConstruction(ConstructionType.House, previewX, previewZ, Quaternion.identity, verify: false);
+                resourceManager.AddResource(ResourceSystem.ResourceName.Workers, -1);
             }
         }
         #endregion

@@ -36,7 +36,9 @@ public partial class DualMesh : MonoBehaviour
             previewParentGO = new GameObject("PreviewObjects");
         }
 
-        shovelPreviewGO = Instantiate(shovelPrefabGO, previewParentGO.transform);
+        //shovelPreviewGO = Instantiate(shovelPrefabGO, previewParentGO.transform);
+        shovelPreviewGO = Instantiate(ActionConfig.Instance.actionsConfig[DualMesh.ActionMode.Dig].loadedPrefab, previewParentGO.transform);
+        MakePreviewTransparent(shovelPreviewGO);
         shovelPreviewGO.SetActive(false);
 
         housePreviewGO = Instantiate(housePrefabGO, previewParentGO.transform);

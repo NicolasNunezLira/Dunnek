@@ -10,8 +10,8 @@ public class ResourceUI : MonoBehaviour
 
     void Update()
     {
-        workersText.text = $"Workers: {ResourceManager.Instance.GetAmount("Workers")}";
-        workForceText.text = $"Work Force: {ResourceManager.Instance.GetAmount("Work Force")}";
-        sandText.text = $"Sand: {ResourceManager.Instance.GetAmount("Sand")}"; 
+        workersText.text = $"Workers: {ResourceManager.Instance.GetAmount(ResourceName.Workers)}";
+        workForceText.text = $"Work Force: {ResourceManager.Instance.GetAmount(ResourceName.WorkForce)}";
+        sandText.text = $"Sand: {ResourceManager.Instance.GetAmount(ResourceName.Sand)}"; 
     }
 }
