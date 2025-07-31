@@ -67,7 +67,7 @@ namespace Building
 
             ConstructionData data = constructions[idToDestroy];
 
-            resourceManager.AddResource(ResourceSystem.ResourceName.Workers, -constructionsConfigs.constructionConfig[data.type].production.initial.Workers);
+            resourceManager.AddResource(ResourceSystem.ResourceName.Work, -constructionsConfigs.constructionConfig[data.type].rate.Work);
             resourceManager.AddResource(ResourceSystem.ResourceName.Sand, Mathf.Floor(constructionsConfigs.constructionConfig[data.type].cost.Sand / 2));
 
             // Liberar celdas ocupadas

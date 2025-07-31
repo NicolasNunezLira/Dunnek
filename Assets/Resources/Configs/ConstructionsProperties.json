@@ -3,22 +3,11 @@
     {
         "type": "House",
         "cost": {
-            "Workers": 1,
+            "Work": 1,
             "Sand": 10
         },
-        "production": {
-            "initial": {
-                "Workers": 1,
-                "Sand": 0
-            },
-            "flow":
-            {
-                "Workers": 0,
-                "Sand": 0
-            }
-        },
-        "requirements": {
-            "Workers": 0,
+        "rate": {
+            "Work": 1,
             "Sand": 0
         },
         "prefab": "Prefabs/Dunek01"
@@ -26,21 +15,11 @@
     {
         "type": "SegmentWall",
         "cost": {
-            "Workers": 1,
+            "Work": 1,
             "Sand": 5
         },
-        "production": {
-            "initial": {
-                "Workers": 0,
-                "Sand": 0
-            },
-            "flow": {
-                "Workers": 0,
-                "Sand": 0
-            }
-        },
-        "requirements": {
-            "Workers": 0,
+        "rate": {
+            "Work": 0,
             "Sand": 0
         },
         "prefab": "Prefabs/wall2"
@@ -48,21 +27,11 @@
     {
         "type": "Tower",
         "cost": {
-            "Workers": 2,
+            "Work": 2,
             "Sand": 10
         },
-        "production": {
-            "initial": {
-                "Workers": 0,
-                "Sand": 0
-            },
-            "Sand": {
-                "Workers": 0,
-                "Sand": 0
-            }
-        },
-        "requirements": {
-            "Workers": 0,
+        "rate": {
+            "Work": 0,
             "Sand": 0
         },
         "prefab": "Prefabs/tower"
@@ -70,22 +39,12 @@
     {
         "type": "Cantera",
         "cost": {
-            "Workers": 0,
+            "Work": 0,
             "Sand": 0
         },
-        "production": {
-            "initial": {
-                "Workers": 0,
-                "Sand": 0
-            },
-            "flow": {
-                "Workers": 0,
-                "Sand": 2
-            }
-        },
-        "requirements": {
-            "Workers": 3,
-            "Sand": 0
+        "rate": {
+            "Work": 0,
+            "Sand": 2
         },
         "prefab": "Prefabs/Cantera"
     }

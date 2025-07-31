@@ -1,36 +1,41 @@
-using UnityEngine;
+using System.Collections.Generic;
 
 namespace ResourceSystem
 {
     [System.Serializable]
     public enum ResourceName
-    { Workers, WorkForce, Sand}
+    { Work, Sand}
 
     [System.Serializable]
     public class Resource
     {
         public ResourceName Name { get; private set; }
-        public float Available { get; private set; }
-        public float Cummulated { get; private set; }
+        public float Amount { get; private set; }
+        public float Rate { get; private set; }
+        public Dictionary<int, float> Producers = new();
 
-        public Resource(ResourceName name, float initialAmount = 0)
+        public Resource(ResourceName name, float initialAmount = 0, float initialRate = 0)
         {
             Name = name;
-            Cummulated = initialAmount;
-            Available = Cummulated;
+            Amount = initialAmount;
+            Rate = initialRate;
         }
 
         public void Add(float amount)
         {
-            Cummulated += amount;
-            Available += amount;
+            Amount += amount;
+        }
+
+        public void AddRate(float amount)
+        {
+            Rate += amount;
         }
 
         public bool TryConsume(float amount)
         {
-            if (Available >= amount)
+            if (Amount >= amount)
             {
-                Available -= amount;
+                Amount -= amount;
                 return true;
             }
             return false;

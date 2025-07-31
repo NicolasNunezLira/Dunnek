@@ -193,13 +193,12 @@ namespace DunefieldModel_DualMesh
 
             // Add productive constructions to ProductionManager
             var config = ConstructionConfig.Instance.constructionConfig[type];
-            var flow = config.production.flow;
-            if (flow.Workers > 0 || flow.Sand > 0)
+            var rate = config.rate;
+            if (rate.Work > 0 || rate.Sand > 0)
             {
                 bool isActive = ResourceSystem.ResourceManager.Instance.TryConsumeResource(
-                    ResourceSystem.ResourceName.Workers, config.requirements.Workers);
+                    ResourceSystem.ResourceName.Work, config.rate.Work);
                 ProductionManager.Instance.constructions[id] = new ProductiveConstruction(type, isActive);
-                ProductionManager.Instance.totalRequiredWorkers += config.requirements.Workers;
             }
         }
 

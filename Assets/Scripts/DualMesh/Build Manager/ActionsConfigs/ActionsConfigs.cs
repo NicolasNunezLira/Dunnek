@@ -16,14 +16,14 @@ public class ActionConfig : Singleton<ActionConfig>
     [System.Serializable]
     public class ResourceCost
     {
-        public int WorkForce;
+        public int Work;
         public int Sand;
     }
 
     [System.Serializable]
     public class ResourceProduction
     {
-        public int[] WorkForce;
+        public int[] Work;
         public int[] Sand;
     }
 

@@ -11,9 +11,8 @@ namespace ResourceSystem {
         {
             base.Awake();
 
-            RegisterResource(ResourceName.Workers, 1f);
-            RegisterResource(ResourceName.WorkForce, 1f);
-            RegisterResource(ResourceName.Sand, 0f);
+            RegisterResource(ResourceName.Work, 1f);
+            RegisterResource(ResourceName.Sand, 100f);
         }
 
         public void RegisterResource(ResourceName name, float initialAmount)
@@ -36,6 +35,18 @@ namespace ResourceSystem {
             }
         }
 
+        public void AddRate(ResourceName name, float amount)
+        {
+            if (resources.TryGetValue(name, out var res))
+            {
+                res.AddRate(amount);
+            }
+            else
+            {
+                Debug.LogWarning($"Trying to add rate to unregistered resource: {name}");
+            }
+        }
+
         public bool TryConsumeResource(ResourceName name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
@@ -48,12 +59,12 @@ namespace ResourceSystem {
 
         public float GetAmount(ResourceName name)
         {
-            return resources.TryGetValue(name, out var res) ? res.Cummulated : 0f;
+            return resources.TryGetValue(name, out var res) ? res.Amount : 0f;
         }
 
-        public float GetAvailableAmount(ResourceName name)
+        public float GetRate(ResourceName name)
         {
-            return resources.TryGetValue(name, out var res) ? res.Available : 0f;
+            return resources.TryGetValue(name, out var res) ? res.Rate : 0f;
         }
 
         public Dictionary<ResourceName, Resource> GetAllResources()
@@ -61,9 +72,18 @@ namespace ResourceSystem {
             return resources;
         }
 
-        public void UpdateWorkForce()
+        public bool HasEnough(ResourceName name, float amount)
         {
-            resources[ResourceName.WorkForce].Add(resources[ResourceName.Workers].Available);
+            return resources.ContainsKey(name) && resources[name].Amount >= amount;
         }
+
+        public void UpdateResources()
+        {
+            foreach (Resource resource in resources.Values)
+            {
+                Debug.Log($"{resource.Amount}, {resource.Rate}");
+                resource.Add(resource.Rate);
+            }
+        } 
     }
 }

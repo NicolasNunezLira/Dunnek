@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using ResourceSystem;
 
 public class TimerUI : MonoBehaviour
 {

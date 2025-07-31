@@ -17,15 +17,8 @@ public class ConstructionConfig : Singleton<ConstructionConfig>
     [System.Serializable]
     public class ResourceCost
     {
-        public float Workers;
-        public float Sand;
-    }
-
-    [System.Serializable]
-    public class ResourceProduction
-    {
-        public ResourceCost initial;
-        public ResourceCost flow;
+        [SerializeField] public float Work;
+        [SerializeField] public float Sand;
     }
 
     [System.Serializable]
@@ -33,8 +26,7 @@ public class ConstructionConfig : Singleton<ConstructionConfig>
     {
         public string type;
         public ResourceCost cost;
-        public ResourceProduction production;
-        public ResourceCost requirements;
+        public ResourceCost rate;
         public string prefab;
         [System.NonSerialized]
         public GameObject loadedPrefab;

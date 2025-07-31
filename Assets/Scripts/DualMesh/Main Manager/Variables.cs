@@ -30,6 +30,7 @@ public partial class DualMesh : MonoBehaviour
     private BuildSystem builder;
     private GameObject housePreviewGO, wallPreviewGO, towerPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
 
+    public Data.ConstructionType currentConstructionType;
 
     public enum PlayingMode { Simulation, Build, Destroy, Action };
     public PlayingMode inMode { get; set; } = PlayingMode.Simulation;

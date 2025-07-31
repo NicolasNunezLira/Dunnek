@@ -211,10 +211,10 @@ namespace Building
                 var cost = config.cost;
 
                 necessarySand += cost.Sand * amount;
-                necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
+                necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Work);
             }
 
-            return resourceManager.GetAmount(ResourceSystem.ResourceName.Workers) >= necessaryWorkers &&
+            return resourceManager.GetAmount(ResourceSystem.ResourceName.Work) >= necessaryWorkers &&
                     resourceManager.GetAmount(ResourceSystem.ResourceName.Sand) >= necessarySand;
         }
         #endregion
@@ -224,7 +224,7 @@ namespace Building
         {
             var cost = ActionConfig.Instance.actionsConfig[action].cost;
 
-            return resourceManager.GetAmount(ResourceSystem.ResourceName.WorkForce) >= cost.WorkForce &&
+            return resourceManager.GetAmount(ResourceSystem.ResourceName.Work) >= cost.Work &&
                     resourceManager.GetAmount(ResourceSystem.ResourceName.Sand) >= cost.Sand;
         }
         #endregion  
@@ -232,22 +232,21 @@ namespace Building
         #region Consume resources
         private void UpdateResources(Dictionary<ConstructionType, int> amounts)
         {
-            float necessaryWorkers = 0;
+            float necessaryWork = 0;
             foreach (var (type, amount) in amounts)
             {
                 var cost = constructionsConfigs.constructionConfig[type].cost;
 
                 resourceManager.TryConsumeResource(ResourceSystem.ResourceName.Sand, cost.Sand * amount);
 
-                necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Workers);
+                necessaryWork = Mathf.Max(necessaryWork, cost.Work);
 
-                var production = constructionsConfigs.constructionConfig[type].production;
+                var rates = constructionsConfigs.constructionConfig[type].rate;
 
-                resourceManager.AddResource(ResourceSystem.ResourceName.Workers, production.initial.Workers);
-                resourceManager.AddResource(ResourceSystem.ResourceName.Sand, production.initial.Sand);
+                resourceManager.AddRate(ResourceSystem.ResourceName.Work, rates.Work);
+                resourceManager.AddRate(ResourceSystem.ResourceName.Sand, rates.Sand);
             }
-
-            //resourceManager.TryConsumeResource("Workers", necessaryWorkers);
+            resourceManager.TryConsumeResource(ResourceSystem.ResourceName.Work, necessaryWork);
         }
         #endregion
     }    

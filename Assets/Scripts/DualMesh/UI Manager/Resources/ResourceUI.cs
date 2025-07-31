@@ -5,13 +5,11 @@ using ResourceSystem;
 public class ResourceUI : MonoBehaviour
 {
     public TextMeshProUGUI workersText;
-    public TextMeshProUGUI workForceText;
     public TextMeshProUGUI sandText;
 
     void Update()
     {
-        workersText.text = $"Workers: {ResourceManager.Instance.GetAmount(ResourceName.Workers)}";
-        workForceText.text = $"Work Force: {ResourceManager.Instance.GetAmount(ResourceName.WorkForce)}";
-        sandText.text = $"Sand: {ResourceManager.Instance.GetAmount(ResourceName.Sand)}"; 
+        workersText.text = $"Work: {ResourceManager.Instance.GetAmount(ResourceName.Work)} ({ResourceManager.Instance.GetRate(ResourceName.Work)})";
+        sandText.text = $"Sand: {ResourceManager.Instance.GetAmount(ResourceName.Sand)} ({ResourceManager.Instance.GetRate(ResourceName.Sand)})"; 
     }
 }

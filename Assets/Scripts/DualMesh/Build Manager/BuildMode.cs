@@ -18,6 +18,7 @@ namespace Building
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
+        public Data.ConstructionType currentConstructionType;
         public DualMesh.ActionMode currentActionMode;
         public DualMesh.PlayingMode inMode;
         public NativeGrid terrain;
@@ -51,6 +52,7 @@ namespace Building
             float pulledDownTime,
             DualMesh.PlayingMode inMode,
             DualMesh.BuildMode currentBuildMode,
+            Data.ConstructionType currentConstructionType,
             DualMesh.ActionMode currentActionMode,
             NativeGrid terrain,
             GameObject activePreview,
@@ -58,8 +60,8 @@ namespace Building
             bool planicie
         )
         {
-            resourceManager = ResourceSystem.ResourceManager.TryGetInstance();
-            constructionsConfigs = ConstructionConfig.TryGetInstance();
+            resourceManager = ResourceSystem.ResourceManager.Instance;
+            constructionsConfigs = ConstructionConfig.Instance;
             
             duneModel = model;
             this.inMode = inMode;
@@ -72,6 +74,7 @@ namespace Building
             this.terrain = terrain;
             this.constructionGrid = constructionGrid;
             this.activePreview = activePreview;
+            this.currentConstructionType = currentConstructionType;
 
             wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews[ConstructionType.SegmentWall]);
             wallPreviewParent = new GameObject();
@@ -81,8 +84,7 @@ namespace Building
             {
                 previewX = duneModel.xResolution / 2;
                 previewZ = duneModel.zResolution / 2;
-                GameObjectConstruction(ConstructionType.House, previewX, previewZ, Quaternion.identity, verify: false);
-                resourceManager.AddResource(ResourceSystem.ResourceName.Workers, -1);
+                GameObjectConstruction(ConstructionType.House, previewX, previewZ, Quaternion.identity, verify: true);
             }
         }
         #endregion
@@ -97,7 +99,7 @@ namespace Building
             else
             {
                 Debug.LogWarning("Wall prefab does not have a renderer!");
-                return 1f; // valor por defecto
+                return 1f; 
             }
         }
     }

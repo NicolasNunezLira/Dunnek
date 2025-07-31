@@ -15,33 +15,40 @@ public class ProductionManager : Singleton<ProductionManager>
 
     void Update()
     {
-        if (totalRequiredWorkers <= ResourceSystem.ResourceManager.Instance.GetAmount(ResourceSystem.ResourceName.Workers))
+        var resourceManager = ResourceSystem.ResourceManager.Instance;
+        Dictionary<int, bool> updatedStates = new();
+
+        foreach ((int id, ProductiveConstruction construction) in constructions)
         {
-            Dictionary<int, bool> activate = new();
-            foreach ((int i, ProductiveConstruction construction) in constructions)
+            bool shouldBeActive = construction.isActive;
+
+            if (!construction.isActive)
             {
-                if (!construction.isActive)
+                // Si está inactiva, intenta activarse consumiendo recursos
+                if (resourceManager.TryConsumeResource(ResourceSystem.ResourceName.Work, construction.rates.Work))
                 {
-                    activate[i] = ResourceSystem.ResourceManager.Instance.TryConsumeResource(ResourceSystem.ResourceName.Workers, construction.requirements.Workers);
+                    shouldBeActive = true;
+                }
+            }
+            else
+            {
+                // Si está activa, revisa que aún cumple los requisitos
+                if (!resourceManager.HasEnough(ResourceSystem.ResourceName.Work, construction.rates.Work))
+                {
+                    shouldBeActive = false;
+                    //resourceManager.AddResource(ResourceSystem.ResourceName.Workers, construction.requirements.Workers);
                 }
             }
 
-            foreach ((int i, bool act) in activate)
-            {
-                var construction = constructions[i];
-                construction.isActive = act;
-                constructions[i] = construction;
-            }
+            updatedStates[id] = shouldBeActive;
         }
-    }
 
-    public void UpdateResources()
-    {
-        foreach ((int i, ProductiveConstruction construction) in constructions)
+        // Aplicar cambios
+        foreach ((int id, bool newState) in updatedStates)
         {
-            if (!construction.isActive) continue;
-
-            ResourceSystem.ResourceManager.Instance.AddResource(ResourceSystem.ResourceName.Sand, construction.flow.Sand);
+            var construction = constructions[id];
+            construction.isActive = newState;
+            constructions[id] = construction;
         }
     }
 }
@@ -50,8 +57,7 @@ public struct ProductiveConstruction
 {
     public ConstructionType type;
     public bool isActive;
-    public ConstructionConfig.ResourceCost requirements => ConstructionConfig.Instance.constructionConfig[type].requirements;
-    public ConstructionConfig.ResourceCost flow => ConstructionConfig.Instance.constructionConfig[type].production.flow;
+    public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.constructionConfig[type].rate;
 
     public ProductiveConstruction(ConstructionType type, bool isActive)
     {

@@ -3,7 +3,11 @@
     {
         "type": "Dig",
         "cost": {
-            "WorkForce": 1,
+            "Work": 1,
+            "Sand": 0
+        },
+        "production": {
+            "Work": 1,
             "Sand": 0
         },
         "prefab": "Prefabs/PalaDunnek"
@@ -11,7 +15,11 @@
     {
         "type": "Flat",
         "cost": {
-            "WorkForce": 5,
+            "Work": 5,
+            "Sand": 0
+        },
+        "production": {
+            "Work": 0,
             "Sand": 0
         },
         "prefab": "Prefabs/BuildPreview"
@@ -21,6 +29,10 @@
         "cost": {
             "WorkForce": 5,
             "Sand": 10
+        },
+        "production": {
+            "Work": 0,
+            "Sand": 0
         },
         "prefab": "Prefabs/Balde"
     }

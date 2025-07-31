@@ -13,6 +13,16 @@ public partial class DualMesh : MonoBehaviour
         }
         builder.currentBuildMode = mode;
         currentBuildMode = mode;
+
+        switch (mode)
+        {
+            case BuildMode.PlaceHouse:
+                currentConstructionType = Data.ConstructionType.House;
+                break;
+            case BuildMode.PlaceCantera:
+                currentConstructionType = Data.ConstructionType.Cantera;
+                break;
+        }
         
         builder.UpdateBuildPreviewVisual();
         uiController.UpdateBuildsButtonVisual(mode);
