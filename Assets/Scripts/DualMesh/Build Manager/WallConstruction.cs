@@ -52,7 +52,7 @@ namespace Building
                 allSupport.Add(new int2(x, z));
             }
             currentCompositeConstructionID++;
-            activePreview = towerPreviewGO;
+            activePreview = PreviewManager.Instance.buildPreviews[ConstructionType.Tower];
             activePreview.SetActive(false);
 
             //RestoreAllPreviews();

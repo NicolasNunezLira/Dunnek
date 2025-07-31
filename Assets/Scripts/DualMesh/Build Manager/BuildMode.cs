@@ -9,7 +9,7 @@ namespace Building
     public partial class BuildSystem
     {
         #region Variables
-        public GameObject shovelPreviewGO, housePreviewGO, wallPreviewGO, towerPreviewGO, sweeperPreviewGO, activePreview, housePrefab, wallPrefab, towerPrefab, circlePreviewGO;
+        public GameObject activePreview;
         public ModelDM duneModel;
         public DualMeshConstructor dualMeshConstructor;
         public int buildRadius = 4;
@@ -49,15 +49,6 @@ namespace Building
             int currentConstructionID,
             int currentCompositeConstructionID,
             float pulledDownTime,
-            GameObject housePrefab,
-            GameObject wallPrefab,
-            GameObject towerPrefab,
-            GameObject shovelPreviewGO,
-            GameObject housePreviewGO,
-            GameObject wallPreviewGO,
-            GameObject towerPreviewGO,
-            GameObject sweeperPreviewGO,
-            GameObject circlePreviewGO,
             DualMesh.PlayingMode inMode,
             DualMesh.BuildMode currentBuildMode,
             DualMesh.ActionMode currentActionMode,
@@ -77,21 +68,12 @@ namespace Building
             this.durationBuild = pulledDownTime;
             this.currentConstructionID = currentConstructionID;
             this.currentCompositeConstructionID = currentCompositeConstructionID;
-            this.housePrefab = housePrefab;
-            this.wallPrefab = wallPrefab;
-            this.towerPrefab = towerPrefab;
-            this.shovelPreviewGO = shovelPreviewGO;
-            this.housePreviewGO = housePreviewGO;
-            this.wallPreviewGO = wallPreviewGO;
-            this.towerPreviewGO = towerPreviewGO;
-            this.circlePreviewGO = circlePreviewGO;
-            this.sweeperPreviewGO = sweeperPreviewGO;
             this.currentBuildMode = currentBuildMode;
             this.terrain = terrain;
             this.constructionGrid = constructionGrid;
             this.activePreview = activePreview;
 
-            wallPrefabLength = CalculateWallPrefabLength(wallPrefab);
+            wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews[ConstructionType.SegmentWall]);
             wallPreviewParent = new GameObject();
             wallPreviewParent.name = "Wall Previews";
 

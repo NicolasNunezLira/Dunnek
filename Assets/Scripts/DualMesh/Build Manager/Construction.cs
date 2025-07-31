@@ -243,8 +243,8 @@ namespace Building
 
                 var production = constructionsConfigs.constructionConfig[type].production;
 
-                resourceManager.AddResource(ResourceSystem.ResourceName.Workers, production.Workers[0]);
-                resourceManager.AddResource(ResourceSystem.ResourceName.Sand, production.Sand[0]);
+                resourceManager.AddResource(ResourceSystem.ResourceName.Workers, production.initial.Workers);
+                resourceManager.AddResource(ResourceSystem.ResourceName.Sand, production.initial.Sand);
             }
 
             //resourceManager.TryConsumeResource("Workers", necessaryWorkers);

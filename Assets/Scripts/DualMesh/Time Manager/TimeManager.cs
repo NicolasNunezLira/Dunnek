@@ -31,6 +31,7 @@ public class TimeManager : Singleton<TimeManager>
                 OnTimeAdvance?.Invoke();
                 turn++;
                 ResourceSystem.ResourceManager.Instance.UpdateWorkForce();
+                ProductionManager.Instance.UpdateResources();
                 //GlobalVariablesManager.UpdateVariableProduction();
             }
         }

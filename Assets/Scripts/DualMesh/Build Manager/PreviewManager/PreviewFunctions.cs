@@ -30,12 +30,13 @@ namespace Building
                     {
                         tempWallEndPoint = point;
                         PreviewWall();
-                        towerPreviewGO?.SetActive(false);
+                        PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower]?.SetActive(false);
                         return;
                     }
                     else
                     {
-                        towerPreviewGO?.SetActive(DualMesh.instance.inMode == DualMesh.PlayingMode.Build);
+                        PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower]?.SetActive(
+                            DualMesh.instance.inMode == DualMesh.PlayingMode.Build);
                         tempWallEndPoint = null;
                     }
                 }
@@ -53,7 +54,7 @@ namespace Building
                 switch (DualMesh.instance.inMode)
                 {
                     case DualMesh.PlayingMode.Build:
-                        canBuild = HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { Data.ConstructionType.House, 1 } });
+                        canBuild = HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { Data.ConstructionType.Cantera, 1 } });
                         break;
                     case DualMesh.PlayingMode.Action:
                         canBuild = HasEnoughtResourcesForAction(currentActionMode);
@@ -65,7 +66,6 @@ namespace Building
                 {
                     for (int zj = zMin; zj <= zMax; zj++)
                     {
-                        //if (constructionGrid[xi, zj].Count > 0)
                         if (!(constructionGrid[x, z].Count == 0 || constructionGrid.IsOnlyTowerAt(x, z)))
                             canBuild = false;
 
@@ -100,15 +100,16 @@ namespace Building
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceHouse:
-                    activePreview = housePreviewGO;
+                    activePreview = PreviewManager.Instance.buildPreviews[Data.ConstructionType.House];
                     break;
-
+                case DualMesh.BuildMode.PlaceCantera:
+                    activePreview = PreviewManager.Instance.buildPreviews[Data.ConstructionType.Cantera];
+                    break;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
-                    activePreview = towerPreviewGO;
+                    activePreview = PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower];
                     break;
             }
 
-            
             activePreview?.SetActive(true);
         }
 
@@ -140,12 +141,16 @@ namespace Building
 
         public void HideAllPreviews()
         {
+            HideAllActionsPreviews();
+            HideAllBuildsPreviews();
+            /*
             shovelPreviewGO?.SetActive(false);
             wallPreviewGO?.SetActive(false);
             towerPreviewGO?.SetActive(false);
             housePreviewGO?.SetActive(false);
             sweeperPreviewGO?.SetActive(false);
             circlePreviewGO?.SetActive(false);
+            */
         }
 
         public void HideAllActionsPreviews()
@@ -163,13 +168,24 @@ namespace Building
             */
         }
 
-        public void HideAllBuildsPreviews()
+        public void HideAllBuildsPreviews(bool clearWall=false)
         {
+            var buildPreviews = PreviewManager.Instance.buildPreviews;
 
+            foreach (GameObject preview in buildPreviews.Values)
+            {
+                preview?.SetActive(false);
+            }
+            /*
             wallPreviewGO?.SetActive(false);
             towerPreviewGO?.SetActive(false);
-            ClearWallPreview();
-            ClearPoints();
+            */
+            if (clearWall)
+            {
+                ClearWallPreview();
+                ClearPoints();
+            }   
+            
         }
 
         public void RotateWallPreview()

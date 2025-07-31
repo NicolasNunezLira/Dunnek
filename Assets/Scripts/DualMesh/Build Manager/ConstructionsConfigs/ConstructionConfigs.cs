@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Data;
 using Utils;
+using Mono.Cecil;
 
 public class ConstructionConfig : Singleton<ConstructionConfig>
 {
@@ -16,15 +17,15 @@ public class ConstructionConfig : Singleton<ConstructionConfig>
     [System.Serializable]
     public class ResourceCost
     {
-        public int Workers;
-        public int Sand;
+        public float Workers;
+        public float Sand;
     }
 
     [System.Serializable]
     public class ResourceProduction
     {
-        public int[] Workers;
-        public int[] Sand;
+        public ResourceCost initial;
+        public ResourceCost flow;
     }
 
     [System.Serializable]

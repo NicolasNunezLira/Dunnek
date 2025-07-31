@@ -547,6 +547,7 @@ GameObject:
   - component: {fileID: 164671257}
   - component: {fileID: 164671253}
   - component: {fileID: 164671259}
+  - component: {fileID: 164671260}
   m_Layer: 7
   m_Name: DualMeshGenerator
   m_TagString: Untagged
@@ -607,7 +608,7 @@ MonoBehaviour:
   hopLength: 5
   shadowSlope: 0.02
   windDirection: {x: 1, y: 1}
-  grainsPerStep: 3000
+  grainsPerStep: 500
   avalancheSlope: 0.1
   criticalSlopeThreshold: 1
   maxCellsPerFrame: 100
@@ -729,6 +730,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BuildsPreviewParent: {fileID: 0}
   ActionsPreviewParent: {fileID: 0}
+--- !u!114 &164671260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164671251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afdf553821a7c85438697c99d9a6779f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &177258481
 GameObject:
   m_ObjectHideFlags: 0

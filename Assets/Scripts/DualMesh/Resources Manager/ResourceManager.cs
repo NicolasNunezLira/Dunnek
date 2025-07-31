@@ -12,7 +12,6 @@ namespace ResourceSystem {
             base.Awake();
 
             RegisterResource(ResourceName.Workers, 1f);
-            RegisterResource(ResourceName.AvailableWorkers, 1f);
             RegisterResource(ResourceName.WorkForce, 1f);
             RegisterResource(ResourceName.Sand, 0f);
         }
@@ -49,7 +48,12 @@ namespace ResourceSystem {
 
         public float GetAmount(ResourceName name)
         {
-            return resources.TryGetValue(name, out var res) ? res.Amount : 0f;
+            return resources.TryGetValue(name, out var res) ? res.Cummulated : 0f;
+        }
+
+        public float GetAvailableAmount(ResourceName name)
+        {
+            return resources.TryGetValue(name, out var res) ? res.Available : 0f;
         }
 
         public Dictionary<ResourceName, Resource> GetAllResources()
@@ -59,7 +63,7 @@ namespace ResourceSystem {
 
         public void UpdateWorkForce()
         {
-            resources[ResourceName.WorkForce].Add(resources[ResourceName.AvailableWorkers].Amount);
+            resources[ResourceName.WorkForce].Add(resources[ResourceName.Workers].Available);
         }
     }
 }

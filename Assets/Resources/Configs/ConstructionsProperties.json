@@ -3,12 +3,19 @@
     {
         "type": "House",
         "cost": {
-            "Workers": 2,
+            "Workers": 1,
             "Sand": 10
         },
         "production": {
-            "Workers": [1, 0],
-            "Sand": [0, 0]
+            "initial": {
+                "Workers": 1,
+                "Sand": 0
+            },
+            "flow":
+            {
+                "Workers": 0,
+                "Sand": 0
+            }
         },
         "requirements": {
             "Workers": 0,
@@ -23,8 +30,14 @@
             "Sand": 5
         },
         "production": {
-            "Workers": [0, 0],
-            "Sand": [0, 0]
+            "initial": {
+                "Workers": 0,
+                "Sand": 0
+            },
+            "flow": {
+                "Workers": 0,
+                "Sand": 0
+            }
         },
         "requirements": {
             "Workers": 0,
@@ -39,8 +52,14 @@
             "Sand": 10
         },
         "production": {
-            "Workers": [0, 0],
-            "Sand": [0, 0]
+            "initial": {
+                "Workers": 0,
+                "Sand": 0
+            },
+            "Sand": {
+                "Workers": 0,
+                "Sand": 0
+            }
         },
         "requirements": {
             "Workers": 0,
@@ -51,12 +70,18 @@
     {
         "type": "Cantera",
         "cost": {
-            "Workers": 10,
-            "Sand": 100
+            "Workers": 0,
+            "Sand": 0
         },
         "production": {
-            "Workers": [0, 0],
-            "Sand": [0, 2]
+            "initial": {
+                "Workers": 0,
+                "Sand": 0
+            },
+            "flow": {
+                "Workers": 0,
+                "Sand": 2
+            }
         },
         "requirements": {
             "Workers": 3,
