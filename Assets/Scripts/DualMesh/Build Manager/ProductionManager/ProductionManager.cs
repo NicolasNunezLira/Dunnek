@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Data;
 using Utils;
+using ResourceSystem;
 
 public class ProductionManager : Singleton<ProductionManager>
 {
@@ -13,9 +14,8 @@ public class ProductionManager : Singleton<ProductionManager>
         base.Awake();
     }
 
-    void Update()
+    public void UpdateProductiveConstructions()
     {
-        var resourceManager = ResourceSystem.ResourceManager.Instance;
         Dictionary<int, bool> updatedStates = new();
 
         foreach ((int id, ProductiveConstruction construction) in constructions)
@@ -25,7 +25,7 @@ public class ProductionManager : Singleton<ProductionManager>
             if (!construction.isActive)
             {
                 // Si está inactiva, intenta activarse consumiendo recursos
-                if (resourceManager.TryConsumeResource(ResourceSystem.ResourceName.Work, construction.rates.Work))
+                if (ResourceManager.TryConsumeResource(Resource.Work, construction.rates[Resource.Work]))
                 {
                     shouldBeActive = true;
                 }
@@ -33,10 +33,10 @@ public class ProductionManager : Singleton<ProductionManager>
             else
             {
                 // Si está activa, revisa que aún cumple los requisitos
-                if (!resourceManager.HasEnough(ResourceSystem.ResourceName.Work, construction.rates.Work))
+                if (!ResourceManager.HasEnough(Resource.Work, construction.rates[Resource.Work]))
                 {
                     shouldBeActive = false;
-                    //resourceManager.AddResource(ResourceSystem.ResourceName.Workers, construction.requirements.Workers);
+                    //resourceManager.AddResource(Resource.Workers, construction.requirements.Workers);
                 }
             }
 

@@ -1,29 +1,29 @@
 using System.Collections.Generic;
-using Utils;
+using System.Data.Common;
+using Data;
 using UnityEngine;
 
 namespace ResourceSystem {
-    public class ResourceManager : Singleton<ResourceManager>
+    public static class ResourceManager
     {
-        private Dictionary<ResourceName, Resource> resources = new Dictionary<ResourceName, Resource>();
+        static private Dictionary<Resource, ResourceClass> resources = new Dictionary<Resource, ResourceClass>();
+        static private Dictionary<int, Consumer> consumers = new Dictionary<int, Consumer>();
 
-        protected override void Awake()
+        public static void Awake()
         {
-            base.Awake();
-
-            RegisterResource(ResourceName.Work, 1f);
-            RegisterResource(ResourceName.Sand, 100f);
+            RegisterResource(Resource.Work, 100f);
+            RegisterResource(Resource.Sand, 100f);
         }
 
-        public void RegisterResource(ResourceName name, float initialAmount)
+        public static void RegisterResource(Resource name, float initialAmount)
         {
             if (!resources.ContainsKey(name))
             {
-                resources[name] = new Resource(name, initialAmount);
+                resources[name] = new ResourceClass(name, initialAmount);
             }
         }
 
-        public void AddResource(ResourceName name, float amount)
+        public static void AddResource(Resource name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
             {
@@ -35,7 +35,7 @@ namespace ResourceSystem {
             }
         }
 
-        public void AddRate(ResourceName name, float amount)
+        public static void AddRate(Resource name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
             {
@@ -47,7 +47,7 @@ namespace ResourceSystem {
             }
         }
 
-        public bool TryConsumeResource(ResourceName name, float amount)
+        public static bool TryConsumeResource(Resource name, float amount)
         {
             if (resources.TryGetValue(name, out var res))
             {
@@ -57,33 +57,55 @@ namespace ResourceSystem {
             return false;
         }
 
-        public float GetAmount(ResourceName name)
+        public static float GetAmount(Resource name)
         {
             return resources.TryGetValue(name, out var res) ? res.Amount : 0f;
         }
 
-        public float GetRate(ResourceName name)
+        public static float GetRate(Resource name)
         {
             return resources.TryGetValue(name, out var res) ? res.Rate : 0f;
         }
 
-        public Dictionary<ResourceName, Resource> GetAllResources()
+        public static Dictionary<Resource, ResourceClass> GetAllResources()
         {
             return resources;
         }
 
-        public bool HasEnough(ResourceName name, float amount)
+        public static bool HasEnough(Resource name, float amount)
         {
             return resources.ContainsKey(name) && resources[name].Amount >= amount;
         }
 
-        public void UpdateResources()
+        public static void UpdateResources()
         {
-            foreach (Resource resource in resources.Values)
+            foreach (ResourceClass resource in resources.Values)
             {
-                Debug.Log($"{resource.Amount}, {resource.Rate}");
-                resource.Add(resource.Rate);
+                resource.UpdateAmount();
             }
-        } 
+        }
+
+        public static void TryAddConsumer(int id, ConstructionType type, bool isOperative)
+        {
+            var rates = ConstructionConfig.Instance.constructionConfig[type].rate;
+            if (rates[Resource.Sand] == 0 && rates[Resource.Work] == 0) return;
+
+            consumers[id] = new Consumer(id, type, isOperative);
+        }
+
+        public struct Consumer
+        {
+            public int id;
+            public ConstructionType type;
+            public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.constructionConfig[type].rate;
+            public bool isOperative;
+
+            public Consumer(int id, ConstructionType type, bool isOperative)
+            {
+                this.id = id;
+                this.type = type;
+                this.isOperative = isOperative;
+            }
+        }
     }
 }

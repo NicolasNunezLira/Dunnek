@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Linq;
 using Data;
+using ResourceSystem;
 
 namespace Building
 {
@@ -121,8 +122,8 @@ namespace Building
 
         public void AddConstructionToList(
             GameObject obj,
-            UnityEngine.Vector3 position,
-            UnityEngine.Quaternion rotation,
+            Vector3 position,
+            Quaternion rotation,
             ConstructionType currentType,
             List<int2> support,
             List<int2> boundarySupport,
@@ -207,15 +208,15 @@ namespace Building
             float necessarySand = 0, necessaryWorkers = 0;
             foreach (var (type, amount) in amounts)
             {
-                var config = constructionsConfigs.constructionConfig[type];
+                var config = ConstructionConfig.Instance.constructionConfig[type];
                 var cost = config.cost;
 
-                necessarySand += cost.Sand * amount;
-                necessaryWorkers = Mathf.Max(necessaryWorkers, cost.Work);
+                necessarySand += cost[Resource.Sand] * amount;
+                necessaryWorkers = Mathf.Max(necessaryWorkers, cost[Resource.Work]);
             }
 
-            return resourceManager.GetAmount(ResourceSystem.ResourceName.Work) >= necessaryWorkers &&
-                    resourceManager.GetAmount(ResourceSystem.ResourceName.Sand) >= necessarySand;
+            return ResourceManager.GetAmount(Resource.Work) >= necessaryWorkers &&
+                    ResourceManager.GetAmount(Resource.Sand) >= necessarySand;
         }
         #endregion
 
@@ -224,29 +225,26 @@ namespace Building
         {
             var cost = ActionConfig.Instance.actionsConfig[action].cost;
 
-            return resourceManager.GetAmount(ResourceSystem.ResourceName.Work) >= cost.Work &&
-                    resourceManager.GetAmount(ResourceSystem.ResourceName.Sand) >= cost.Sand;
+            return ResourceManager.GetAmount(Resource.Work) >= cost.Work &&
+                    ResourceManager.GetAmount(Resource.Sand) >= cost.Sand;
         }
         #endregion  
 
         #region Consume resources
         private void UpdateResources(Dictionary<ConstructionType, int> amounts)
         {
-            float necessaryWork = 0;
             foreach (var (type, amount) in amounts)
             {
                 var cost = constructionsConfigs.constructionConfig[type].cost;
 
-                resourceManager.TryConsumeResource(ResourceSystem.ResourceName.Sand, cost.Sand * amount);
-
-                necessaryWork = Mathf.Max(necessaryWork, cost.Work);
+                ResourceManager.TryConsumeResource(Resource.Sand, cost[Resource.Sand] * amount);
+                ResourceManager.TryConsumeResource(Resource.Work, cost[Resource.Work] * amount);
 
                 var rates = constructionsConfigs.constructionConfig[type].rate;
 
-                resourceManager.AddRate(ResourceSystem.ResourceName.Work, rates.Work);
-                resourceManager.AddRate(ResourceSystem.ResourceName.Sand, rates.Sand);
+                ResourceManager.AddRate(Resource.Work, rates[Resource.Work]);
+                ResourceManager.AddRate(Resource.Sand, rates[Resource.Sand]);
             }
-            resourceManager.TryConsumeResource(ResourceSystem.ResourceName.Work, necessaryWork);
         }
         #endregion
     }    

@@ -1,4 +1,5 @@
 using Data;
+using ResourceSystem;
 
 namespace Building
 {
@@ -37,8 +38,8 @@ namespace Building
 
         public bool ConfirmAction()
         {
-            if (!canBuild && resourceManager.TryConsumeResource(
-                        ResourceSystem.ResourceName.Work,
+            if (!canBuild && ResourceManager.TryConsumeResource(
+                        Resource.Work,
                         ActionConfig.Instance.actionsConfig[currentActionMode].cost.Work
                 ))
                 return false;

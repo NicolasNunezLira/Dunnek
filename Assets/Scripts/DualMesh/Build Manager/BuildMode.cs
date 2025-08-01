@@ -37,7 +37,7 @@ namespace Building
         private float wallPrefabLength;
         private GameObject wallPreviewParent;
 
-        private ResourceSystem.ResourceManager resourceManager;
+        //private ResourceSystem.ResourceManager resourceManager;
         private ConstructionConfig constructionsConfigs;
 
         #endregion
@@ -59,10 +59,7 @@ namespace Building
             ConstructionGrid constructionGrid,
             bool planicie
         )
-        {
-            resourceManager = ResourceSystem.ResourceManager.Instance;
-            constructionsConfigs = ConstructionConfig.Instance;
-            
+        {            
             duneModel = model;
             this.inMode = inMode;
             dualMeshConstructor = constructor;
@@ -79,6 +76,8 @@ namespace Building
             wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews[ConstructionType.SegmentWall]);
             wallPreviewParent = new GameObject();
             wallPreviewParent.name = "Wall Previews";
+
+            constructionsConfigs = ConstructionConfig.TryGetInstance();
 
             if (planicie)
             {

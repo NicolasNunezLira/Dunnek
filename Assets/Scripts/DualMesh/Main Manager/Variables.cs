@@ -54,7 +54,7 @@ public partial class DualMesh : MonoBehaviour
 
     private FrameVisualChanges sandChanges, terrainShadowChanges;
 
-    private ResourceSystem.ResourceManager resourceManager;
+    //private ResourceSystem.ResourceManager resourceManager;
     private ConstructionConfig constructionsConfigs;
     private TimeManager timeManager;
     private ActionConfig actionConfig;

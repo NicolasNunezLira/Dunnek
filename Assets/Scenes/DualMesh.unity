@@ -541,7 +541,6 @@ GameObject:
   - component: {fileID: 164671255}
   - component: {fileID: 164671254}
   - component: {fileID: 164671258}
-  - component: {fileID: 164671256}
   - component: {fileID: 164671257}
   - component: {fileID: 164671253}
   - component: {fileID: 164671259}
@@ -674,18 +673,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 164671251}
   m_Mesh: {fileID: 0}
---- !u!114 &164671256
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 164671251}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b83a0b78ffdf59648abe6e59e73c1c5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &164671257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -710,7 +697,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b1cfc9c74c154c49a83d93e9ebeaf5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turnDuration: 10
+  turnDuration: 5
   multiplicator: 2
   turn: 1
   paused: 0

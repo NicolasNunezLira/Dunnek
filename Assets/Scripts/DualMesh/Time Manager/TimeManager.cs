@@ -1,4 +1,3 @@
-using System.Resources;
 using UnityEngine;
 using Utils;
 
@@ -31,7 +30,8 @@ public class TimeManager : Singleton<TimeManager>
                 advancedTime += turnDuration;
                 OnTimeAdvance?.Invoke();
                 turn++;
-                ResourceSystem.ResourceManager.Instance.UpdateResources();
+                ResourceSystem.ResourceManager.UpdateResources();
+                ProductionManager.Instance.UpdateProductiveConstructions();
             }
         }
     }

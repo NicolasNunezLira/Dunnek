@@ -1,17 +1,14 @@
 using UnityEngine;
-using ResourceSystem;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public partial class DualMesh : MonoBehaviour
+public partial class DualMesh :MonoBehaviour
 {
     #region Awake
-    public static DualMesh instance;
+    public static DualMesh Instance;
     void Awake()
     {
-        instance = this;
-        resourceManager = ResourceManager.TryGetInstance();
-        constructionsConfigs = ConstructionConfig.TryGetInstance();
-        actionConfig = ActionConfig.TryGetInstance();
+        Instance = this;
+        ResourceSystem.ResourceManager.Awake();
     }
     #endregion
 

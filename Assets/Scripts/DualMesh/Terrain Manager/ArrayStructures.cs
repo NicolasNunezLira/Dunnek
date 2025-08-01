@@ -190,16 +190,6 @@ namespace DunefieldModel_DualMesh
                 data[key] = new Dictionary<int, Data.ConstructionType>();
 
             data[key][id] = type;
-
-            // Add productive constructions to ProductionManager
-            var config = ConstructionConfig.Instance.constructionConfig[type];
-            var rate = config.rate;
-            if (rate.Work > 0 || rate.Sand > 0)
-            {
-                bool isActive = ResourceSystem.ResourceManager.Instance.TryConsumeResource(
-                    ResourceSystem.ResourceName.Work, config.rate.Work);
-                ProductionManager.Instance.constructions[id] = new ProductiveConstruction(type, isActive);
-            }
         }
 
         public bool TryRemoveConstruction(int x, int z, int id)

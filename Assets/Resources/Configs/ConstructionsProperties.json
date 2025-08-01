@@ -2,50 +2,50 @@
   "configs": [
     {
         "type": "House",
-        "cost": {
-            "Work": 1,
-            "Sand": 10
-        },
-        "rate": {
-            "Work": 1,
-            "Sand": 0
-        },
+        "costList": [
+            { "type": "Work", "value": -1 },
+            { "type": "Sand", "value": -10 }
+        ],
+        "rateList": [
+            { "type": "Work", "value": 1 },
+            { "type": "Sand", "value": 0 }
+        ],
         "prefab": "Prefabs/Dunek01"
     },
     {
         "type": "SegmentWall",
-        "cost": {
-            "Work": 1,
-            "Sand": 5
-        },
-        "rate": {
-            "Work": 0,
-            "Sand": 0
-        },
+        "costList": [
+            { "type": "Work", "value": -1 },
+            { "type": "Sand", "value": -5 }
+        ],
+        "rateList": [
+            { "type": "Work", "value": 0 },
+            { "type": "Sand", "value": 0 }
+        ],
         "prefab": "Prefabs/wall2"
     },
     {
         "type": "Tower",
-        "cost": {
-            "Work": 2,
-            "Sand": 10
-        },
-        "rate": {
-            "Work": 0,
-            "Sand": 0
-        },
+        "costList": [
+            { "type": "Work", "value": -2 },
+            { "type": "Sand", "value": -10 }
+        ],
+        "rateList": [
+            { "type": "Work", "value": 0 },
+            { "type": "Sand", "value": 0 }
+        ],
         "prefab": "Prefabs/tower"
     },
     {
         "type": "Cantera",
-        "cost": {
-            "Work": 0,
-            "Sand": 0
-        },
-        "rate": {
-            "Work": 0,
-            "Sand": 2
-        },
+        "costList": [
+            { "type": "Work", "value": 0 },
+            { "type": "Sand", "value": 0 }
+        ],
+        "rateList": [
+            { "type": "Work", "value": -3 },
+            { "type": "Sand", "value": 2 }
+        ],
         "prefab": "Prefabs/Cantera"
     }
   ]

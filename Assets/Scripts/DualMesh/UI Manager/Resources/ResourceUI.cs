@@ -9,7 +9,7 @@ public class ResourceUI : MonoBehaviour
 
     void Update()
     {
-        workersText.text = $"Work: {ResourceManager.Instance.GetAmount(ResourceName.Work)} ({ResourceManager.Instance.GetRate(ResourceName.Work)})";
-        sandText.text = $"Sand: {ResourceManager.Instance.GetAmount(ResourceName.Sand)} ({ResourceManager.Instance.GetRate(ResourceName.Sand)})"; 
+        workersText.text = $"Work: {ResourceManager.GetAmount(Resource.Work)} ({ResourceManager.GetRate(Resource.Work)})";
+        sandText.text = $"Sand: {ResourceManager.GetAmount(Resource.Sand)} ({ResourceManager.GetRate(Resource.Sand)})"; 
     }
 }

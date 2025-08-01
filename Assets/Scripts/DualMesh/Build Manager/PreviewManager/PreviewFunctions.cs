@@ -36,7 +36,7 @@ namespace Building
                     else
                     {
                         PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower]?.SetActive(
-                            DualMesh.instance.inMode == DualMesh.PlayingMode.Build);
+                            DualMesh.Instance.inMode == DualMesh.PlayingMode.Build);
                         tempWallEndPoint = null;
                     }
                 }
@@ -51,10 +51,10 @@ namespace Building
                 int zMin = Mathf.Clamp(Mathf.FloorToInt(bounds.min.z / cellSize), 0, duneModel.zResolution - 1);
                 int zMax = Mathf.Clamp(Mathf.CeilToInt(bounds.max.z / cellSize), 0, duneModel.zResolution - 1);
                 
-                switch (DualMesh.instance.inMode)
+                switch (DualMesh.Instance.inMode)
                 {
                     case DualMesh.PlayingMode.Build:
-                        canBuild = HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { DualMesh.instance.currentConstructionType, 1 } });
+                        canBuild = HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { DualMesh.Instance.currentConstructionType, 1 } });
                         break;
                     case DualMesh.PlayingMode.Action:
                         canBuild = HasEnoughtResourcesForAction(currentActionMode);

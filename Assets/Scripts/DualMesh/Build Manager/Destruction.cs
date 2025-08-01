@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Text.RegularExpressions;
 using Data;
-using System;
+using ResourceSystem;
 
 namespace Building
 {
@@ -67,8 +67,10 @@ namespace Building
 
             ConstructionData data = constructions[idToDestroy];
 
-            resourceManager.AddResource(ResourceSystem.ResourceName.Work, -constructionsConfigs.constructionConfig[data.type].rate.Work);
-            resourceManager.AddResource(ResourceSystem.ResourceName.Sand, Mathf.Floor(constructionsConfigs.constructionConfig[data.type].cost.Sand / 2));
+            ResourceManager.AddRate(Resource.Work, -constructionsConfigs.constructionConfig[data.type].rate[Resource.Work]);
+            ResourceManager.AddRate(Resource.Sand, -constructionsConfigs.constructionConfig[data.type].rate[Resource.Sand]);
+            ResourceManager.AddResource(
+                Resource.Sand, Mathf.Floor(constructionsConfigs.constructionConfig[data.type].cost[Resource.Sand] / 2));
 
             // Liberar celdas ocupadas
             foreach (int2 coord in data.support)

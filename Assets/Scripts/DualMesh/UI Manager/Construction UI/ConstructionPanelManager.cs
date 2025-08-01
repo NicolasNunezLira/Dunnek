@@ -42,23 +42,23 @@ public class UIController : MonoBehaviour
 
     void OnBuildClicked()
     {
-        DualMesh.instance.SetMode(PlayingMode.Build);
+        DualMesh.Instance.SetMode(PlayingMode.Build);
     }
 
     void OnDestroyClicked()
     {
-        DualMesh.instance.SetMode(PlayingMode.Destroy);
+        DualMesh.Instance.SetMode(PlayingMode.Destroy);
     }
 
     void OnActionClicked()
     {
-        DualMesh.instance.SetMode(PlayingMode.Action);
+        DualMesh.Instance.SetMode(PlayingMode.Action);
     }
 
     IEnumerator WaitAndInitialize()
     {
-        yield return new WaitUntil(() => DualMesh.instance != null);
-        UpdateButtonVisuals(DualMesh.instance.inMode);
+        yield return new WaitUntil(() => DualMesh.Instance != null);
+        UpdateButtonVisuals(DualMesh.Instance.inMode);
     }
 
     public void UpdateButtonVisuals(PlayingMode mode)
@@ -169,15 +169,15 @@ public class UIController : MonoBehaviour
         switch (buttonName)
         {
             case "HouseButton":
-                DualMesh.instance.SetBuildType(BuildMode.PlaceHouse);
+                DualMesh.Instance.SetBuildType(BuildMode.PlaceHouse);
                 UpdateBuildsButtonVisual(BuildMode.PlaceHouse);
                 break;
             case "WallButton":
-                DualMesh.instance.SetBuildType(BuildMode.PlaceWallBetweenPoints);
+                DualMesh.Instance.SetBuildType(BuildMode.PlaceWallBetweenPoints);
                 UpdateBuildsButtonVisual(BuildMode.PlaceWallBetweenPoints);
                 break;
             case "CanteraButton":
-                DualMesh.instance.SetBuildType(BuildMode.PlaceCantera);
+                DualMesh.Instance.SetBuildType(BuildMode.PlaceCantera);
                 UpdateBuildsButtonVisual(BuildMode.PlaceCantera);
                 break;
         }
@@ -188,13 +188,13 @@ public class UIController : MonoBehaviour
         switch (buttonName)
         {
             case "DigButton":
-                DualMesh.instance.SetActionType(ActionMode.Dig);
+                DualMesh.Instance.SetActionType(ActionMode.Dig);
                 break;
             case "AddButton":
-                DualMesh.instance.SetActionType(ActionMode.AddSand);
+                DualMesh.Instance.SetActionType(ActionMode.AddSand);
                 break;
             case "FlattenButton":
-                DualMesh.instance.SetActionType(ActionMode.Flat);
+                DualMesh.Instance.SetActionType(ActionMode.Flat);
                 break;
         }
     }
