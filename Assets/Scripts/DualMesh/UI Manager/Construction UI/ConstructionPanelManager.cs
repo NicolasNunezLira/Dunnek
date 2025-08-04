@@ -5,17 +5,27 @@ using static DualMesh;
 
 public class UIController : MonoBehaviour
 {
+    [Header("Main Buttons")]
     [SerializeField]
-    public GameObject buildOptionsPanel;
-
+    [Tooltip("Recycle Button")]
+    public Button recycleButton;
     [SerializeField]
-    public GameObject actionOptionsPanel;
+    [Tooltip("Build Button")]
     public Button buildButton;
-    public Button destroyButton;
+    [SerializeField]
+    [Tooltip("Action Button")]
     public Button actionButton;
 
+    [Header("Options subpanels")]
+    [SerializeField]
+    [Tooltip("Builds options panel")]
+    public GameObject buildOptionsPanel;
+    [SerializeField]
+    [Tooltip("Action options panel")]
+    public GameObject actionOptionsPanel;
+
     private Outline buildOutline;
-    private Outline destroyOutline;
+    private Outline recycleOutline;
     private Outline actionOutline;
 
     private Button selectedBuildButton;
@@ -24,11 +34,11 @@ public class UIController : MonoBehaviour
     void Start()
     {
         buildButton.onClick.AddListener(OnBuildClicked);
-        destroyButton.onClick.AddListener(OnDestroyClicked);
+        recycleButton.onClick.AddListener(OnDestroyClicked);
         actionButton.onClick.AddListener(OnActionClicked);
 
         buildOutline = buildButton.GetComponent<Outline>();
-        destroyOutline = destroyButton.GetComponent<Outline>();
+        recycleOutline = recycleButton.GetComponent<Outline>();
         actionOutline = actionButton.GetComponent<Outline>();
 
         buildOptionsPanel.SetActive(false);
@@ -42,23 +52,23 @@ public class UIController : MonoBehaviour
 
     void OnBuildClicked()
     {
-        DualMesh.instance.SetMode(PlayingMode.Build);
+        DualMesh.Instance.SetMode(PlayingMode.Build);
     }
 
     void OnDestroyClicked()
     {
-        DualMesh.instance.SetMode(PlayingMode.Destroy);
+        DualMesh.Instance.SetMode(PlayingMode.Recycle);
     }
 
     void OnActionClicked()
     {
-        DualMesh.instance.SetMode(PlayingMode.Action);
+        DualMesh.Instance.SetMode(PlayingMode.Action);
     }
 
     IEnumerator WaitAndInitialize()
     {
-        yield return new WaitUntil(() => DualMesh.instance != null);
-        UpdateButtonVisuals(DualMesh.instance.inMode);
+        yield return new WaitUntil(() => DualMesh.Instance != null);
+        UpdateButtonVisuals(DualMesh.Instance.inMode);
     }
 
     public void UpdateButtonVisuals(PlayingMode mode)
@@ -67,7 +77,7 @@ public class UIController : MonoBehaviour
         Color defaultColor = new Color(0, 0, 0, 0);
 
         buildOutline.effectColor = (mode == PlayingMode.Build) ? selectedColor : defaultColor;
-        destroyOutline.effectColor = (mode == PlayingMode.Destroy) ? selectedColor : defaultColor;
+        recycleOutline.effectColor = (mode == PlayingMode.Recycle) ? selectedColor : defaultColor;
         actionOutline.effectColor = (mode == PlayingMode.Action) ? selectedColor : defaultColor;
 
 
@@ -97,7 +107,9 @@ public class UIController : MonoBehaviour
                 case BuildMode.PlaceWallBetweenPoints:
                     isSelected = btn.name == "WallButton";
                     break;
-                // Agrega más según tus botones
+                case BuildMode.PlaceCantera:
+                    isSelected = btn.name == "CanteraButton";
+                    break;
             }
 
             outline.effectColor = isSelected ? selectedColor : defaultColor;
@@ -166,12 +178,16 @@ public class UIController : MonoBehaviour
         switch (buttonName)
         {
             case "HouseButton":
-                DualMesh.instance.SetBuildType(BuildMode.PlaceHouse);
+                DualMesh.Instance.SetBuildType(BuildMode.PlaceHouse);
                 UpdateBuildsButtonVisual(BuildMode.PlaceHouse);
                 break;
             case "WallButton":
-                DualMesh.instance.SetBuildType(BuildMode.PlaceWallBetweenPoints);
+                DualMesh.Instance.SetBuildType(BuildMode.PlaceWallBetweenPoints);
                 UpdateBuildsButtonVisual(BuildMode.PlaceWallBetweenPoints);
+                break;
+            case "CanteraButton":
+                DualMesh.Instance.SetBuildType(BuildMode.PlaceCantera);
+                UpdateBuildsButtonVisual(BuildMode.PlaceCantera);
                 break;
         }
     }
@@ -181,13 +197,13 @@ public class UIController : MonoBehaviour
         switch (buttonName)
         {
             case "DigButton":
-                DualMesh.instance.SetActionType(ActionMode.Dig);
+                DualMesh.Instance.SetActionType(ActionMode.Dig);
                 break;
             case "AddButton":
-                DualMesh.instance.SetActionType(ActionMode.AddSand);
+                DualMesh.Instance.SetActionType(ActionMode.AddSand);
                 break;
             case "FlattenButton":
-                DualMesh.instance.SetActionType(ActionMode.Flat);
+                DualMesh.Instance.SetActionType(ActionMode.Flat);
                 break;
         }
     }

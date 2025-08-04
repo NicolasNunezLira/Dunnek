@@ -4,7 +4,9 @@ namespace DunefieldModel_DualMesh
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Resources;
     using Data;
+    using NUnit.Framework;
     using Unity.Collections;
 
     #region Native Grid
@@ -157,7 +159,6 @@ namespace DunefieldModel_DualMesh
     public struct ConstructionGrid
     {
         public Dictionary<int2, Dictionary<int, ConstructionType>> data;
-
         private int width;
         private int length;
 
@@ -166,7 +167,7 @@ namespace DunefieldModel_DualMesh
 
         public ConstructionGrid(int width, int length)
         {
-            data = new Dictionary<int2, Dictionary<int, Data.ConstructionType>>();
+            data = new Dictionary<int2, Dictionary<int, ConstructionType>>();
             this.width = width;
             this.length = length;
         }
@@ -219,7 +220,7 @@ namespace DunefieldModel_DualMesh
                         keysToClean.Add(key);
                 }
             }
-            
+
             foreach (var key in keysToClean)
             {
                 data.Remove(key);

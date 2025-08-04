@@ -1,4 +1,5 @@
 using Data;
+using ResourceSystem;
 
 namespace Building
 {
@@ -15,7 +16,10 @@ namespace Building
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceHouse:
-                    GameObjectConstruction(housePrefab, previewX, previewZ, prefabRotation, ConstructionType.House);
+                    GameObjectConstruction(ConstructionType.House, previewX, previewZ, prefabRotation);
+                    return true;
+                case DualMesh.BuildMode.PlaceCantera:
+                    GameObjectConstruction(ConstructionType.Cantera, previewX, previewZ, prefabRotation);
                     return true;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
                     if (wallStartPoint.HasValue && wallEndPoint.HasValue)
@@ -34,10 +38,11 @@ namespace Building
 
         public bool ConfirmAction()
         {
-            if (!canBuild) return false;
+            if (!HasEnoughtResourcesForAction(currentActionMode)) return false;
 
             activePreview.SetActive(false);
 
+            ApplyActionCost(currentActionMode);
 
             switch (currentActionMode)
             {

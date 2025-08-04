@@ -1,13 +1,14 @@
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public partial class DualMesh : MonoBehaviour
+public partial class DualMesh :MonoBehaviour
 {
     #region Awake
-    public static DualMesh instance;
+    public static DualMesh Instance;
     void Awake()
     {
-        instance = this;
+        Instance = this;
+        ResourceSystem.ResourceManager.Awake();
     }
     #endregion
 
@@ -33,15 +34,17 @@ public partial class DualMesh : MonoBehaviour
                 #region Build Mode
                 case PlayingMode.Build:
                     {
+                        TimeManager.Instance.Pause();
                         ConstructionMode();
                         break;
                     }
                 #endregion
 
                 #region Destroy Mode
-                case PlayingMode.Destroy:
+                case PlayingMode.Recycle:
                     {
-                        DestructionMode();
+                        TimeManager.Instance.Pause();
+                        RecycleMode();
                         break;
                     }
                 #endregion
@@ -49,6 +52,7 @@ public partial class DualMesh : MonoBehaviour
                 #region Action Mode
                 case PlayingMode.Action:
                     {
+                        TimeManager.Instance.Pause();
                         ActionsMode();
                         break;
                     }
@@ -57,6 +61,7 @@ public partial class DualMesh : MonoBehaviour
                 #region Simulation Mode
                 case PlayingMode.Simulation:
                     {
+                        TimeManager.Instance.Play();
                         SimulationMode();
                         break;
                     }

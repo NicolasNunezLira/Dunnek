@@ -1,5 +1,6 @@
 using UnityEngine.EventSystems;
 using UnityEngine;
+using Utils;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
@@ -13,11 +14,13 @@ public partial class DualMesh : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
-                currentActionMode = (ActionMode)(((int)currentActionMode - 1 + System.Enum.GetValues(typeof(ActionMode)).Length) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                currentActionMode = (ActionMode)(((int)currentActionMode + 1) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                //currentActionMode = (ActionMode)(((int)currentActionMode - 1 + System.Enum.GetValues(typeof(ActionMode)).Length) % System.Enum.GetValues(typeof(ActionMode)).Length);
             }
             else
             {
-                currentActionMode = (ActionMode)(((int)currentActionMode + 1) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                //currentActionMode = (ActionMode)(((int)currentActionMode + 1) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                currentActionMode = (ActionMode)(((int)currentActionMode - 1 + System.Enum.GetValues(typeof(ActionMode)).Length) % System.Enum.GetValues(typeof(ActionMode)).Length);
             }
 
             SetActionType(currentActionMode);
@@ -35,7 +38,7 @@ public partial class DualMesh : MonoBehaviour
         {
             constructed = builder.ConfirmAction();
             inMode = !constructed ? inMode : PlayingMode.Simulation;
-            uiController.UpdateButtonVisuals(inMode);      
+            uiController.UpdateButtonVisuals(inMode);
         }
     }
 }

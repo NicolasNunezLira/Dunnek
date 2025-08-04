@@ -9,7 +9,7 @@ namespace Data
 {
     [System.Serializable]
     public enum ConstructionType
-    { House, SegmentWall, Wall, Tower };
+    { House, SegmentWall, Wall, Tower, Cantera };
 
     [System.Serializable]
     public class ConstructionData
@@ -248,6 +248,24 @@ namespace Data
                 GameObject.Destroy(part.obj);
             }
             Parts.Clear();
+        }
+    }
+    #endregion
+
+    #region Constructions Properties
+    public class ConstructionProperties
+    {
+        public ConstructionType Type;
+        public float RequiredWorkers;
+        public float RequiredSand;
+        public float AddedWorkers;
+
+        public ConstructionProperties(ConstructionType type, float requiredWorkers, float requiredSand, float addedWorkers)
+        {
+            Type = type;
+            RequiredWorkers = requiredWorkers;
+            RequiredSand = requiredSand;
+            AddedWorkers = addedWorkers;
         }
     }
     #endregion

@@ -37,7 +37,7 @@ namespace Building
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
                 Quaternion rotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z)) * Quaternion.Euler(0, 90, 0);
-                GameObject wall = GameObjectConstruction(wallPrefab, x, z, rotation, Data.ConstructionType.SegmentWall, adjusted);
+                GameObject wall = GameObjectConstruction(ConstructionType.SegmentWall, x, z, rotation, adjusted);
 
                 if (wall != null)
                 {
@@ -52,7 +52,7 @@ namespace Building
                 allSupport.Add(new int2(x, z));
             }
             currentCompositeConstructionID++;
-            activePreview = towerPreviewGO;
+            activePreview = PreviewManager.Instance.buildPreviews[ConstructionType.Tower];
             activePreview.SetActive(false);
 
             //RestoreAllPreviews();
@@ -79,9 +79,8 @@ namespace Building
             if (!constructionGrid.TryGetTypesAt(x, z, ConstructionType.Tower, out List<int> ids))
             {
                 id = currentConstructionID;
-                GameObjectConstruction(towerPrefab, x, z,
-                    Quaternion.LookRotation(Vector3.zero),
-                    Data.ConstructionType.Tower, new Vector3(p.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p.z));
+                GameObjectConstruction(ConstructionType.Tower, x, z,
+                    Quaternion.LookRotation(Vector3.zero), new Vector3(p.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p.z));
                 AddPartToWall(Wall);
             }
             else

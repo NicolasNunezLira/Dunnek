@@ -3,14 +3,26 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Linq;
 using Data;
+using ResourceSystem;
 
 namespace Building
 {
     public partial class BuildSystem
     {
-
-        public GameObject GameObjectConstruction(GameObject prefab, int posX, int posZ, Quaternion rotation, ConstructionType constructionType, Vector3? overridePosition = null)
+        #region Constructions of Game Object
+        public GameObject GameObjectConstruction(
+            ConstructionType type, int posX, int posZ, Quaternion rotation,
+            Vector3? overridePosition = null, bool verify = true)
         {
+            Dictionary<ConstructionType, int> constructionDict = new Dictionary<ConstructionType, int> { { type, 1 } };
+            if (verify)
+            {
+                if (!HasEnoughResourcesForBuild(constructionDict))
+                {
+                    return null;
+                }
+            }
+
             float cellSize = duneModel.size / duneModel.xResolution;
 
             float y = Mathf.Max(
@@ -32,9 +44,10 @@ namespace Building
             }
 
             // Instanciar el prefab con el objeto padre
+            GameObject prefab = constructionsConfigs.constructionConfig[type].loadedPrefab;
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = constructionType.ToString() + currentConstructionID;
+            prefabInstance.name = type.ToString() + currentConstructionID;
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
@@ -82,14 +95,16 @@ namespace Building
                 prefabInstance,
                 centerPos,
                 prefabRotation,
-                constructionType,
+                type,
                 support,
                 GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution),
                 floorHeight,
                 targetHeight - floorHeight);
 
+            UpdateResources(constructionDict);
             return prefabInstance;
         }
+        #endregion
 
         // Helper method to set layer recursively
         private void SetLayerRecursively(GameObject obj, int newLayer)
@@ -107,8 +122,8 @@ namespace Building
 
         public void AddConstructionToList(
             GameObject obj,
-            UnityEngine.Vector3 position,
-            UnityEngine.Quaternion rotation,
+            Vector3 position,
+            Quaternion rotation,
             ConstructionType currentType,
             List<int2> support,
             List<int2> boundarySupport,
@@ -144,6 +159,8 @@ namespace Building
                 constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
             }
 
+            ResourceManager.TryAddConsumer(
+                currentConstructionID, currentType);
             currentConstructionID++;
         }
         #endregion
@@ -187,5 +204,75 @@ namespace Building
         }
         #endregion
 
-    }
+        #region Verificate resources for constructions
+        private bool HasEnoughResourcesForBuild(Dictionary<ConstructionType, int> amounts)
+        {
+            Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
+            foreach (var (type, amount) in amounts)
+            {
+                var config = ConstructionConfig.Instance.constructionConfig[type];
+
+                foreach ((Resource resource, float cost) in config.cost)
+                {
+                    if (!necessaryResources.ContainsKey(resource))
+                    {
+                        necessaryResources[resource] = 0;
+                    }
+                    necessaryResources[resource] += cost * amount;
+                }
+            }
+
+            bool hasEnough = true;
+            foreach ((Resource resource, float cost) in necessaryResources)
+            {
+                if (ResourceManager.GetAmount(resource) < -cost)
+                {
+                    hasEnough = false;
+                    break;
+                }
+            }
+
+            return hasEnough;
+        }
+        #endregion
+
+        #region Verificate resources for actions
+        public bool HasEnoughtResourcesForAction(DualMesh.ActionMode action)
+        {
+            Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
+            var costs = ActionConfig.Instance.actionsConfig[action].cost;
+
+            foreach ((Resource resource, float cost) in costs)
+            {
+                if (!necessaryResources.ContainsKey(resource))
+                {
+                    necessaryResources[resource] = 0;
+                }
+                necessaryResources[resource] += cost;
+            }
+            
+            bool hasEnough = true;
+            foreach ((Resource resource, float cost) in necessaryResources)
+            {
+                if (ResourceManager.GetAmount(resource) < -cost)
+                {
+                    hasEnough = false;
+                    break;
+                }
+            }
+
+            return hasEnough;
+        }
+        #endregion  
+
+        #region Consume resources
+        private void UpdateResources(Dictionary<ConstructionType, int> amounts)
+        {
+            foreach (var (type, amount) in amounts)
+            {
+                for (int i=0; i<amount; i++) ResourceManager.TryUpdateResourcesByBuild(type);
+            }
+        }
+        #endregion
+    }    
 }

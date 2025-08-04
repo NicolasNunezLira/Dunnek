@@ -1,17 +1,14 @@
 using UnityEngine;
 using DunefieldModel_DualMesh;
-using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using UnityEngine.UIElements;
-//using System.Numerics;
+using ResourceSystem;
 
 namespace Building
 {
     public partial class BuildSystem
     {
 
-        public void DigAction(int centerX, int centerZ, int radius, float digDepth)
+        public void DigAction(int centerX, int centerZ, int radius, float digDepth, bool acumular = false)
         {
             if (terrain[centerX, centerZ] >= duneModel.sand[centerX, centerZ]) return;
 
@@ -61,12 +58,19 @@ namespace Building
                         //terrainElev[nx, nz] = newHeight;
                         sandElev[nx, nz] = newHeight;
                         duneModel.sandChanges.AddChanges(nx, nz);
+                        duneModel.ActivateCell(nx, nz);
+                        duneModel.UpdateShadow(nx, nz, duneModel.dx, duneModel.dz);
                     }
                 }
             }
 
+            if (!acumular)
+            {
+                return;
+            }
+
             // 3. Recolectar celdas del anillo expandido con peso
-            List<(int x, int z, float weight)> ringCells = new();
+                List<(int x, int z, float weight)> ringCells = new();
             float weightSum = 0f;
 
             int extraSpreadRadius = CalculateExtraSpreadRadius(totalRemoved, radius);

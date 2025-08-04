@@ -7,14 +7,15 @@ namespace Building
     public partial class BuildSystem
     {
         private GameObject existingStartTower = null, existingEndTower = null;
+        private Color wallPreviewColor;
         public Dictionary<GameObject, Dictionary<Renderer, Material[]>> previewChanges = new();
 
         #region Preview Wall
         public void PreviewWall()
         {
-            towerPreviewGO?.SetActive(false);
+            //towerPreviewGO?.SetActive(false);
+            PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower].SetActive(false);
             ClearWallPreview();
-            canPlaceWall = true;
 
             if (!wallStartPoint.HasValue || !tempWallEndPoint.HasValue) return;
 
@@ -27,6 +28,13 @@ namespace Building
             float adjustedLength = distance / segments;
             Vector3 step = dir * adjustedLength;
 
+            canPlaceWall = HasEnoughResourcesForBuild(new Dictionary<ConstructionType, int>
+            {
+                {ConstructionType.Tower, 2},
+                {ConstructionType.SegmentWall, segments - 2}
+            });
+            wallPreviewColor = canPlaceWall ? Color.green : Color.red;
+
             for (int i = 2; i <= segments; i++)
             {
                 Vector3 pos = p1 + step * (i - 0.5f);
@@ -35,12 +43,14 @@ namespace Building
                 float y = Mathf.Max(duneModel.sand[x, z], duneModel.terrain[x, z]) - 0.1f;
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
-                GameObject wallSegment = GameObject.Instantiate(wallPreviewGO, adjusted, Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0));
+                GameObject wallSegment = GameObject.Instantiate(
+                    PreviewManager.Instance.buildPreviews[Data.ConstructionType.SegmentWall],
+                    adjusted, Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0));
                 wallSegment.name = $"WallPreview_{i}";
                 wallSegment.transform.SetParent(wallPreviewParent.transform);
 
                 bool canBuildSegment = constructionGrid[x, z].Count == 0 || constructionGrid.IsOnlyTowerAt(x, z);
-                Color segmentColor = canBuildSegment ? green : red;
+                Color segmentColor = (canBuildSegment && canPlaceWall) ? green : red;
 
                 canPlaceWall = canPlaceWall && canBuildSegment;
 
@@ -50,15 +60,15 @@ namespace Building
             }
 
             // Coloca torres
-            PlaceTowerPreview(p1);
-            PlaceTowerPreview(p2);
+            PlaceTowerPreview(p1, wallPreviewColor);
+            PlaceTowerPreview(p2, wallPreviewColor);
 
             isWallPreviewActive = true;
         }
         #endregion
         
         #region Place Tower Previews
-        private void PlaceTowerPreview(Vector3 position)
+        private void PlaceTowerPreview(Vector3 position, Color color)
         {
             float cellSize = duneModel.size / duneModel.xResolution;
             int x = Mathf.FloorToInt(position.x / cellSize);
@@ -80,12 +90,13 @@ namespace Building
                 return;
             }
 
-            towerPreviewGO?.SetActive(false);
-            GameObject previewTower = GameObject.Instantiate(towerPreviewGO, finalPos, Quaternion.identity);
+            PreviewManager.Instance.buildPreviews[ConstructionType.Tower]?.SetActive(false);
+            GameObject previewTower = GameObject.Instantiate(
+                PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower], finalPos, Quaternion.identity);
             previewTower.SetActive(true);
             previewTower.name = "TowerPreview" + (wallStartPoint.HasValue ? "Start" : "End");
             previewTower.transform.SetParent(wallPreviewParent.transform);
-            ChangePreviewColor(previewTower, green, false);
+            ChangePreviewColor(previewTower, color, false);
         }
         #endregion
 
@@ -101,6 +112,7 @@ namespace Building
         #region Set points for wall
         public bool SetPointsForWall()
         {
+            if (!HasEnoughResourcesForBuild(new Dictionary<ConstructionType, int> { { ConstructionType.Tower, 1 } })) return false;
             Ray ray1 = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray1, out RaycastHit hit1, 100f, LayerMask.GetMask("Terrain")))
             {
@@ -109,12 +121,12 @@ namespace Building
                 GameObject towerHit = TryGetTowerUnderCursor();
                 if (towerHit != null)
                 {
-                    towerPreviewGO?.SetActive(false);
+                    PreviewManager.Instance.buildPreviews[ConstructionType.Tower]?.SetActive(false);
                     clickedPoint = towerHit.transform.position;
                 }
                 else
                 {
-                    towerPreviewGO?.SetActive(true);
+                    PreviewManager.Instance.buildPreviews[ConstructionType.Tower]?.SetActive(true);
                 }
 
                 if (!wallStartPoint.HasValue)

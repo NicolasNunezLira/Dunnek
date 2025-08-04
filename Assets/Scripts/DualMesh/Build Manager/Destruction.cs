@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Text.RegularExpressions;
 using Data;
-using System;
+using ResourceSystem;
 
 namespace Building
 {
@@ -67,6 +67,15 @@ namespace Building
 
             ConstructionData data = constructions[idToDestroy];
 
+            if (-ConstructionConfig.Instance.constructionConfig[data.type].recycleWorkCost >= ResourceManager.GetAmount(Resource.Work))
+            {
+                Debug.Log($"No hay sufiente trabajao para reciclar la {data.type} {data.id}");
+                RestoreHoverMaterials();
+                return false;
+            }
+
+            ResourceManager.RemoveConsumer(idToDestroy, recycle: true);
+
             // Liberar celdas ocupadas
             foreach (int2 coord in data.support)
             {
@@ -74,7 +83,7 @@ namespace Building
                 int cz = coord.y;
 
                 if (!constructionGrid.IsValid(cx, cz)) continue;
-                
+
                 if (duneModel.sand[cx, cz] >= data.buildHeight + data.floorHeight)
                 {
                     duneModel.sand[cx, cz] -= data.buildHeight;

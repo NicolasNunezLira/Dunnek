@@ -2,6 +2,7 @@ using UnityEngine;
 using Data;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using ResourceSystem;
 
 namespace DunefieldModel_DualMesh
 {
@@ -55,6 +56,8 @@ namespace DunefieldModel_DualMesh
                 terrainShadow[cell.x, cell.y] = terrain[cell.x, cell.y];
                 //AddChanges(terrainShadowChanges, cell.x, cell.y);
             }
+
+            ResourceManager.RemoveConsumer(id, recycle: false);
 
 
             if (data.obj != null)
