@@ -17,7 +17,7 @@ namespace Building
             Dictionary<ConstructionType, int> constructionDict = new Dictionary<ConstructionType, int> { { type, 1 } };
             if (verify)
             {
-                if (!HasEnoughResources(constructionDict))
+                if (!HasEnoughResourcesForBuild(constructionDict))
                 {
                     return null;
                 }
@@ -205,30 +205,63 @@ namespace Building
         #endregion
 
         #region Verificate resources for constructions
-        private bool HasEnoughResources(Dictionary<ConstructionType, int> amounts)
+        private bool HasEnoughResourcesForBuild(Dictionary<ConstructionType, int> amounts)
         {
-            float necessarySand = 0, necessaryWorkers = 0;
+            Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
             foreach (var (type, amount) in amounts)
             {
                 var config = ConstructionConfig.Instance.constructionConfig[type];
-                var cost = config.cost;
 
-                necessarySand += cost[Resource.Sand] * amount;
-                necessaryWorkers = Mathf.Min(necessaryWorkers, cost[Resource.Work]);
+                foreach ((Resource resource, float cost) in config.cost)
+                {
+                    if (!necessaryResources.ContainsKey(resource))
+                    {
+                        necessaryResources[resource] = 0;
+                    }
+                    necessaryResources[resource] += cost * amount;
+                }
             }
 
-            return ResourceManager.GetAmount(Resource.Work) >= -necessaryWorkers &&
-                    ResourceManager.GetAmount(Resource.Sand) >= -necessarySand;
+            bool hasEnough = true;
+            foreach ((Resource resource, float cost) in necessaryResources)
+            {
+                if (ResourceManager.GetAmount(resource) < -cost)
+                {
+                    hasEnough = false;
+                    break;
+                }
+            }
+
+            return hasEnough;
         }
         #endregion
 
         #region Verificate resources for actions
         public bool HasEnoughtResourcesForAction(DualMesh.ActionMode action)
         {
-            var cost = ActionConfig.Instance.actionsConfig[action].cost;
+            Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
+            var costs = ActionConfig.Instance.actionsConfig[action].cost;
 
-            return ResourceManager.GetAmount(Resource.Work) >= cost.Work &&
-                    ResourceManager.GetAmount(Resource.Sand) >= cost.Sand;
+            foreach ((Resource resource, float cost) in costs)
+            {
+                if (!necessaryResources.ContainsKey(resource))
+                {
+                    necessaryResources[resource] = 0;
+                }
+                necessaryResources[resource] += cost;
+            }
+            
+            bool hasEnough = true;
+            foreach ((Resource resource, float cost) in necessaryResources)
+            {
+                if (ResourceManager.GetAmount(resource) < -cost)
+                {
+                    hasEnough = false;
+                    break;
+                }
+            }
+
+            return hasEnough;
         }
         #endregion  
 

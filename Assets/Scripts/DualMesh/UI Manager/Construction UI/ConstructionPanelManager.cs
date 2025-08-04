@@ -5,17 +5,27 @@ using static DualMesh;
 
 public class UIController : MonoBehaviour
 {
+    [Header("Main Buttons")]
     [SerializeField]
-    public GameObject buildOptionsPanel;
-
+    [Tooltip("Recycle Button")]
+    public Button recycleButton;
     [SerializeField]
-    public GameObject actionOptionsPanel;
+    [Tooltip("Build Button")]
     public Button buildButton;
-    public Button destroyButton;
+    [SerializeField]
+    [Tooltip("Action Button")]
     public Button actionButton;
 
+    [Header("Options subpanels")]
+    [SerializeField]
+    [Tooltip("Builds options panel")]
+    public GameObject buildOptionsPanel;
+    [SerializeField]
+    [Tooltip("Action options panel")]
+    public GameObject actionOptionsPanel;
+
     private Outline buildOutline;
-    private Outline destroyOutline;
+    private Outline recycleOutline;
     private Outline actionOutline;
 
     private Button selectedBuildButton;
@@ -24,11 +34,11 @@ public class UIController : MonoBehaviour
     void Start()
     {
         buildButton.onClick.AddListener(OnBuildClicked);
-        destroyButton.onClick.AddListener(OnDestroyClicked);
+        recycleButton.onClick.AddListener(OnDestroyClicked);
         actionButton.onClick.AddListener(OnActionClicked);
 
         buildOutline = buildButton.GetComponent<Outline>();
-        destroyOutline = destroyButton.GetComponent<Outline>();
+        recycleOutline = recycleButton.GetComponent<Outline>();
         actionOutline = actionButton.GetComponent<Outline>();
 
         buildOptionsPanel.SetActive(false);
@@ -67,7 +77,7 @@ public class UIController : MonoBehaviour
         Color defaultColor = new Color(0, 0, 0, 0);
 
         buildOutline.effectColor = (mode == PlayingMode.Build) ? selectedColor : defaultColor;
-        destroyOutline.effectColor = (mode == PlayingMode.Destroy) ? selectedColor : defaultColor;
+        recycleOutline.effectColor = (mode == PlayingMode.Destroy) ? selectedColor : defaultColor;
         actionOutline.effectColor = (mode == PlayingMode.Action) ? selectedColor : defaultColor;
 
 
@@ -100,7 +110,6 @@ public class UIController : MonoBehaviour
                 case BuildMode.PlaceCantera:
                     isSelected = btn.name == "CanteraButton";
                     break;
-                // Agrega más según tus botones
             }
 
             outline.effectColor = isSelected ? selectedColor : defaultColor;

@@ -144,7 +144,12 @@ namespace ResourceSystem {
                     TryAddRate(resource, -rate);
                 }
 
-                if (recycle) AddResource(Resource.Sand, Mathf.Floor(ConstructionConfig.Instance.constructionConfig[consumer.type].cost[Resource.Sand] / 2));
+                if (recycle)
+                {
+                    var config = ConstructionConfig.Instance.constructionConfig[consumer.type];
+                    AddResource(Resource.Sand, -Mathf.Floor(config.cost[Resource.Sand] / 2));
+                    AddResource(Resource.Work, config.recycleWorkCost); 
+                }
 
                 consumers.Remove(id);
             }

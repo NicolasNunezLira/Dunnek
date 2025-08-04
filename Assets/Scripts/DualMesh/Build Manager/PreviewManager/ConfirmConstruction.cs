@@ -38,19 +38,17 @@ namespace Building
 
         public bool ConfirmAction()
         {
-            if (!canBuild && ResourceManager.TryConsumeResource(
-                        Resource.Work,
-                        ActionConfig.Instance.actionsConfig[currentActionMode].cost.Work
-                ))
-                return false;
+            if (!HasEnoughtResourcesForAction(currentActionMode)) return false;
 
             activePreview.SetActive(false);
+
+            ApplyActionCost(currentActionMode);
 
             switch (currentActionMode)
             {
                 case DualMesh.ActionMode.Dig:
                     DigAction(previewX, previewZ, buildRadius, digDepth);
-                        return true;
+                    return true;
                 case DualMesh.ActionMode.Flat:
                     FlatSand(previewX, previewZ, 3 * buildRadius);
                     return true;

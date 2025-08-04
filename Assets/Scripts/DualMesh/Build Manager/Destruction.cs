@@ -67,6 +67,13 @@ namespace Building
 
             ConstructionData data = constructions[idToDestroy];
 
+            if (-ConstructionConfig.Instance.constructionConfig[data.type].recycleWorkCost >= ResourceManager.GetAmount(Resource.Work))
+            {
+                Debug.Log($"No hay sufiente trabajao para reciclar la {data.type} {data.id}");
+                RestoreHoverMaterials();
+                return false;
+            }
+
             ResourceManager.RemoveConsumer(idToDestroy, recycle: true);
 
             // Liberar celdas ocupadas

@@ -2719,7 +2719,7 @@ MonoBehaviour:
   buildOptionsPanel: {fileID: 393705838}
   actionOptionsPanel: {fileID: 319198454}
   buildButton: {fileID: 921165607}
-  destroyButton: {fileID: 916138785}
+  recycleButton: {fileID: 916138785}
   actionButton: {fileID: 896335853}
 --- !u!114 &755058213
 MonoBehaviour:
@@ -2818,7 +2818,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Build
+  m_text: 'Build (C)
+
 
 '
   m_isRightToLeft: 0
@@ -3208,7 +3209,7 @@ GameObject:
   - component: {fileID: 916138785}
   - component: {fileID: 916138788}
   m_Layer: 5
-  m_Name: DestroyButton
+  m_Name: RecycleButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4490,7 +4491,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Actions
+  m_text: 'Actions (V)
 
 '
   m_isRightToLeft: 0
@@ -4887,9 +4888,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Destroy
-
-'
+  m_text: Recycle (X)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

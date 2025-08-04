@@ -44,7 +44,7 @@ public partial class DualMesh :MonoBehaviour
                 case PlayingMode.Destroy:
                     {
                         TimeManager.Instance.Pause();
-                        DestructionMode();
+                        RecycleMode();
                         break;
                     }
                 #endregion

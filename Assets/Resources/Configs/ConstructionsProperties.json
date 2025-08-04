@@ -10,6 +10,7 @@
             { "type": "Work", "value": 1 },
             { "type": "Sand", "value": 0 }
         ],
+        "recycleWorkCost": 0,
         "prefab": "Prefabs/Dunek01"
     },
     {
@@ -22,6 +23,7 @@
             { "type": "Work", "value": 0 },
             { "type": "Sand", "value": 0 }
         ],
+        "recycleWorkCost": -2,
         "prefab": "Prefabs/wall2"
     },
     {
@@ -34,6 +36,7 @@
             { "type": "Work", "value": 0 },
             { "type": "Sand", "value": 0 }
         ],
+        "recycleWorkCost": -5,
         "prefab": "Prefabs/tower"
     },
     {
@@ -46,6 +49,7 @@
             { "type": "Work", "value": -3 },
             { "type": "Sand", "value": 2 }
         ],
+        "recycleWorkCost": -10,
         "prefab": "Prefabs/Cantera"
     }
   ]

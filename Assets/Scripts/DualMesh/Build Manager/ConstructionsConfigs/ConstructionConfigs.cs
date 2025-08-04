@@ -59,6 +59,7 @@ public class ConstructionConfig : Singleton<ConstructionConfig>
         // Estos se usan solo para cargar desde JSON
         public List<ResourceAmount> costList;
         public List<ResourceAmount> rateList;
+        public float recycleWorkCost;
 
         // Estos son los diccionarios reales que se usarán en código
         [System.NonSerialized]

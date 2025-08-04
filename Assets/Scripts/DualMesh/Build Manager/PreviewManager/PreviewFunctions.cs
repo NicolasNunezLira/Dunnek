@@ -54,7 +54,7 @@ namespace Building
                 switch (DualMesh.Instance.inMode)
                 {
                     case DualMesh.PlayingMode.Build:
-                        canBuild = HasEnoughResources(new Dictionary<Data.ConstructionType, int> { { DualMesh.Instance.currentConstructionType, 1 } });
+                        canBuild = HasEnoughResourcesForBuild(new Dictionary<Data.ConstructionType, int> { { DualMesh.Instance.currentConstructionType, 1 } });
                         break;
                     case DualMesh.PlayingMode.Action:
                         canBuild = HasEnoughtResourcesForAction(currentActionMode);

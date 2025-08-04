@@ -2,38 +2,38 @@
   "configs": [
     {
         "type": "Dig",
-        "cost": {
-            "Work": 1,
-            "Sand": 0
-        },
-        "production": {
-            "Work": 1,
-            "Sand": 0
-        },
+        "costList": [
+            {"type": "Work", "value": -1},
+            {"type": "Sand", "value": 0}
+        ],
+        "productionList": [
+            {"type": "Work", "value": 0},
+            {"type": "Sand", "value": 1}
+        ],
         "prefab": "Prefabs/PalaDunnek"
     },
     {
         "type": "Flat",
-        "cost": {
-            "Work": 5,
-            "Sand": 0
-        },
-        "production": {
-            "Work": 0,
-            "Sand": 0
-        },
+        "costList": [
+            {"type": "Work", "value": -5},
+            {"type": "Sand", "value": 0}
+        ],
+        "productionList": [
+            {"type": "Work", "value": 0},
+            {"type": "Sand", "value": 0}
+        ],
         "prefab": "Prefabs/BuildPreview"
     },
     {
         "type": "AddSand",
-        "cost": {
-            "WorkForce": 5,
-            "Sand": 10
-        },
-        "production": {
-            "Work": 0,
-            "Sand": 0
-        },
+        "costList": [
+            {"type": "Work", "value": -5},
+            {"type": "Sand", "value": -10}
+        ],
+        "productionList": [
+            {"type": "Work", "value": 0},
+            {"type": "Sand", "value": 0}
+        ],
         "prefab": "Prefabs/Balde"
     }
   ]

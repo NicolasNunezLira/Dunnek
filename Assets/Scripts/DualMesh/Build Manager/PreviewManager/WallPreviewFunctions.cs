@@ -28,7 +28,7 @@ namespace Building
             float adjustedLength = distance / segments;
             Vector3 step = dir * adjustedLength;
 
-            canPlaceWall = HasEnoughResources(new Dictionary<ConstructionType, int>
+            canPlaceWall = HasEnoughResourcesForBuild(new Dictionary<ConstructionType, int>
             {
                 {ConstructionType.Tower, 2},
                 {ConstructionType.SegmentWall, segments - 2}
@@ -112,7 +112,7 @@ namespace Building
         #region Set points for wall
         public bool SetPointsForWall()
         {
-            if (!HasEnoughResources(new Dictionary<ConstructionType, int> { { ConstructionType.Tower, 1 } })) return false;
+            if (!HasEnoughResourcesForBuild(new Dictionary<ConstructionType, int> { { ConstructionType.Tower, 1 } })) return false;
             Ray ray1 = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray1, out RaycastHit hit1, 100f, LayerMask.GetMask("Terrain")))
             {

@@ -66,7 +66,6 @@ namespace Building
 
             if (!acumular)
             {
-                ResourceSystem.ResourceManager.AddResource(Resource.Sand, 1);
                 return;
             }
 
