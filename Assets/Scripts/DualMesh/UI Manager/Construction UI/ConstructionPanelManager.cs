@@ -57,7 +57,7 @@ public class UIController : MonoBehaviour
 
     void OnDestroyClicked()
     {
-        DualMesh.Instance.SetMode(PlayingMode.Destroy);
+        DualMesh.Instance.SetMode(PlayingMode.Recycle);
     }
 
     void OnActionClicked()
@@ -77,7 +77,7 @@ public class UIController : MonoBehaviour
         Color defaultColor = new Color(0, 0, 0, 0);
 
         buildOutline.effectColor = (mode == PlayingMode.Build) ? selectedColor : defaultColor;
-        recycleOutline.effectColor = (mode == PlayingMode.Destroy) ? selectedColor : defaultColor;
+        recycleOutline.effectColor = (mode == PlayingMode.Recycle) ? selectedColor : defaultColor;
         actionOutline.effectColor = (mode == PlayingMode.Action) ? selectedColor : defaultColor;
 
 

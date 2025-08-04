@@ -14,11 +14,13 @@ public partial class DualMesh : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
-                currentActionMode = (ActionMode)(((int)currentActionMode - 1 + System.Enum.GetValues(typeof(ActionMode)).Length) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                currentActionMode = (ActionMode)(((int)currentActionMode + 1) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                //currentActionMode = (ActionMode)(((int)currentActionMode - 1 + System.Enum.GetValues(typeof(ActionMode)).Length) % System.Enum.GetValues(typeof(ActionMode)).Length);
             }
             else
             {
-                currentActionMode = (ActionMode)(((int)currentActionMode + 1) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                //currentActionMode = (ActionMode)(((int)currentActionMode + 1) % System.Enum.GetValues(typeof(ActionMode)).Length);
+                currentActionMode = (ActionMode)(((int)currentActionMode - 1 + System.Enum.GetValues(typeof(ActionMode)).Length) % System.Enum.GetValues(typeof(ActionMode)).Length);
             }
 
             SetActionType(currentActionMode);

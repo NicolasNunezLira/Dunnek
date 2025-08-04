@@ -28,11 +28,11 @@ public partial class DualMesh : MonoBehaviour
 
     private bool constructed = false, destructed = false, isHandlingPullDown = false;
     private BuildSystem builder;
-    private GameObject housePreviewGO, wallPreviewGO, towerPreviewGO, activePreview, shovelPreviewGO, sweeperPreviewGO, circlePreviewGO;
+    private GameObject activePreview;
 
     public Data.ConstructionType currentConstructionType;
 
-    public enum PlayingMode { Simulation, Build, Destroy, Action };
+    public enum PlayingMode { Simulation, Build, Recycle, Action };
     public PlayingMode inMode { get; set; } = PlayingMode.Simulation;
 
     [SerializeField]
@@ -53,10 +53,5 @@ public partial class DualMesh : MonoBehaviour
     private bool isPaused = false, isWallReadyForConstruction = false;
 
     private FrameVisualChanges sandChanges, terrainShadowChanges;
-
-    //private ResourceSystem.ResourceManager resourceManager;
-    private ConstructionConfig constructionsConfigs;
-    private TimeManager timeManager;
-    private ActionConfig actionConfig;
     #endregion
 }

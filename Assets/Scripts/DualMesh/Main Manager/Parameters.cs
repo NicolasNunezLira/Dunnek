@@ -80,28 +80,6 @@ public partial class DualMesh : MonoBehaviour
     [Header("Constructions Settings")]
     [Tooltip("Time in seconds to pulled down a construction after being built")]
     [SerializeField] public float pulledDownTime = 5f;
-
-    [Header("Actions prefab")]
-    [Tooltip("Shovel Prefab")]
-    [SerializeField] public GameObject shovelPrefabGO;
-
-    [Tooltip("Flat Prefab")]
-    [SerializeField] public GameObject sweeperPrefabGO;
-
-    [Tooltip("Deposition Prefab")]
-    [SerializeField] public GameObject circlePrefabGO;
-
-
-    [Tooltip("House Prefab")]
-    [SerializeField] public GameObject housePrefabGO;
-
-    [Tooltip("Wall prefab")]
-    [SerializeField] public GameObject wallPrefabGO;
-
-    [Tooltip("Tower prefab")]
-    [SerializeField] public GameObject towerPrefabGO;
-
-
     #endregion
 
 }

@@ -6,8 +6,7 @@ public partial class DualMesh : MonoBehaviour
     #region Handle Input
     public void HandleInput()
     {
-        // Enter/Exit Build Mode
-        if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Destroy)
+        if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Recycle)
         {
             PlayingMode newMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
             SetMode(newMode);
@@ -15,7 +14,7 @@ public partial class DualMesh : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.X) && inMode != PlayingMode.Build)
         {
-            PlayingMode newMode = (inMode == PlayingMode.Destroy) ? PlayingMode.Simulation : PlayingMode.Destroy;
+            PlayingMode newMode = (inMode == PlayingMode.Recycle) ? PlayingMode.Simulation : PlayingMode.Recycle;
             SetMode(newMode);
         }
 
