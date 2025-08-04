@@ -159,6 +159,8 @@ namespace Building
                 constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
             }
 
+            ResourceManager.TryAddConsumer(
+                currentConstructionID, currentType);
             currentConstructionID++;
         }
         #endregion
@@ -212,11 +214,11 @@ namespace Building
                 var cost = config.cost;
 
                 necessarySand += cost[Resource.Sand] * amount;
-                necessaryWorkers = Mathf.Max(necessaryWorkers, cost[Resource.Work]);
+                necessaryWorkers = Mathf.Min(necessaryWorkers, cost[Resource.Work]);
             }
 
-            return ResourceManager.GetAmount(Resource.Work) >= necessaryWorkers &&
-                    ResourceManager.GetAmount(Resource.Sand) >= necessarySand;
+            return ResourceManager.GetAmount(Resource.Work) >= -necessaryWorkers &&
+                    ResourceManager.GetAmount(Resource.Sand) >= -necessarySand;
         }
         #endregion
 
@@ -235,15 +237,7 @@ namespace Building
         {
             foreach (var (type, amount) in amounts)
             {
-                var cost = constructionsConfigs.constructionConfig[type].cost;
-
-                ResourceManager.TryConsumeResource(Resource.Sand, cost[Resource.Sand] * amount);
-                ResourceManager.TryConsumeResource(Resource.Work, cost[Resource.Work] * amount);
-
-                var rates = constructionsConfigs.constructionConfig[type].rate;
-
-                ResourceManager.AddRate(Resource.Work, rates[Resource.Work]);
-                ResourceManager.AddRate(Resource.Sand, rates[Resource.Sand]);
+                for (int i=0; i<amount; i++) ResourceManager.TryUpdateResourcesByBuild(type);
             }
         }
         #endregion

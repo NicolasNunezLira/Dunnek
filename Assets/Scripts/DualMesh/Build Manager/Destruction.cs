@@ -67,10 +67,7 @@ namespace Building
 
             ConstructionData data = constructions[idToDestroy];
 
-            ResourceManager.AddRate(Resource.Work, -constructionsConfigs.constructionConfig[data.type].rate[Resource.Work]);
-            ResourceManager.AddRate(Resource.Sand, -constructionsConfigs.constructionConfig[data.type].rate[Resource.Sand]);
-            ResourceManager.AddResource(
-                Resource.Sand, Mathf.Floor(constructionsConfigs.constructionConfig[data.type].cost[Resource.Sand] / 2));
+            ResourceManager.RemoveConsumer(idToDestroy, recycle: true);
 
             // Liberar celdas ocupadas
             foreach (int2 coord in data.support)

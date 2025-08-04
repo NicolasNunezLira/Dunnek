@@ -30,8 +30,7 @@ public class TimeManager : Singleton<TimeManager>
                 advancedTime += turnDuration;
                 OnTimeAdvance?.Invoke();
                 turn++;
-                ResourceSystem.ResourceManager.UpdateResources();
-                ProductionManager.Instance.UpdateProductiveConstructions();
+                ResourceSystem.ResourceManager.UpdateConsumers();
             }
         }
     }
