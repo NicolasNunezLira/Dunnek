@@ -25,14 +25,19 @@ namespace DraftSystem
             base.Awake();
 
             ConstructionUnlockerManager.Awake();
+
         }
         #endregion
 
         #region Start Drafting
         public void StartDraft()
         {
+            if (currentState != DraftState.Idle) return;
+
             List<BuildCardInstance> draftOptions = GetRandomCardInstances(cartToDraft);
             ShowDraftUI(draftOptions);
+
+            currentState = DraftState.Drafting;
         }
 
         List<BuildCardInstance> GetRandomCardInstances(int count)
@@ -82,7 +87,8 @@ namespace DraftSystem
 
         void ShowDraftUI(List<BuildCardInstance> draftOptions)
         {
-
+            List<BuildCard> cardsToShow = draftOptions.Select(instance => instance.cardData).ToList();
+            DraftUI.Instance.ShowDraft(cardsToShow);
         }
         #endregion
 

@@ -65,7 +65,16 @@ public partial class DualMesh :MonoBehaviour
                         SimulationMode();
                         break;
                     }
-                    #endregion
+                #endregion
+
+                #region Draft Mode
+                case PlayingMode.Draft:
+                    {
+                        TimeManager.Instance.Pause();
+                        DraftSystem.DraftManager.Instance.StartDraft();
+                        break;
+                    }
+                #endregion
             }
 
             if (constructed)

@@ -28,6 +28,12 @@ public partial class DualMesh : MonoBehaviour
         {
             SetMode(PlayingMode.Simulation);
         }
+
+        if (Input.GetKeyDown(KeyCode.B) && inMode != PlayingMode.Draft)
+        {
+            PlayingMode newMode = (inMode == PlayingMode.Draft) ? PlayingMode.Simulation : PlayingMode.Draft;
+            SetMode(newMode);
+        }
         #endregion
     }
 

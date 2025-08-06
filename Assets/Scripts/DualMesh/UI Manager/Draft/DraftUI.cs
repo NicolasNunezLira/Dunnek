@@ -14,15 +14,34 @@ namespace DraftSystem
         private List<BuildCardUI> instantiatedCards = new();
         private BuildCard selectedCard;
 
+        protected override void Awake()
+        {
+            base.Awake();
+
+            cardContainer?.gameObject.SetActive(false);
+            cardPrefab?.gameObject.SetActive(false);
+
+            if (confirmButton != null)
+            {
+                confirmButton.onClick.AddListener(ConfirmSelection);
+                confirmButton.gameObject.SetActive(false);
+            }
+        }
+
         public void ShowDraft(List<BuildCard> draftOptions)
         {
             ClearPreviousCards();
+
+            cardContainer.gameObject.SetActive(true);
+            confirmButton.gameObject.SetActive(true);
 
             foreach (var cardData in draftOptions)
             {
                 var cardUI = Instantiate(cardPrefab, cardContainer);
                 cardUI.Setup(cardData);
-                cardUI.GetComponent<Button>().onClick.AddListener(() => OnCardSelected(cardUI));
+                cardUI.gameObject.SetActive(true);
+                //cardUI.GetComponent<Button>().onClick.AddListener(() => OnCardSelected(cardUI));
+                instantiatedCards.Add(cardUI);
             }
         }
 
@@ -44,7 +63,12 @@ namespace DraftSystem
                 ConstructionUnlockerManager.UnlockConstruction(selectedCard.constructionType);
 
                 ClearPreviousCards();
-                gameObject.SetActive(false);
+                //gameObject.SetActive(false);
+                cardContainer.gameObject.SetActive(false);
+                confirmButton.gameObject.SetActive(false);
+
+                DraftManager.Instance.currentState = DraftState.Idle;
+                DualMesh.Instance.SetMode(DualMesh.PlayingMode.Simulation);
             }
         }
 
@@ -52,12 +76,12 @@ namespace DraftSystem
         {
             foreach (var card in instantiatedCards)
             {
-                Object.Destroy(card); // card.GameObject
+                Object.Destroy(card.gameObject); // card.GameObject
             }
 
             instantiatedCards.Clear();
             selectedCard = null;
-            confirmButton.onClick.RemoveAllListeners();
+            //confirmButton.onClick.RemoveAllListeners();
         }
     }
 }
