@@ -577,6 +577,7 @@ GameObject:
   - component: {fileID: 164671253}
   - component: {fileID: 164671259}
   - component: {fileID: 164671260}
+  - component: {fileID: 164671261}
   m_Layer: 7
   m_Name: DualMeshGenerator
   m_TagString: Untagged
@@ -596,7 +597,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1936213879}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &164671253
@@ -618,14 +620,14 @@ MonoBehaviour:
   size: 50
   openEnded: 0
   planicie: 1
-  terrainMaterial: {fileID: 2100000, guid: 07a9a9609108e4b4caf4730f4f6e0761, type: 2}
+  terrainMaterial: {fileID: 2100000, guid: 23344b3d4d5243649843b0af425d8097, type: 2}
   terrainScale1: 0.003
   terrainAmplitude1: 8
   terrainScale2: 0.01
   terrainAmplitude2: 4
   terrainScale3: 0.05
   terrainAmplitude3: 2
-  sandMaterial: {fileID: 2100000, guid: fa542ab47cc7bb3418c35926f8cab963, type: 2}
+  sandMaterial: {fileID: 2100000, guid: f0f72e36898b4ce39ca3a416fe4db66f, type: 2}
   sandScale1: 0.02
   sandAmplitude1: 1.5
   sandScale2: 0.06
@@ -785,6 +787,37 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &164671261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164671251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71ef9a4c961f26a45ada4dfc14902d64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rockPrefabs:
+  - {fileID: 3189550197384498378, guid: 6ecdfe46a8fa43e494cf3ee8ce0df57e, type: 3}
+  - {fileID: 8578709666758421167, guid: ef2ec9353ccb4818bc52dcd72f4366ee, type: 3}
+  - {fileID: 4110015381959883988, guid: 19703458656444aeadafd4ae3f708a7d, type: 3}
+  treePrefabs:
+  - {fileID: 2611588523068720836, guid: af4014f61793480686387b57c55448e4, type: 3}
+  - {fileID: 5037314164210229809, guid: d6568448a2dc47ad9bdb965b39e66e57, type: 3}
+  - {fileID: 3501486107098535314, guid: 4537fb83857d4db2ae2e745c5b3af271, type: 3}
+  bushPrefabs:
+  - {fileID: 6244422567661042610, guid: 4db60b76f414415cb38e593814b833dd, type: 3}
+  - {fileID: 7865413847991648932, guid: 1daccfd274f9439bb7b537354fc0495b, type: 3}
+  - {fileID: 4443743228138257195, guid: 9cf5e545a3ce472aac31ad93cfba71dd, type: 3}
+  seed: 42
+  treeThreshold: 0.6
+  rockThreshold: 0.75
+  scale: 10
+  rockParent: {fileID: 2122494987}
+  treeParent: {fileID: 1620790113}
+  bushParent: {fileID: 1241263461}
 --- !u!1 &177258481
 GameObject:
   m_ObjectHideFlags: 0
@@ -4279,6 +4312,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1172793183}
   m_CullTransparentMesh: 1
+--- !u!1 &1241263460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1241263461}
+  m_Layer: 9
+  m_Name: Bushes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1241263461
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241263460}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1764687325}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1306692686
 GameObject:
   m_ObjectHideFlags: 0
@@ -4602,6 +4666,37 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1620790112
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1620790113}
+  m_Layer: 9
+  m_Name: Trees
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1620790113
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620790112}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1764687325}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1692121903
 GameObject:
   m_ObjectHideFlags: 0
@@ -4758,6 +4853,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1722320495}
   m_CullTransparentMesh: 1
+--- !u!1 &1764687324
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1764687325}
+  m_Layer: 7
+  m_Name: Vegetation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1764687325
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764687324}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1620790113}
+  - {fileID: 1241263461}
+  m_Father: {fileID: 1936213879}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1902187626
 GameObject:
   m_ObjectHideFlags: 0
@@ -5017,6 +5145,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1930012508}
   m_CullTransparentMesh: 1
+--- !u!1 &1936213878
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1936213879}
+  m_Layer: 7
+  m_Name: DesertObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1936213879
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1936213878}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2122494987}
+  - {fileID: 1764687325}
+  m_Father: {fileID: 164671252}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1936672826
 GameObject:
   m_ObjectHideFlags: 0
@@ -5355,6 +5516,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 604712594}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2122494986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2122494987}
+  m_Layer: 7
+  m_Name: Rocks
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2122494987
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2122494986}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1936213879}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2145947118
 GameObject:

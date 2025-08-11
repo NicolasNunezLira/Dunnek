@@ -1,0 +1,145 @@
+// SandSimulation_Debug.compute - Versión simplificada para debugging
+#pragma kernel ErodeGrains
+#pragma kernel DepositGrains  
+#pragma kernel RunAvalanche
+
+// Buffers básicos
+RWStructuredBuffer<float> sandHeights;
+RWStructuredBuffer<float> terrainShadow;
+RWStructuredBuffer<int> shadow;
+RWStructuredBuffer<uint> randomSeeds;
+
+// Parámetros básicos
+int width;
+int height;
+int windDx;
+int windDz;
+float erosionHeight;
+int grainsPerStep;
+float slopeThreshold;
+
+// Funciones básicas
+int GetIndex(int x, int z)
+{
+    return z * width + x;
+}
+
+bool IsValidCell(int x, int z)
+{
+    return x >= 0 && x < width && z >= 0 && z < height;
+}
+
+// Random simple
+uint hash(uint x) 
+{
+    x += (x << 10u);
+    x ^= (x >>  6u);
+    x += (x <<  3u);
+    x ^= (x >> 11u);
+    x += (x << 15u);
+    return x;
+}
+
+float random(uint seed)
+{
+    return float(hash(seed)) / 4294967295.0;
+}
+
+// Kernel de erosión simplificado
+[numthreads(64, 1, 1)]
+void ErodeGrains(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= grainsPerStep) return;
+    
+    uint seed = randomSeeds[id.x] + id.x;
+    
+    // Posición aleatoria
+    int x = (int)(random(seed) * width);
+    int z = (int)(random(seed + 1000) * height);
+    
+    if (!IsValidCell(x, z)) return;
+    
+    int index = GetIndex(x, z);
+    
+    // Erosión simple
+    if (shadow[index] == 0 && sandHeights[index] > terrainShadow[index])
+    {
+        float eroded = min(erosionHeight, sandHeights[index] - terrainShadow[index]);
+        sandHeights[index] -= eroded;
+        
+        // Deposición simple
+        int newX = clamp(x + windDx, 0, width - 1);
+        int newZ = clamp(z + windDz, 0, height - 1);
+        int newIndex = GetIndex(newX, newZ);
+        
+        sandHeights[newIndex] += eroded;
+    }
+    
+    randomSeeds[id.x] = hash(seed + 2000);
+}
+
+// Kernel vacío para DepositGrains
+[numthreads(64, 1, 1)]
+void DepositGrains(uint3 id : SV_DispatchThreadID)
+{
+    // Vacío por ahora
+}
+
+// Kernel de avalancha simplificado
+[numthreads(8, 8, 1)]
+void RunAvalanche(uint3 id : SV_DispatchThreadID)
+{
+    int x = (int)id.x;
+    int z = (int)id.y;
+    
+    if (!IsValidCell(x, z)) return;
+    
+    int index = GetIndex(x, z);
+    float currentHeight = sandHeights[index];
+    float terrainHeight = terrainShadow[index];
+    
+    if (currentHeight <= terrainHeight + 0.001) return;
+    
+    // Avalancha simple hacia el vecino más bajo
+    float minHeight = currentHeight;
+    int bestIndex = index;
+    
+    // Revisar 4 vecinos
+    int offsets[8] = {1, 0, -1, 0, 0, 1, 0, -1}; // x, z pairs
+    
+    for (int i = 0; i < 4; i++)
+    {
+        int nx = x + offsets[i * 2];
+        int nz = z + offsets[i * 2 + 1];
+        
+        if (IsValidCell(nx, nz))
+        {
+            int nIndex = GetIndex(nx, nz);
+            float neighborHeight = max(sandHeights[nIndex], terrainShadow[nIndex]);
+            
+            if (neighborHeight < minHeight)
+            {
+                minHeight = neighborHeight;
+                bestIndex = nIndex;
+            }
+        }
+    }
+    
+    if (bestIndex != index)
+    {
+        float totalCurrentHeight = max(currentHeight, terrainHeight);
+        float slope = totalCurrentHeight - minHeight;
+        
+        if (slope > slopeThreshold)
+        {
+            float transfer = min(slope * 0.1, currentHeight - terrainHeight);
+            transfer = min(transfer, currentHeight * 0.5);
+            
+            if (transfer > 0.001)
+            {
+                sandHeights[index] -= transfer;
+                sandHeights[bestIndex] += transfer;
+            }
+        }
+    }
+}
