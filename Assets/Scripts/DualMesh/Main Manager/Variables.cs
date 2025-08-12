@@ -18,7 +18,7 @@ public partial class DualMesh : MonoBehaviour
 
     public ConstructionGrid constructionGrid;
 
-    private ModelDM duneModel;
+    public ModelDM duneModel;
     private FindSlopeMooreDeterministic slopeFinder;
 
     private DualMeshConstructor dualMeshConstructor;

@@ -578,6 +578,7 @@ GameObject:
   - component: {fileID: 164671259}
   - component: {fileID: 164671260}
   - component: {fileID: 164671261}
+  - component: {fileID: 164671262}
   m_Layer: 7
   m_Name: DualMeshGenerator
   m_TagString: Untagged
@@ -598,6 +599,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 525112920}
   - {fileID: 1936213879}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -615,11 +617,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previewParentGO: {fileID: 0}
   uiController: {fileID: 755058212}
-  xResolution: 255
-  zResolution: 255
+  xResolution: 250
+  zResolution: 250
   size: 50
   openEnded: 0
-  planicie: 1
+  planicie: 0
   terrainMaterial: {fileID: 2100000, guid: 23344b3d4d5243649843b0af425d8097, type: 2}
   terrainScale1: 0.003
   terrainAmplitude1: 8
@@ -634,8 +636,8 @@ MonoBehaviour:
   sandAmplitude2: 0.8
   sandScale3: 0.1
   sandAmplitude3: 0.3
-  heightVariation: 0.02
-  slope: 0.15
+  heightVariation: 0.005
+  slope: 0.015
   hopLength: 5
   shadowSlope: 0.02
   windDirection: {x: 1, y: 1}
@@ -647,6 +649,31 @@ MonoBehaviour:
   conicShapeFactor: 1
   minAvalancheAmount: 1.5
   pulledDownTime: 800
+  duneModel:
+    xResolution: 0
+    zResolution: 0
+    HopLength: 0
+    pSand: 0
+    pNoSand: 0
+    shadowSlope: 0
+    depositeHeight: 0
+    erosionHeight: 0
+    slopeThreshold: 0
+    grainsPerStep: 0
+    grainsOutside: 0
+    slope: 0
+    avalancheSlope: 0
+    dx: 0
+    dz: 0
+    currentConstructionID: 0
+    currentCompositeConstructionID: 0
+    verbose: 0
+    isPaused: 0
+    maxCellsPerFrame: 0
+    conicShapeFactor: 0
+    avalancheTrasnferRate: 0
+    minAvalancheAmount: 0
+    size: 0
   currentConstructionType: 0
 --- !u!23 &164671254
 MeshRenderer:
@@ -818,6 +845,22 @@ MonoBehaviour:
   rockParent: {fileID: 2122494987}
   treeParent: {fileID: 1620790113}
   bushParent: {fileID: 1241263461}
+--- !u!114 &164671262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 164671251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddd7528e46b4d714b9e78b7512a7cdcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 512
+  rayLength: 100
 --- !u!1 &177258481
 GameObject:
   m_ObjectHideFlags: 0
@@ -1948,6 +1991,50 @@ RectTransform:
   m_AnchoredPosition: {x: -550.42, y: 254}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &525112919
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 525112920}
+  - component: {fileID: 525112921}
+  m_Layer: 7
+  m_Name: Surfaces
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &525112920
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525112919}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 164671252}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &525112921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525112919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ecc989d67aaaad4db9b07db17d0addd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &582182726
 GameObject:
   m_ObjectHideFlags: 0
@@ -3745,7 +3832,7 @@ Transform:
   m_GameObject: {fileID: 961739749}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0, y: 10, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4862,7 +4949,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1764687325}
-  m_Layer: 7
+  m_Layer: 9
   m_Name: Vegetation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5154,7 +5241,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1936213879}
-  m_Layer: 7
+  m_Layer: 9
   m_Name: DesertObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5526,7 +5613,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2122494987}
-  m_Layer: 7
+  m_Layer: 9
   m_Name: Rocks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5574,7 +5661,7 @@ Transform:
   m_GameObject: {fileID: 2145947118}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25, y: -4, z: 25}
+  m_LocalPosition: {x: 25, y: 2, z: 25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5596,8 +5683,8 @@ MonoBehaviour:
   moveSpeed: 20
   zoomSpeed: 400
   rotationSpeed: 5
-  minZoom: 1
-  maxZoom: 100
+  minZoom: -10
+  maxZoom: 10
   isControllable: 1
 --- !u!1001 &639698722973977544
 PrefabInstance:

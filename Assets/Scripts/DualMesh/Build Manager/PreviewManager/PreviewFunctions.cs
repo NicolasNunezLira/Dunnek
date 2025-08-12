@@ -66,7 +66,9 @@ namespace Building
                 {
                     for (int zj = zMin; zj <= zMax; zj++)
                     {
-                        if (!(constructionGrid[x, z].Count == 0 || constructionGrid.IsOnlyTowerAt(x, z)))
+                        if (!(constructionGrid[x, z].Count == 0
+                            || constructionGrid.IsOnlyTowerAt(x, z)
+                            || VegetationManager.vegetationGrid[x, z] != 0))
                             canBuild = false;
 
                         float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrain[xi, zj]);
@@ -77,7 +79,7 @@ namespace Building
                 float avgX = (x + (buildSize - 1) / 2f) * duneModel.size / duneModel.xResolution;
                 float avgZ = (z + (buildSize - 1) / 2f) * duneModel.size / duneModel.zResolution;
 
-                activePreview.transform.position = new UnityEngine.Vector3(avgX, maxY + 0.5f, avgZ);
+                activePreview.transform.position = new UnityEngine.Vector3(avgX, maxY + 0.1f, avgZ);
 
                 Color color = canBuild ? green : red;
                 foreach (var rend_ in activePreview.GetComponentsInChildren<Renderer>())

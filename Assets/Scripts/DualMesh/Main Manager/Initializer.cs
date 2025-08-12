@@ -39,7 +39,7 @@ public partial class DualMesh : MonoBehaviour
         terrainShadowChanges = new FrameVisualChanges(terrainShadow.VisualWidth, terrainShadow.VisualHeight);
 
         // Initialize the desert prefabs
-        VegetationManager.Initialize();
+        VegetationManager.Initialize(sand.VisualWidth, sand.VisualHeight);
         DesertPrefabSpawner.Instance.Spawn();
 
         duneModel = new ModelDM(

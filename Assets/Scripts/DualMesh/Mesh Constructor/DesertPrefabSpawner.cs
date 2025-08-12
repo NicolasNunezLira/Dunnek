@@ -17,7 +17,7 @@ public class DesertPrefabSpawner : Singleton<DesertPrefabSpawner>
 
     public float scale = 10f;
 
-    [Tooltip("Parent for rocks")]
+    [Tooltip("Parent for desert elements")]
     public Transform rockParent;
     public Transform treeParent;
     public Transform bushParent;
@@ -28,7 +28,7 @@ public class DesertPrefabSpawner : Singleton<DesertPrefabSpawner>
 
     public enum DesertElement
     {
-        Rock, Tree, Bush
+        None = 0, Rock, Tree, Bush
     }
 
     private Dictionary<DesertElement, Transform> parent => new Dictionary<DesertElement, Transform>
@@ -39,9 +39,9 @@ public class DesertPrefabSpawner : Singleton<DesertPrefabSpawner>
     };
 
     private Dictionary<DesertElement, List<float>> randomExtremes = new Dictionary<DesertElement, List<float>> {
-        {DesertElement.Rock, new List<float> {0.05f, 0.08f} },
-        {DesertElement.Tree, new List<float> {0.08f, 0.12f} },
-        {DesertElement.Bush, new List<float> {0.1f, 0.2f}}
+        {DesertElement.Rock, new List<float> {0.01f, 0.05f} },
+        {DesertElement.Tree, new List<float> {0.01f, 0.08f} },
+        {DesertElement.Bush, new List<float> {0.05f, 0.1f}}
     };
     #endregion
 
@@ -49,8 +49,6 @@ public class DesertPrefabSpawner : Singleton<DesertPrefabSpawner>
     protected override void Awake()
     {
         base.Awake();
-
-
     }
     #endregion
 
@@ -71,8 +69,8 @@ public class DesertPrefabSpawner : Singleton<DesertPrefabSpawner>
         {
             for (int z = 0; z < simZDOF; z++)
             {
-                if (occupied[x, z]) continue;
-                float height = Mathf.Max(terrain[x, z], sand[x, z]);
+                if (occupied[x, z] || sand[x, z] >= terrain[x, z] + 0.2f) continue;
+                float height = terrain[x, z];
                 float nx = (float)x / simXDOF;
                 float nz = (float)z / simZDOF;
                 float noise = Mathf.PerlinNoise(nx * scale + seed, nz * scale + seed);
@@ -92,6 +90,8 @@ public class DesertPrefabSpawner : Singleton<DesertPrefabSpawner>
                 }
             }
         }
+
+        DualMesh.OnDesertGenerated?.Invoke();
     }
 
     void PlaceRandomPrefab(
@@ -108,52 +108,14 @@ public class DesertPrefabSpawner : Singleton<DesertPrefabSpawner>
 
         GameObject obj = Instantiate(prefab, position, rot, parent[element]);
 
+
+
         float scaleRand = Random.Range(randomExtremes[element][0], randomExtremes[element][1]);
         obj.transform.localScale *= scaleRand;
 
-        Collider col = obj.GetComponentInChildren<Collider>();
-        if (col == null)
-        {
-            Debug.LogWarning("Prefab sin collider: " + prefab.name);
-            return;
-        }
-
-        Bounds bounds = col.bounds;
-
-        // Convertir límites a índice de grilla
-        int minX = Mathf.Clamp(Mathf.RoundToInt(bounds.min.x / size * (simXDOF - 1)), 0, simXDOF - 1);
-        int maxX = Mathf.Clamp(Mathf.RoundToInt(bounds.max.x / size * (simXDOF - 1)), 0, simXDOF - 1);
-        int minZ = Mathf.Clamp(Mathf.RoundToInt(bounds.min.z / size * (simZDOF - 1)), 0, simZDOF - 1);
-        int maxZ = Mathf.Clamp(Mathf.RoundToInt(bounds.max.z / size * (simZDOF - 1)), 0, simZDOF - 1);
-
-        // Usar raycasts para verificar nodos realmente ocupados
-        for (int x = minX; x <= maxX; x++)
-        {
-            for (int z = minZ; z <= maxZ; z++)
-            {
-                Vector3 rayOrigin = new Vector3(
-                    (float)x / (simXDOF - 1) * size,
-                    bounds.max.y + 1f, // un poco por encima del objeto
-                    (float)z / (simZDOF - 1) * size
-                );
-
-                if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, Mathf.Infinity))
-                {
-                    if (hit.collider != null && hit.collider.transform.IsChildOf(obj.transform))
-                    {
-                        occupiedNodes[x, z] = true;
-                    }
-                }
-            }
-        }
-
-        if (element != DesertElement.Rock)
-        {
-            VegetationManager.AddVegetation(
-                element,
-                obj
-            );
-        }
+        var id = obj.GetComponent<VegetationIdentifier>();
+        if (id == null) id = obj.AddComponent<VegetationIdentifier>();
+        id.element = element;
     }
     #endregion
 }

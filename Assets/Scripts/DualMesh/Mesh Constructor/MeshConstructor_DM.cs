@@ -92,15 +92,27 @@ namespace DunefieldModel_DualMesh
                        GenerateMountain();
 
             // Creación del terreno
+            Transform surfacesParent = parentTransform != null ? parentTransform.Find("Surfaces") : null;
+
+            if (surfacesParent == null)
+            {
+                GameObject surfacesGO = new GameObject("Surfaces");
+                if (parentTransform != null)
+                {
+                    surfacesGO.transform.parent = parentTransform;
+                }
+                surfacesParent = surfacesGO.transform;
+            }
+
             terrainGO = CreateMeshObject("TerrainMesh", terainMaterial,
                 GenerateMesh(terrain));
             if (parentTransform != null)
-                terrainGO.transform.parent = parentTransform;
+                terrainGO.transform.parent = surfacesParent;
 
             sandGO = CreateMeshObject("SandMesh", sandMaterial,
                 GenerateMesh(sand));
             if (parentTransform != null)
-                sandGO.transform.parent = parentTransform;
+                sandGO.transform.parent = surfacesParent;
 
 
             ApplyOffset(terrainGO, sandGO, terrain);

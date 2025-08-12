@@ -5,6 +5,9 @@ public partial class DualMesh :MonoBehaviour
 {
     #region Awake
     public static DualMesh Instance;
+
+    public static System.Action OnDesertGenerated;
+
     void Awake()
     {
         Instance = this;
