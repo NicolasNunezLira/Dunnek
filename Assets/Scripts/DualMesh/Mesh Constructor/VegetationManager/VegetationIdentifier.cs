@@ -1,8 +1,7 @@
 using UnityEngine;
-using static DesertPrefabSpawner;
+using static VegetationManager;
 
 public class VegetationIdentifier : MonoBehaviour
 {
-    public DesertElement element;
+    public VegetationType element;
 }
-

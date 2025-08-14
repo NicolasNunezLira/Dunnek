@@ -21,7 +21,12 @@ namespace DunefieldModel_DualMesh
 
             UpdateShadow(x, z, dx, dz);
 
-            ActivateCell(x, z);          
+            ActivateCell(x, z);
+
+            if (VegetationManager.Instance.vegetationGrid.HasVegetation(x, z))
+            {
+                VegetationManager.Instance.vegetationGrid.TryDestroy(x, z);
+            }        
         }
 
     }

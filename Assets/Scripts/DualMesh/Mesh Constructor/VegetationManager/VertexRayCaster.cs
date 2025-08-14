@@ -15,7 +15,7 @@ public class VertexRaycaster : MonoBehaviour
 
     private bool[,] windGrid;
     private bool[,] erosionGrid;
-    private DesertPrefabSpawner.DesertElement[,] vegetationGrid;
+    private VegetationManager.VegetationType[,] vegetationGrid;
 
     private void Awake()
     {
@@ -26,7 +26,7 @@ public class VertexRaycaster : MonoBehaviour
 
         windGrid = new bool[width, height];
         erosionGrid = new bool[width, height];
-        vegetationGrid = new DesertPrefabSpawner.DesertElement[width, height];
+        vegetationGrid = new VegetationManager.VegetationType[width, height];
     }
 
     private void OnEnable()
@@ -86,16 +86,13 @@ public class VertexRaycaster : MonoBehaviour
                             {
                                 switch (vegetation.element)
                                 {
-                                    case DesertPrefabSpawner.DesertElement.Tree:
+                                    case VegetationManager.VegetationType.Tree:
                                         windGrid[nx, nz] = true;
                                         erosionGrid[nx, nz] = true;
                                         AddShadow(nx, nz, bounds);
                                         break;
-                                    case DesertPrefabSpawner.DesertElement.Bush:
+                                    case VegetationManager.VegetationType.Bush:
                                         erosionGrid[nx, nz] = true;
-                                        break;
-                                    case DesertPrefabSpawner.DesertElement.Rock:
-                                        AddShadow(nx, nz, bounds);
                                         break;
                                 }
                             }
@@ -108,7 +105,7 @@ public class VertexRaycaster : MonoBehaviour
                 yield return null;
         }
 
-        VegetationManager.SetEffectGrids(windGrid, erosionGrid, vegetationGrid);
+        //VegetationManager.SetEffectGrids(windGrid, erosionGrid, vegetationGrid);
     }
 
     private Vector2Int WorldToGrid(Vector3 worldPos)
