@@ -143,7 +143,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 72255538}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 580.5, y: 264.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -577,8 +577,6 @@ GameObject:
   - component: {fileID: 164671253}
   - component: {fileID: 164671259}
   - component: {fileID: 164671260}
-  - component: {fileID: 164671261}
-  - component: {fileID: 164671262}
   m_Layer: 7
   m_Name: DualMeshGenerator
   m_TagString: Untagged
@@ -619,7 +617,7 @@ MonoBehaviour:
   uiController: {fileID: 755058212}
   xResolution: 250
   zResolution: 250
-  size: 50
+  size: 100
   openEnded: 0
   planicie: 0
   terrainMaterial: {fileID: 2100000, guid: 23344b3d4d5243649843b0af425d8097, type: 2}
@@ -649,6 +647,8 @@ MonoBehaviour:
   conicShapeFactor: 1
   minAvalancheAmount: 1.5
   pulledDownTime: 800
+  terrainGO: {fileID: 0}
+  sandGO: {fileID: 0}
   duneModel:
     xResolution: 0
     zResolution: 0
@@ -814,88 +814,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &164671261
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 164671251}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71ef9a4c961f26a45ada4dfc14902d64, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  treePrefabs:
-  - {fileID: 2611588523068720836, guid: af4014f61793480686387b57c55448e4, type: 3}
-  - {fileID: 5037314164210229809, guid: d6568448a2dc47ad9bdb965b39e66e57, type: 3}
-  - {fileID: 3501486107098535314, guid: 4537fb83857d4db2ae2e745c5b3af271, type: 3}
-  bushPrefabs:
-  - {fileID: 6244422567661042610, guid: 4db60b76f414415cb38e593814b833dd, type: 3}
-  - {fileID: 7865413847991648932, guid: 1daccfd274f9439bb7b537354fc0495b, type: 3}
-  - {fileID: 4443743228138257195, guid: 9cf5e545a3ce472aac31ad93cfba71dd, type: 3}
-  seed: 42
-  treeThreshold: 0.6
-  scale: 10
-  treeParent: {fileID: 1620790113}
-  bushParent: {fileID: 1241263461}
---- !u!114 &164671262
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 164671251}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f2cbbbae46f8f146a170e4054057094, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  archPrefabs:
-  - {fileID: 6840935146444355537, guid: aa9ae083b41246de899faa96a00dd2ff, type: 3}
-  - {fileID: 6598193996083460494, guid: e748ce8686ac4d13a6e1dec0882957ad, type: 3}
-  - {fileID: 3189550197384498378, guid: 6ecdfe46a8fa43e494cf3ee8ce0df57e, type: 3}
-  boulderPrefabs:
-  - {fileID: 7382857988686033389, guid: b8fba5c5c3b64437b26c8caf112e0b3e, type: 3}
-  - {fileID: 3655575204992600520, guid: 6702ceda9bdc48e2bf9485d74932400a, type: 3}
-  - {fileID: 5236015630531848917, guid: 39effe264c2d4377a8cc17f909c1427e, type: 3}
-  - {fileID: 1587374033758381882, guid: f82028de2f6a4db5a68d1d3342ec8b6a, type: 3}
-  - {fileID: 5362372042584422485, guid: 6d18958519d84ab4a00accd99f02dcee, type: 3}
-  - {fileID: 4671958595853854400, guid: b9bbc5fb85264b76a0415e5ec42d7547, type: 3}
-  - {fileID: 7656285121913899657, guid: b2fcf2bfc95e4715ba44946810acd352, type: 3}
-  - {fileID: 5885377026503307483, guid: ac4c0a02ae5042d5abd2ab47b6659b99, type: 3}
-  - {fileID: 4446913876419300549, guid: f7416b42274e40898692ddb95c603046, type: 3}
-  cliffPrefabs:
-  - {fileID: 6568707999109275679, guid: 6f47f4e357114c2e9bcd299602703a4f, type: 3}
-  - {fileID: 537699544968453236, guid: 9375d6b02b2b4de59f925706543c6eaa, type: 3}
-  - {fileID: 6420444253002347566, guid: fcc3edc3a55e404fb2f2af46818beb57, type: 3}
-  - {fileID: 9078418317922017561, guid: 067ebc76d9ba4b55ad51f5d69c56f952, type: 3}
-  - {fileID: 8578709666758421167, guid: ef2ec9353ccb4818bc52dcd72f4366ee, type: 3}
-  highCliffPrefabs:
-  - {fileID: 6956023090200625754, guid: 41c7e744f8cf48d7b71e82984389498d, type: 3}
-  - {fileID: 931297383398437035, guid: 4b244996dc6547708e3034e5399a6768, type: 3}
-  - {fileID: 464350482629877768, guid: 862df6abfc1142b78584b80b0ae3f629, type: 3}
-  rockPrefabs:
-  - {fileID: 14963779438477741, guid: d60c9d2e82cf4114a7b75b977e74e7a2, type: 3}
-  - {fileID: 2324761946523954390, guid: a36a5d75f71d418b8728e42595064a2f, type: 3}
-  - {fileID: 520065509455020024, guid: c862511698cd46e8b262e504a9e3af3b, type: 3}
-  - {fileID: 1774456228872585419, guid: c76137bbe9e7457e8f837c4a61f782fd, type: 3}
-  - {fileID: 7335465068584378703, guid: b90e42f67aeb4fc6b997a83f3621b354, type: 3}
-  - {fileID: 1435112969269915027, guid: 77c841b718f64a2a96dfc2e112c68f77, type: 3}
-  - {fileID: 1568932738690432039, guid: 6caef0526b064c59a5b3956ae1de5b4e, type: 3}
-  - {fileID: 3710704705371756740, guid: b14911a57d544a0aa9c9e2941b16d536, type: 3}
-  - {fileID: 2895062654731002711, guid: 90f6704ffce642a5aab60ce85fc4fa48, type: 3}
-  rubblePrefabs:
-  - {fileID: 4110015381959883988, guid: 19703458656444aeadafd4ae3f708a7d, type: 3}
-  - {fileID: 8075598907269164860, guid: e4f6966b18894589b9d79a688f3a6441, type: 3}
-  - {fileID: 1198660286048447800, guid: f50d935983e14827a517f34e7d3aa55c, type: 3}
-  - {fileID: 211340075216382320, guid: 4d7d03ab6b9b4495bd39daff91139388, type: 3}
-  - {fileID: 1600011016679556909, guid: 92ba7f1887ba4e09966ed33e06b5e2ce, type: 3}
-  - {fileID: 3925144872683212182, guid: 8f7dab6a27b1492db4de2671438fd139, type: 3}
-  seed: 42
-  rockThreshold: 0.5
-  scale: 6
-  rockTransform: {fileID: 2122494987}
 --- !u!1 &177258481
 GameObject:
   m_ObjectHideFlags: 0
@@ -2036,6 +1954,7 @@ GameObject:
   m_Component:
   - component: {fileID: 525112920}
   - component: {fileID: 525112921}
+  - component: {fileID: 525112922}
   m_Layer: 7
   m_Name: Surfaces
   m_TagString: Untagged
@@ -2068,6 +1987,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ecc989d67aaaad4db9b07db17d0addd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &525112922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 525112919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 162de503dcb83144588416444a137d28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &582182726
@@ -4143,6 +4074,57 @@ RectTransform:
   m_AnchoredPosition: {x: 491, y: -61.5}
   m_SizeDelta: {x: 70, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1076998167
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1076998168}
+  - component: {fileID: 1076998169}
+  m_Layer: 10
+  m_Name: Mountains
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1076998168
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1076998167}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1936213879}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1076998169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1076998167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b9a071f12fa084fbc8b0a16a3c21dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mountainPrefabs:
+  - {fileID: 5329562903018383631, guid: 5a7c12d763e4c6948ac5b4dda63a2999, type: 3}
+  - {fileID: 8941837520741754277, guid: 5f45359d78ca5004088041512e3baf1d, type: 3}
+  seed: 42
+  rockThreshold: 0.75
+  scale: 10
+  rockTransform: {fileID: 1076998168}
 --- !u!1 &1107995506
 GameObject:
   m_ObjectHideFlags: 0
@@ -4984,6 +4966,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1764687325}
+  - component: {fileID: 1764687326}
   m_Layer: 9
   m_Name: Vegetation
   m_TagString: Untagged
@@ -5008,6 +4991,32 @@ Transform:
   - {fileID: 1241263461}
   m_Father: {fileID: 1936213879}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1764687326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764687324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71ef9a4c961f26a45ada4dfc14902d64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  treePrefabs:
+  - {fileID: 2611588523068720836, guid: af4014f61793480686387b57c55448e4, type: 3}
+  - {fileID: 5037314164210229809, guid: d6568448a2dc47ad9bdb965b39e66e57, type: 3}
+  - {fileID: 3501486107098535314, guid: 4537fb83857d4db2ae2e745c5b3af271, type: 3}
+  bushPrefabs:
+  - {fileID: 6244422567661042610, guid: 4db60b76f414415cb38e593814b833dd, type: 3}
+  - {fileID: 7865413847991648932, guid: 1daccfd274f9439bb7b537354fc0495b, type: 3}
+  - {fileID: 4443743228138257195, guid: 9cf5e545a3ce472aac31ad93cfba71dd, type: 3}
+  seed: 42
+  treeThreshold: 0.6
+  scale: 10
+  treeParent: {fileID: 1620790113}
+  bushParent: {fileID: 1241263461}
+  currentID: 0
 --- !u!1 &1902187626
 GameObject:
   m_ObjectHideFlags: 0
@@ -5298,6 +5307,7 @@ Transform:
   m_Children:
   - {fileID: 2122494987}
   - {fileID: 1764687325}
+  - {fileID: 1076998168}
   m_Father: {fileID: 164671252}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1936672826

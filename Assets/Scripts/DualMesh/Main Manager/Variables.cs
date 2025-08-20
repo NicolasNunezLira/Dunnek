@@ -12,7 +12,7 @@ public partial class DualMesh : MonoBehaviour
     public int simXResolution => openEnded ? xResolution + 40 : xResolution;
     public int simZResolution => openEnded ? zResolution + 40 : zResolution;
 
-    private GameObject terrainGO, sandGO;
+    public GameObject terrainGO, sandGO;
 
     public NativeGrid sand, terrain, terrainShadow;
 

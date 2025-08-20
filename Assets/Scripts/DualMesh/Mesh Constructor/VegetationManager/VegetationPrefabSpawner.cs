@@ -61,7 +61,7 @@ public class VegetationManager : Singleton<VegetationManager>
         zDOF = DualMesh.Instance.zResolution + 1;
         size = DualMesh.Instance.size;
         sand = DualMesh.Instance.sand;
-        terrain = DualMesh.Instance.terrain;
+        terrain = DualMesh.Instance.terrainShadow;
 
         Random.InitState(seed);
 
@@ -75,7 +75,9 @@ public class VegetationManager : Singleton<VegetationManager>
                 float nz = (float)z / zDOF;
                 float noise = Mathf.PerlinNoise(nx * scale + seed, nz * scale + seed);
 
-                Vector3 pos = new Vector3(nx * size, height, nz * size);
+                float biasX = terrain[x, z] > sand[x, z] ? 0 : Random.Range(-0.5f, 0.5f);
+                float biasZ = terrain[x, z] > sand[x, z] ? 0 : Random.Range(-0.5f, 0.5f);
+                Vector3 pos = new Vector3(nx * size + biasX, height, nz * size + biasZ);
 
                 if (noise > treeThreshold)
                 {

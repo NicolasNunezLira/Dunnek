@@ -159,7 +159,7 @@ namespace DunefieldModel_DualMesh
                 xNext += dx;
                 zNext += dz;
             }
-}
+        }
 
         #endregion
     }
