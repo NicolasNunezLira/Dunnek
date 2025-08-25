@@ -12,9 +12,9 @@ namespace Building
         public GameObject activePreview;
         public ModelDM duneModel;
         public DualMeshConstructor dualMeshConstructor;
-        public int buildRadius = 4;
+        public int buildRadius = 2;
         public int buildSize = 2; 
-        public float digDepth = 1f, durationBuild = 5f;
+        public float digDepth = 0.5f, durationBuild = 5f;
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;

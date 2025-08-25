@@ -24,6 +24,7 @@ public class VegetationManager : Singleton<VegetationManager>
     private int xDOF, zDOF;
     private float size;
     NativeGrid sand, terrain;
+    string targetLayer = "Vegetation";
 
     public enum VegetationType
     {
@@ -107,6 +108,7 @@ public class VegetationManager : Singleton<VegetationManager>
         Quaternion rot = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
 
         GameObject obj = Instantiate(prefab, position, rot, parent[element]);
+        SetLayerRecursively(obj, LayerMask.NameToLayer(targetLayer));
 
         float scaleRand = Random.Range(randomExtremes[element][0], randomExtremes[element][1]);
         obj.transform.localScale *= scaleRand;
@@ -116,7 +118,7 @@ public class VegetationManager : Singleton<VegetationManager>
         id.element = element;
 
         VegetationData veg = new VegetationData(currentID, element, obj, gridPos);
-        vegetationGrid.AddVegetation(gridPos.x, gridPos.y , veg);
+        vegetationGrid.AddVegetation(gridPos.x, gridPos.y, veg);
     }
     #endregion
 
@@ -142,7 +144,7 @@ public class VegetationManager : Singleton<VegetationManager>
             return data != null && data.ContainsKey(cell);
         }
 
-         public VegetationData? GetVegetation(int x, int z)
+        public VegetationData? GetVegetation(int x, int z)
         {
             if (HasVegetation(x, z))
             {
@@ -160,7 +162,7 @@ public class VegetationManager : Singleton<VegetationManager>
             {
                 return false;
             }
-            else 
+            else
             {
                 return veg.Value.affectsErosion;
             }
@@ -174,7 +176,7 @@ public class VegetationManager : Singleton<VegetationManager>
             {
                 return false;
             }
-            else 
+            else
             {
                 return veg.Value.affectsWind;
             }
@@ -223,6 +225,17 @@ public class VegetationManager : Singleton<VegetationManager>
 
         public bool affectsWind => type == VegetationType.Tree;
         public bool affectsErosion => type != VegetationType.None;
+    }
+    #endregion
+
+    #region Set Layer
+    void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        obj.layer = newLayer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
+        }
     }
     #endregion
 }

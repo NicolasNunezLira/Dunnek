@@ -238,6 +238,24 @@ namespace ResourceSystem {
             return newState;
         }
 
+        public static void SetConsumerActive(int id, bool active)
+        {
+            if (!consumers.ContainsKey(id)) return;
+
+            Consumer consumer = consumers[id];
+
+            if (active)
+            {
+                consumer.isOperative = true;
+                TryActivateConsumer(id);
+            }
+            else
+            {
+                consumer.isOperative = false;
+                TryDeactivateConsumer(id);
+            }
+        }
+
         public static Dictionary<int, Consumer> GetAllConsumers()
         {
             return consumers;
