@@ -3088,8 +3088,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tooltipPrefab: {fileID: 4754063713470967220, guid: 92ce3bae3fb162e43a7f7ffda7f40e43, type: 3}
-  heightOffset: 1.5
-  forwardOffset: 0.5
+  heightOffset: 0.5
+  forwardOffset: 0.2
   screenPadding: {x: 20, y: 20}
 --- !u!1 &821710827
 GameObject:

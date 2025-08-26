@@ -8,11 +8,19 @@ public class ClickeableObject : MonoBehaviour
     {
         if (DualMesh.Instance.inMode != DualMesh.PlayingMode.Simulation) return;
 
-        TooltipManager.Instance.ShowTooltip(transform, tooltipInfo);
+        ResourcesLink link = GetComponent<ResourcesLink>();
+
+        int? id = (link != null) ? (link.IsConsumer ? link.ConsumerId : null) : null;
+        
+        string info = (link != null) ? link.GetInfoString() : null;
+
+        TooltipManager.Instance.ShowTooltip(transform, tooltipInfo, info, id);
     }
 
+    /*
     private void OnMouseExit()
     {
         TooltipManager.Instance.HideTooltip();
     }
+    */
 }
