@@ -159,8 +159,16 @@ namespace Building
                 constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
             }
 
-            ResourceManager.TryAddConsumer(
-                currentConstructionID, currentType);
+            bool wasAdded = ResourceManager.TryAddConsumer(
+                currentConstructionID,
+                currentType);
+            if (wasAdded)
+            {
+                ResourcesLink link = obj.GetComponent<ResourcesLink>();
+                if (link != null) link.Init(
+                    currentConstructionID,
+                    currentType);
+            }
             currentConstructionID++;
         }
         #endregion

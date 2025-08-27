@@ -2,6 +2,7 @@ using UnityEngine;
 using DunefieldModel_DualMesh;
 using System.Collections.Generic;
 using ResourceSystem;
+using Unity.Collections;
 
 namespace Building
 {
@@ -48,7 +49,10 @@ namespace Building
 
                     if (dist <= radius - 0.5f)
                     {
-                        if (terrain[nx, nz] >= sandElev[nx, nz] || constructionGrid[nx, nz].Count > 0) continue;
+                        if (
+                            terrain[nx, nz] >= sandElev[nx, nz]
+                            || constructionGrid[nx, nz].Count > 0
+                            || VegetationManager.Instance.vegetationGrid.HasVegetation(nx, nz) ) continue;
                         float original = sandElev[nx, nz];
                         float newHeight = original - digDepth;
                         newHeight = newHeight > terrain[nx, nz] ? newHeight : terrain[nx, nz];

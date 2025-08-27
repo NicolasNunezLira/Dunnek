@@ -12,13 +12,13 @@ public partial class DualMesh : MonoBehaviour
     public int simXResolution => openEnded ? xResolution + 40 : xResolution;
     public int simZResolution => openEnded ? zResolution + 40 : zResolution;
 
-    private GameObject terrainGO, sandGO;
+    public GameObject terrainGO, sandGO;
 
     public NativeGrid sand, terrain, terrainShadow;
 
     public ConstructionGrid constructionGrid;
 
-    private ModelDM duneModel;
+    public ModelDM duneModel;
     private FindSlopeMooreDeterministic slopeFinder;
 
     private DualMeshConstructor dualMeshConstructor;
@@ -32,7 +32,7 @@ public partial class DualMesh : MonoBehaviour
 
     public Data.ConstructionType currentConstructionType;
 
-    public enum PlayingMode { Simulation, Build, Recycle, Action };
+    public enum PlayingMode { Simulation, Build, Recycle, Action, Draft };
     public PlayingMode inMode { get; set; } = PlayingMode.Simulation;
 
     [SerializeField]

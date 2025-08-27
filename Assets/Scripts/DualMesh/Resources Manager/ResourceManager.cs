@@ -8,12 +8,13 @@ namespace ResourceSystem {
         #region Variables
         static private Dictionary<Resource, ResourceClass> resources = new Dictionary<Resource, ResourceClass>();
         static private Dictionary<int, Consumer> consumers = new Dictionary<int, Consumer>();
+        static private Dictionary<int, bool> forcedToStopConsumers = new Dictionary<int, bool>();
         #endregion
 
         #region Awake
         public static void Awake()
         {
-            RegisterResource(Resource.Work, 1f);
+            RegisterResource(Resource.Work, 40f);
             RegisterResource(Resource.Sand, 40f);
         }
         #endregion
@@ -73,10 +74,12 @@ namespace ResourceSystem {
                 TryConsumeResource(resource, cost);
             }
 
+            /*
             foreach ((Resource resource, float rate) in config.rate)
             {
-                TryAddRate(resource, rate);
+                TryAddRate(resource, rate); // Aqui
             }
+            */
         }
 
         public static float GetAmount(Resource name)
@@ -109,17 +112,18 @@ namespace ResourceSystem {
         #endregion
 
         #region Consumers Methods
-        public static void TryAddConsumer(int id, ConstructionType type)
+        public static bool TryAddConsumer(int id, ConstructionType type)
         {
             if (consumers.ContainsKey(id))
             {
                 Debug.LogWarning($"Consumer with ID {id} already exists.");
-                return;
+                return false;
             }
 
             var rates = ConstructionConfig.Instance.constructionConfig[type].rate;
-            if (rates[Resource.Sand] == 0 && rates[Resource.Work] == 0) return;
+            if (rates[Resource.Sand] == 0 && rates[Resource.Work] == 0) return false;
 
+            /*
             bool isOperative = true;
             foreach ((Resource resource, float rate) in rates)
             {
@@ -131,7 +135,10 @@ namespace ResourceSystem {
                     break;
                 }
             }
-            consumers[id] = new Consumer(id, type, isOperative);
+            */
+            consumers[id] = new Consumer(id, type, false);
+
+            return true;
         }
 
         public static void RemoveConsumer(int id, bool recycle = false)
@@ -161,6 +168,12 @@ namespace ResourceSystem {
 
             foreach (Consumer consumer in consumers.Values)
             {
+                if (consumer.isForceToStop)
+                {
+                    if (consumer.isOperative) TryDeactivateConsumer(consumer.id);
+                    updatedStates[consumer.id] = false;
+                    continue;
+                }
                 if (!consumer.isOperative) updatedStates[consumer.id] = TryActivateConsumer(consumer.id);
                 else updatedStates[consumer.id] = TryDeactivateConsumer(consumer.id);
             }
@@ -176,6 +189,7 @@ namespace ResourceSystem {
         private static bool TryActivateConsumer(int id)
         {
             Consumer consumer = consumers[id];
+            if (consumer.isOperative) return true;
 
             foreach ((Resource resource, float rate) in consumer.rates)
             {
@@ -193,12 +207,14 @@ namespace ResourceSystem {
                 TryAddRate(resource, rate);
             }
 
+            consumer.isOperative = true; 
             return true;
         }
 
         private static bool TryDeactivateConsumer(int id)
         {
             Consumer consumer = consumers[id];
+            if (!consumer.isOperative) return false;
 
             bool newState = true;
 
@@ -213,17 +229,27 @@ namespace ResourceSystem {
                 }
             }
 
-            if (newState)
+            if (!consumer.isForceToStop)
             {
-                foreach ((Resource resource, float rate) in consumer.rates)
+                if (newState)
                 {
-                    if (rate > 0)
+                    foreach ((Resource resource, float rate) in consumer.rates)
                     {
-                        AddResource(resource, rate);
+                        if (rate > 0)
+                        {
+                            AddResource(resource, rate);
+                        }
+                        else
+                        {
+                            TryConsumeResource(resource, rate);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    foreach ((Resource resource, float rate) in consumer.rates)
                     {
-                        TryConsumeResource(resource, rate);
+                        TryAddRate(resource, -rate);
                     }
                 }
             }
@@ -235,7 +261,20 @@ namespace ResourceSystem {
                 }
             }
 
+            consumer.isOperative = false; 
             return newState;
+        }
+
+
+        public static void SetConsumerActive(int id, bool isForceToStop)
+        {
+            if (!consumers.ContainsKey(id)) return;
+
+            Consumer consumer = consumers[id];
+
+            consumer.isForceToStop = isForceToStop;
+
+            consumers[id] = consumer;
         }
 
         public static Dictionary<int, Consumer> GetAllConsumers()
@@ -249,12 +288,14 @@ namespace ResourceSystem {
             public ConstructionType type;
             public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.constructionConfig[type].rate;
             public bool isOperative;
+            public bool isForceToStop;
 
             public Consumer(int id, ConstructionType type, bool isOperative)
             {
                 this.id = id;
                 this.type = type;
                 this.isOperative = isOperative;
+                isForceToStop = false;
             }
         }
         #endregion

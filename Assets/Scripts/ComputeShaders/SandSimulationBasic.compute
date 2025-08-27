@@ -1,0 +1,130 @@
+#pragma kernel ErodeGrains
+#pragma kernel RunAvalanche
+
+// Buffers
+RWStructuredBuffer<float> sandHeights;
+RWStructuredBuffer<float> terrainShadow;
+RWStructuredBuffer<int> shadow;
+RWStructuredBuffer<uint> randomSeeds;
+
+// Parámetros
+int width, height;
+int windDx, windDz;
+float erosionHeight;
+int grainsPerStep;
+float slopeThreshold;
+
+// Estado de random
+static uint rng_state;
+
+uint rand_xorshift()
+{
+    rng_state ^= rng_state << 13;
+    rng_state ^= rng_state >> 17;
+    rng_state ^= rng_state << 5;
+    return rng_state;
+}
+
+float rand_float()
+{
+    return float(rand_xorshift()) * (1.0 / 4294967296.0);
+}
+
+int rand_int(int minVal, int maxVal)
+{
+    return minVal + int(rand_float() * (maxVal - minVal));
+}
+
+int GetIndex(int x, int z)
+{
+    return z * width + x;
+}
+
+bool IsValidCell(int x, int z)
+{
+    return x >= 0 && x < width && z >= 0 && z < height;
+}
+
+[numthreads(64, 1, 1)]
+void ErodeGrains(uint3 id : SV_DispatchThreadID)
+{
+    if ((int)id.x >= grainsPerStep) return;
+    
+    rng_state = randomSeeds[id.x];
+    
+    int x = rand_int(0, width);
+    int z = rand_int(0, height);
+    
+    if (!IsValidCell(x, z)) return;
+    
+    int index = GetIndex(x, z);
+    
+    // Erosión simple
+    if (shadow[index] == 0 && sandHeights[index] > terrainShadow[index])
+    {
+        float eroded = min(erosionHeight, sandHeights[index] - terrainShadow[index]);
+        sandHeights[index] -= eroded;
+        
+        // Deposición simple en dirección del viento
+        int newX = x + windDx;
+        int newZ = z + windDz;
+        
+        if (IsValidCell(newX, newZ))
+        {
+            sandHeights[GetIndex(newX, newZ)] += eroded;
+        }
+    }
+    
+    randomSeeds[id.x] = rng_state;
+}
+
+[numthreads(8, 8, 1)]
+void RunAvalanche(uint3 id : SV_DispatchThreadID)
+{
+    int x = (int)id.x;
+    int z = (int)id.y;
+    
+    if (!IsValidCell(x, z)) return;
+    
+    int index = GetIndex(x, z);
+    float currentHeight = sandHeights[index];
+    float terrainHeight = terrainShadow[index];
+    
+    if (currentHeight <= terrainHeight) return;
+    
+    float maxSlope = 0.0;
+    int bestNeighbor = index;
+    
+    // Revisar 4 vecinos cardinales
+    int neighbors[4];
+    neighbors[0] = GetIndex(x + 1, z);    // Este
+    neighbors[1] = GetIndex(x - 1, z);    // Oeste
+    neighbors[2] = GetIndex(x, z + 1);    // Norte
+    neighbors[3] = GetIndex(x, z - 1);    // Sur
+    
+    for (int i = 0; i < 4; i++)
+    {
+        int nx = (i == 0) ? x + 1 : (i == 1) ? x - 1 : x;
+        int nz = (i == 2) ? z + 1 : (i == 3) ? z - 1 : z;
+        
+        if (IsValidCell(nx, nz))
+        {
+            int nIndex = GetIndex(nx, nz);
+            float neighborHeight = max(sandHeights[nIndex], terrainShadow[nIndex]);
+            float slope = max(currentHeight, terrainHeight) - neighborHeight;
+            
+            if (slope > maxSlope)
+            {
+                maxSlope = slope;
+                bestNeighbor = nIndex;
+            }
+        }
+    }
+    
+    if (maxSlope > slopeThreshold)
+    {
+        float transfer = min(maxSlope * 0.1, currentHeight - terrainHeight);
+        sandHeights[index] -= transfer;
+        sandHeights[bestNeighbor] += transfer;
+    }
+}

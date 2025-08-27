@@ -66,8 +66,12 @@ namespace Building
                 {
                     for (int zj = zMin; zj <= zMax; zj++)
                     {
-                        if (!(constructionGrid[x, z].Count == 0 || constructionGrid.IsOnlyTowerAt(x, z)))
+                        if (!(constructionGrid[xi, zj].Count == 0)
+                            || constructionGrid.IsOnlyTowerAt(xi, zj)
+                            || VegetationManager.Instance.vegetationGrid.HasVegetation(xi, zj))
+                        {
                             canBuild = false;
+                        }
 
                         float y = Mathf.Max(duneModel.sand[xi, zj], duneModel.terrain[xi, zj]);
                         if (y > maxY) maxY = y;
@@ -77,7 +81,7 @@ namespace Building
                 float avgX = (x + (buildSize - 1) / 2f) * duneModel.size / duneModel.xResolution;
                 float avgZ = (z + (buildSize - 1) / 2f) * duneModel.size / duneModel.zResolution;
 
-                activePreview.transform.position = new UnityEngine.Vector3(avgX, maxY + 0.5f, avgZ);
+                activePreview.transform.position = new UnityEngine.Vector3(avgX, maxY + 0.1f, avgZ);
 
                 Color color = canBuild ? green : red;
                 foreach (var rend_ in activePreview.GetComponentsInChildren<Renderer>())
@@ -118,23 +122,6 @@ namespace Building
             HideAllPreviews();
 
             activePreview = PreviewManager.Instance.actionPreviews[currentActionMode];
-
-            /*
-            switch (currentActionMode)
-            {
-                case DualMesh.ActionMode.Dig:
-                    activePreview = shovelPreviewGO;
-                    break;
-
-                case DualMesh.ActionMode.Flat:
-                    activePreview = sweeperPreviewGO;
-                    break;
-
-                case DualMesh.ActionMode.AddSand:
-                    activePreview = circlePreviewGO;
-                    break;
-            }
-            */
            
             activePreview.SetActive(true);
         }
@@ -143,14 +130,6 @@ namespace Building
         {
             HideAllActionsPreviews();
             HideAllBuildsPreviews();
-            /*
-            shovelPreviewGO?.SetActive(false);
-            wallPreviewGO?.SetActive(false);
-            towerPreviewGO?.SetActive(false);
-            housePreviewGO?.SetActive(false);
-            sweeperPreviewGO?.SetActive(false);
-            circlePreviewGO?.SetActive(false);
-            */
         }
 
         public void HideAllActionsPreviews()
@@ -161,11 +140,6 @@ namespace Building
             {
                 preview?.SetActive(false);
             }
-            /*
-            shovelPreviewGO?.SetActive(false);
-            sweeperPreviewGO?.SetActive(false);
-            circlePreviewGO?.SetActive(false);
-            */
         }
 
         public void HideAllBuildsPreviews(bool clearWall=false)
@@ -176,16 +150,11 @@ namespace Building
             {
                 preview?.SetActive(false);
             }
-            /*
-            wallPreviewGO?.SetActive(false);
-            towerPreviewGO?.SetActive(false);
-            */
             if (clearWall)
             {
                 ClearWallPreview();
                 ClearPoints();
-            }   
-            
+            }               
         }
 
         public void RotateWallPreview()

@@ -30,6 +30,11 @@ namespace DunefieldModel_DualMesh
                     continue;
                 }
 
+                if (VegetationManager.Instance.vegetationGrid.AffectsErosion(x, z))
+                {
+                    continue;
+                }
+
                 depositeH = ErodeGrain(x, z, dx, dz, erosionHeight);
 
                 if (depositeH <= 0f) continue;
@@ -44,6 +49,20 @@ namespace DunefieldModel_DualMesh
             int i = HopLength;
             int xCurr = x;
             int zCurr = z;
+
+            if (VegetationManager.Instance.vegetationGrid.AffectsWind(x, z))
+            {
+                // Reducir HopLength localmente para que la arena caiga antes
+                i = rnd.Next(0, Math.Max(1, i - 1));
+
+                // Incluso podrías forzar deposición inmediata:
+                if (rnd.NextDouble() < 0.5) // probabilidad de quedarse atrapada
+                {
+                    DepositGrain(xCurr, zCurr, dx, dz, depositeH);
+                    sandChanges.AddChanges(xCurr, zCurr);
+                    return;
+                }
+            }
 
             // Conteo de celdas de terreno en el camino
             int countTerrain = 0;

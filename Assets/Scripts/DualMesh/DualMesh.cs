@@ -5,6 +5,9 @@ public partial class DualMesh :MonoBehaviour
 {
     #region Awake
     public static DualMesh Instance;
+
+    public static System.Action OnDesertGenerated;
+
     void Awake()
     {
         Instance = this;
@@ -65,7 +68,16 @@ public partial class DualMesh :MonoBehaviour
                         SimulationMode();
                         break;
                     }
-                    #endregion
+                #endregion
+
+                #region Draft Mode
+                case PlayingMode.Draft:
+                    {
+                        TimeManager.Instance.Pause();
+                        DraftSystem.DraftManager.Instance.StartDraft();
+                        break;
+                    }
+                #endregion
             }
 
             if (constructed)

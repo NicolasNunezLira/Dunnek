@@ -1,5 +1,3 @@
-using UnityEngine;
-using Data;
 using ResourceSystem;
 
 namespace Building

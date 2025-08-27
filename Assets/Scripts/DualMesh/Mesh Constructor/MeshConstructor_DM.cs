@@ -22,6 +22,8 @@ namespace DunefieldModel_DualMesh
         public Transform parentTransform;
         public bool planicie;
 
+        public Mesh sandMesh, terrainMesh;
+
         private int xDOF => xResolution + 1;
         private int zDOF => zResolution + 1;
         private int simXDOF => simXResolution + 1;
@@ -92,15 +94,33 @@ namespace DunefieldModel_DualMesh
                        GenerateMountain();
 
             // Creación del terreno
+            Transform surfacesParent = parentTransform != null ? parentTransform.Find("Surfaces") : null;
+
+            if (surfacesParent == null)
+            {
+                GameObject surfacesGO = new GameObject("Surfaces");
+                if (parentTransform != null)
+                {
+                    surfacesGO.transform.parent = parentTransform;
+                }
+                surfacesParent = surfacesGO.transform;
+            }
+
+            terrainMesh = GenerateMesh(terrain);
+            //MeshSaver.SaveMeshAsAsset(terrainMesh, "Asset/GenertatedTerrainMesh.asset");
+
+            sandMesh = GenerateMesh(sand);
+            //MeshSaver.SaveMeshAsAsset(sandMesh, "Asset/GenertatedSandMesh.asset");
+
             terrainGO = CreateMeshObject("TerrainMesh", terainMaterial,
-                GenerateMesh(terrain));
+                terrainMesh);
             if (parentTransform != null)
-                terrainGO.transform.parent = parentTransform;
+                terrainGO.transform.parent = surfacesParent;
 
             sandGO = CreateMeshObject("SandMesh", sandMaterial,
-                GenerateMesh(sand));
+                sandMesh);
             if (parentTransform != null)
-                sandGO.transform.parent = parentTransform;
+                sandGO.transform.parent = surfacesParent;
 
 
             ApplyOffset(terrainGO, sandGO, terrain);
