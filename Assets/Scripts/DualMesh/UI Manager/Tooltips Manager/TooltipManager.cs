@@ -23,7 +23,7 @@ public class TooltipManager : Singleton<TooltipManager>
     private Camera mainCamera;
 
     private int currentConsumerId = -1;
-    private bool isForceToStop = false, justOpened = false;   
+    private bool isForceToStop, justOpened = false;   
 
     protected override void Awake()
     {
@@ -85,8 +85,10 @@ public class TooltipManager : Singleton<TooltipManager>
                 justOpened = false;
                 return;
             }
+
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
+
             if (!RectTransformUtility.RectangleContainsScreenPoint(tooltipUI, Input.mousePosition, mainCamera))
             {
                 HideTooltip();
@@ -139,8 +141,13 @@ public class TooltipManager : Singleton<TooltipManager>
     {
         if (currentConsumerId < 0) return;
 
-        isForceToStop = !isForceToStop;
-        ResourceManager.SetConsumerActive(currentConsumerId, isForceToStop);
+        var consumers = ResourceManager.GetAllConsumers();
+        if (!consumers.ContainsKey(currentConsumerId)) return;
+
+        var consumer = consumers[currentConsumerId];
+        bool newState = !consumer.isForceToStop;
+
+        ResourceManager.SetConsumerActive(currentConsumerId, newState);
         UpdateButtonText();
     }
 
@@ -148,8 +155,12 @@ public class TooltipManager : Singleton<TooltipManager>
     {
         if (toggleButton == null) return;
 
+        var consumers = ResourceManager.GetAllConsumers();
+        if (!consumers.ContainsKey(currentConsumerId)) return;
+
+        var consumer = consumers[currentConsumerId];
         var textComp = toggleButton.GetComponentInChildren<TextMeshProUGUI>();
         if (textComp != null)
-            textComp.text = isForceToStop ? "Activar producción" : "Forzar detención";
+            textComp.text = consumer.isForceToStop ? "Activar producción" : "Forzar detención";
     }
 }

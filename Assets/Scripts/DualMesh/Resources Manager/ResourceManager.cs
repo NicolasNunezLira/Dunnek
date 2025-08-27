@@ -8,6 +8,7 @@ namespace ResourceSystem {
         #region Variables
         static private Dictionary<Resource, ResourceClass> resources = new Dictionary<Resource, ResourceClass>();
         static private Dictionary<int, Consumer> consumers = new Dictionary<int, Consumer>();
+        static private Dictionary<int, bool> forcedToStopConsumers = new Dictionary<int, bool>();
         #endregion
 
         #region Awake
@@ -169,6 +170,7 @@ namespace ResourceSystem {
             {
                 if (consumer.isForceToStop)
                 {
+                    if (consumer.isOperative) TryDeactivateConsumer(consumer.id);
                     updatedStates[consumer.id] = false;
                     continue;
                 }
@@ -227,17 +229,27 @@ namespace ResourceSystem {
                 }
             }
 
-            if (newState)
+            if (!consumer.isForceToStop)
             {
-                foreach ((Resource resource, float rate) in consumer.rates)
+                if (newState)
                 {
-                    if (rate > 0)
+                    foreach ((Resource resource, float rate) in consumer.rates)
                     {
-                        AddResource(resource, rate);
+                        if (rate > 0)
+                        {
+                            AddResource(resource, rate);
+                        }
+                        else
+                        {
+                            TryConsumeResource(resource, rate);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    foreach ((Resource resource, float rate) in consumer.rates)
                     {
-                        TryConsumeResource(resource, rate);
+                        TryAddRate(resource, -rate);
                     }
                 }
             }
@@ -262,14 +274,7 @@ namespace ResourceSystem {
 
             consumer.isForceToStop = isForceToStop;
 
-            if (isForceToStop)
-            {
-                TryDeactivateConsumer(id);
-            }
-            else
-            {
-                TryActivateConsumer(id);
-            }
+            consumers[id] = consumer;
         }
 
         public static Dictionary<int, Consumer> GetAllConsumers()

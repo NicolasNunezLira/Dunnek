@@ -753,10 +753,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   turnDuration: 5
-  multiplicator: 2
+  multiplicator: 5
   turn: 1
   paused: 0
-  fastForward: 0
+  fastForward: 1
 --- !u!114 &164671259
 MonoBehaviour:
   m_ObjectHideFlags: 0
