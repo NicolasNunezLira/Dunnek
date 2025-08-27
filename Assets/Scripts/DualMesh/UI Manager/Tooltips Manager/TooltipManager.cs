@@ -107,7 +107,7 @@ public class TooltipManager : Singleton<TooltipManager>
             tooltipInfo.text = info;
 
         if (tooltipUI != null)
-                tooltipUI.gameObject.SetActive(true);
+            tooltipUI.gameObject.SetActive(true);
 
         if (consumerId.HasValue)
         {
@@ -125,6 +125,8 @@ public class TooltipManager : Singleton<TooltipManager>
         }
 
         justOpened = true;
+        
+        LayoutRebuilder.ForceRebuildLayoutImmediate(tooltipUI);
     }
 
     public void HideTooltip()

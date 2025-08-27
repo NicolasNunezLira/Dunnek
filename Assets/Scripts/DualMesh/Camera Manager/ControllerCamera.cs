@@ -5,11 +5,16 @@ namespace CameraManager
 {
     public class CameraController : MonoBehaviour
     {
+        [Header("Camera movement options")]
         public float moveSpeed = 20f;
-        public float zoomSpeed = 100f;
+        public float zoomSpeed = 400f;
         public float rotationSpeed = 5f;
-        public float minZoom = 10f;
-        public float maxZoom = 80f;
+        public float minZoom = -10f;
+        public float maxZoom = 10f;
+
+        [Header("Terrain Layouts options")]
+        public float minDistanceFromGround = 1f;
+        public LayerMask groundMask;
 
         private float targetHeight;
         private float currentZoom;
@@ -38,20 +43,32 @@ namespace CameraManager
             HandleRotation();
             HandleZoom();
             HandleTilt();
+            ClampAboveTerrain();
         }
 
-        void HandleMovement()
-        {
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
+void HandleMovement()
+{
+    float h = Input.GetAxis("Horizontal");
+    float v = Input.GetAxis("Vertical");
 
-            Vector3 move = (transform.forward * v + transform.right * h).normalized;
-            transform.position += move * moveSpeed * Time.deltaTime;
-        }
+    // Calcula un forward y right planos (sin componente Y)
+    Vector3 flatForward = transform.forward;
+    flatForward.y = 0f;
+    flatForward.Normalize();
+
+    Vector3 flatRight = transform.right;
+    flatRight.y = 0f;
+    flatRight.Normalize();
+
+    Vector3 move = (flatForward * v + flatRight * h).normalized;
+
+    transform.position += move * moveSpeed * Time.deltaTime;
+}
+
 
         void HandleRotation()
         {
-            if (Input.GetMouseButton(1)) // clic derecho
+            if (Input.GetMouseButton(1))
             {
                 float rotX = Input.GetAxis("Mouse X") * rotationSpeed;
                 transform.Rotate(0f, rotX, 0f, Space.World);
@@ -98,7 +115,7 @@ namespace CameraManager
             transform.position = endPos;
             transform.rotation = endRot;
         }
-        
+
         void HandleTilt()
         {
             if (Input.GetMouseButton(1)) // botón del medio
@@ -110,9 +127,28 @@ namespace CameraManager
                 // Limita la inclinación entre 10 y 80 grados (ajustable)
                 //newAngle = Mathf.Clamp(newAngle, 10f, 80f);
 
-                transform.eulerAngles = new Vector3(newAngle, angles.y, 0f);
+                transform.eulerAngles = new Vector3(newAngle, angles.y, angles.z);
+                //transform.eulerAngles = new Vector3(Mathf.Lerp(transform.eulerAngles.x, newAngle, Time.deltaTime * 5f), angles.y, angles.z);
+
             }
         }
 
+        void ClampAboveTerrain()
+        {
+            Ray ray = new Ray(transform.position + Vector3.up * 100f, Vector3.down);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundMask))
+            {
+                float groundY = hit.point.y;
+                if (transform.position.y < groundY + minDistanceFromGround)
+                {
+                    Vector3 pos = transform.position;
+                    pos.y = groundY + minDistanceFromGround;
+                    transform.position = pos;
+
+                    targetHeight = pos.y;
+                }
+            }
+
+        }
     }
 }

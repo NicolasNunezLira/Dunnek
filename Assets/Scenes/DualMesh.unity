@@ -5778,11 +5778,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8c911a13a934c34dbaa3f5bf6ecc1d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 20
+  moveSpeed: 3
   zoomSpeed: 400
   rotationSpeed: 5
   minZoom: -10
   maxZoom: 10
+  minDistanceFromGround: 1
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 1152
   isControllable: 1
 --- !u!1001 &639698722973977544
 PrefabInstance:
