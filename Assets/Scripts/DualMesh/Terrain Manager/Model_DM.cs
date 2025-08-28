@@ -64,7 +64,7 @@ namespace DunefieldModel_DualMesh
             float size,
             int xResolution, int zResolution,
             float slope,
-            int dx, int dz,
+            //int dx, int dz,
             ref Dictionary<int, ConstructionData> constructions,
             ref int currentConstructionID,
             ref int currentCompositeConstructionID,
@@ -96,8 +96,8 @@ namespace DunefieldModel_DualMesh
             this.shadowSlope = shadowSlope;
             this.slope = slope;
             this.avalancheSlope = avalancheSlope;
-            this.dx = dx;
-            this.dz = dz;
+            //this.dx = dx;
+            //this.dz = dz;
             this.xResolution = xResolution;
             this.zResolution = zResolution;
             this.sandChanges = sandChanges;

@@ -63,8 +63,11 @@ public partial class DualMesh : MonoBehaviour
     [Tooltip("Shadow slope for the simulation.")]
     public float shadowSlope = 0.803847577f; // 3 * tan(15 degrees) ~ 0.803847577f
 
+    /*
     [Tooltip("The direction of the wind.")]
     public Vector2 windDirection = new Vector2(1, 0);
+    */
+    
     [Tooltip("The number of grains per step.")]
     public int grainsPerStep = 5000;
 

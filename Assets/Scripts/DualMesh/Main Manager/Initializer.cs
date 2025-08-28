@@ -52,7 +52,7 @@ public partial class DualMesh : MonoBehaviour
             size,
             xResolution + 1, zResolution + 1,
             slope,
-            (int)windDirection.x, (int)windDirection.y,
+            //(int)windDirection.x, (int)windDirection.y,
             ref constructions,
             ref currentConstructionID,
             ref currentCompositeConstructionID,
