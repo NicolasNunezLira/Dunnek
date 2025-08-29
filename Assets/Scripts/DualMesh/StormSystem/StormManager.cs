@@ -1,6 +1,6 @@
 using UnityEngine;
-using System.Collections.Generic;
 using Utils;
+using Random = UnityEngine.Random;
 
 namespace StormSystem
 {
@@ -11,7 +11,7 @@ namespace StormSystem
 
         private int currentStormIndex = 0;
         private int currentEventIndex = 0;
-        public int eventTurnsRemaining { get; private set; } 
+        public int eventTurnsRemaining { get; private set; }
         public Vector2 currentDirection { get; private set; }
         private float currentMagnitude;
 
@@ -32,13 +32,13 @@ namespace StormSystem
             TextAsset jsonFile = Resources.Load<TextAsset>(configFile);
             if (jsonFile == null)
             {
-                Debug.LogError($"No se encontro el archivo de tormentas en Resources/+{configFile}.json");
+                //Debug.LogError($"No se encontro el archivo de tormentas en Resources/+{configFile}.json");
                 return;
             }
 
             config = JsonUtility.FromJson<StormConfig>(jsonFile.text);
-            Debug.Log("Tormentas cargadas:" + config.storms.Count);
-            Debug.Log("Multiplicadores cargados:" + config.multipliers.Count);
+            //Debug.Log("Tormentas cargadas:" + config.storms.Count);
+            //Debug.Log("Multiplicadores cargados:" + config.multipliers.Count);
         }
         #endregion
 
@@ -98,7 +98,15 @@ namespace StormSystem
                 }
                 else
                 {
-                    currentStormIndex = (currentStormIndex + 1) % config.storms.Count;
+                    if (currentStormIndex < config.storms.Count - 1)
+                    {
+                        currentStormIndex++;
+                    }
+                    else
+                    {
+                        ApplyMultipliers(currentStormIndex);
+                    }
+
                     InitStorm(currentStormIndex);
                 }
 
@@ -106,8 +114,11 @@ namespace StormSystem
                 do
                 {
                     newDir = Random.insideUnitCircle.normalized;
-                } while (Mathf.Abs(Vector2.Angle(currentDirection, newDir)) >= 90f);
+                } while (
+                    Vector2.Angle(currentDirection, newDir) >= 90f
+                    && Vector2.Angle(currentDirection, newDir) <= 270f);
                 currentDirection = newDir;
+
                 OnWindChanged?.Invoke(currentDirection);
             }
         }
@@ -125,6 +136,22 @@ namespace StormSystem
 
         #region Event for UI
         public event System.Action<Vector2> OnWindChanged;
+        #endregion
+
+        #region Apply Multipliers
+        private void ApplyMultipliers(int index)
+        {
+            StormData storm = config.storms[index];
+            StormMultiplier multiplier = config.multipliers[index % config.multipliers.Count]; // ciclo de multiplicadores
+
+            storm.a *= multiplier.ma;
+            storm.b *= multiplier.mb;
+            storm.ta = Mathf.RoundToInt(multiplier.mta * storm.ta);
+            storm.tb = Mathf.RoundToInt(multiplier.mtb * storm.tb);
+            storm.na = Mathf.RoundToInt(multiplier.mna * storm.na);
+
+            Debug.Log($"Multiplicadores aplicados en tormenta {index}");
+        }
         #endregion
     }
 }
