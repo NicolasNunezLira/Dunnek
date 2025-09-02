@@ -13,16 +13,17 @@ public class ConsumeResourcesAction : IConstructionAction
 {
     public void Execute(ConstructionInstance instance)
     {
-        foreach (var kvp in instance.data.cost)
+        foreach (PrefabCost cost in instance.data.cost)
         {
-            ResourceManager.instance.Consume(kvp.Key, kvp.Value);
+            foreach (ResourceAmount amount in cost.cost)
+                ResourceManager.TryConsumeResource(amount.resource, amount.amount);
         }
     }
 }
 
 public class ConnectToNeighboursAction : IConstructionAction
 {
-    public void Execute(Construction instance)
+    public void Execute(ConstructionInstance instance)
     {
         // Connect logic
     }

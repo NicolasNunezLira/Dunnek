@@ -4,30 +4,21 @@ using System.Collections.Generic;
 
 public class ConstructionManager
 {
-    private Dictionary<string, ConstructionData> dataById;
-    private Dictionary<string, IConstructionPlacer> placers;
+    public List<GameObject> prefabReferences;
+    private ConstructionFactory factory;
+    private Dictionary<string, GameObject> prefabLookup;
 
-    public ConstructionManager(List<ConstructionData> dataList)
+    private List<ConstructionInstance> constructios;
+
+    void Awake()
     {
-        dataById = new();
-        placers = new();
-
-        foreach (var data in dataList)
+        prefabLookup = new Dictionary<string, GameObject>();
+        foreach (var prefab in prefabReferences)
         {
-            dataById[data.id] = data;
+            prefabLookup[prefab.name] = prefab;
         }
 
-        placers[Placer.Single] = new SinglePlacer();
-        placers[Placer.Wall] = new WallPlacer();
-    }
-
-    public void Build(string id, Vector3 start, Vector3? end = null)
-    {
-        if (!dataById.ContainsKey(id)) return;
-
-        var data = dataById[id];
-        var placer = placers[data.placerType];
-        placer.Place(data, start, end);
+        factory = new ConstructionFactory(prefabLookup);
     }
 }
 

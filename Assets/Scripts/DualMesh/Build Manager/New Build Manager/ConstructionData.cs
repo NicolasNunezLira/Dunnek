@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using ResourceSystem;
+using System;
+using UnityEngine;
 
 #region Enums
 public enum ConstructionCategory
@@ -41,8 +43,8 @@ public class ResourceAmount
 [Serializable]
 public class PrefabCost
 {
-    public string prefabName;
-    public List<ResourceAmount> cost;
+  public string prefabName;
+  public List<ResourceAmount> cost;
 }
 #endregion
 
@@ -54,7 +56,7 @@ public class ConstructionData
     public string category;
     public Placer placerType;
     public List<string> prefabs;
-    public List<PrefabCost> cost;
+    public List<PrefabCost> costs;
     public List<string> actions;
     public BonusData bonus;
 }
@@ -77,7 +79,7 @@ Example for json file, where actions represents the dynamic behaviour when it is
       "category": "Housing",
       "placerType": "Single",
       "prefabs": ["HousePrefab"],
-      "prefabCosts": [
+      "costs": [
         {
           "prefabName": "HousePrefab",
           "cost": [
@@ -94,7 +96,7 @@ Example for json file, where actions represents the dynamic behaviour when it is
       "category": "Wall",
       "placerType": "Wall",
       "prefabs": ["WallTowerPrefab", "WallSegmentPrefab"],
-      "prefabCosts": [
+      "costs": [
         {
           "prefabName": "WallTowerPrefab",
           "cost": [
@@ -116,7 +118,7 @@ Example for json file, where actions represents the dynamic behaviour when it is
       "category": "BonusProvider",
       "placerType": "Single",
       "prefabs": ["ShrinePrefab"],
-      "prefabCosts": [
+      "costs": [
         {
           "prefabName": "ShrinePrefab",
           "cost": [

@@ -1,56 +1,34 @@
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
-using Utils;
 
-public class ConstructionDatabase : Singleton<ConstructionDatabase>
+public static class JsonLoader
 {
-    public Dictionary<string, ConstructionData> constructionLookup;
-
-    protected override void Awake()
+    /// <summary>
+    /// Carga un archivo JSON desde StreamingAssets y lo deserializa a ConstructionDataList.
+    /// </summary>
+    /// <param name="fileName">Nombre del archivo JSON (incluyendo extensión)</param>
+    public static ConstructionDataList LoadConstructions(
+        string fileName = "StramingAssets/ConstructionData.json"
+        )
     {
-        base.Awake();
-        LoadConstructions();
-    }
+        string filePath = Path.Combine(Application.streamingAssetsPath, fileName);
 
-    public void LoadConstructions()
-    {
-        constructionLookup = new Dictionary<string, ConstructionData>();
-
-        // Carga el JSON desde Resources (Assets/Resources/ConstructionData.json)
-        TextAsset jsonText = Resources.Load<TextAsset>("ConstructionData");
-        if (jsonText == null)
+        if (!File.Exists(filePath))
         {
-            Debug.LogError("No se encontró ConstructionData.json en Resources");
-            return;
+            Debug.LogError($"[JsonLoader] No se encontró el archivo: {filePath}");
+            return new ConstructionDataList();
         }
 
-        ConstructionDataList dataList = JsonUtility.FromJson<ConstructionDataList>(jsonText.text);
-        foreach (var c in dataList.constructions)
+        string jsonContent = File.ReadAllText(filePath);
+
+        try
         {
-            // Si en prefabs tienes solo strings, aquí puedes cargar los GameObjects
-            // Ejemplo usando Resources.Load
-            List<GameObject> loadedPrefabs = new List<GameObject>();
-            foreach (var prefabName in c.prefabs)
-            {
-                GameObject prefab = Resources.Load<GameObject>(prefabName);
-                if (prefab != null)
-                    loadedPrefabs.Add(prefab);
-                else
-                    Debug.LogWarning($"No se encontró prefab {prefabName} en Resources");
-            }
-            c.prefabs = loadedPrefabs;
-
-            // Agregar al diccionario
-            constructionLookup[c.id] = c;
+            return JsonUtility.FromJson<ConstructionDataList>(jsonContent);
         }
-
-        Debug.Log($"Se cargaron {constructionLookup.Count} construcciones.");
-    }
-
-    public ConstructionData GetConstructionById(string id)
-    {
-        if (constructionLookup.TryGetValue(id, out ConstructionData data))
-            return data;
-        return null;
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[JsonLoader] Error al deserializar JSON: {ex.Message}");
+            return new ConstructionDataList();
+        }
     }
 }
