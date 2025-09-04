@@ -6,11 +6,12 @@ public partial class DualMesh : MonoBehaviour
     public void SetBuildType(BuildMode mode)
     {
         builder.HideAllActionsPreviews();
-        if (mode == BuildMode.PlaceHouse)
+        if (mode == BuildMode.PlaceBuild)
         {
             builder.ClearWallPreview();
             builder.ClearPoints();
         }
+        // Aqui cambiar la logica de la eleccion de construccion en funcion al nuevo sistema
         builder.currentBuildMode = mode;
         currentBuildMode = mode;
 

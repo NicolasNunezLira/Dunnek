@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Utils;
-using Data;
+using ConstructionSystem;
+using JetBrains.Annotations;
 public class PreviewManager : Singleton<PreviewManager>
 {
     public GameObject BuildsPreviewParent, ActionsPreviewParent;
-    public Dictionary<ConstructionType, GameObject> buildPreviews = new();
+    public Dictionary<string, Dictionary<string, GameObject>> buildPreviews = new();
 
     public Dictionary<DualMesh.ActionMode, GameObject> actionPreviews = new();
 
@@ -23,15 +24,21 @@ public class PreviewManager : Singleton<PreviewManager>
             BuildsPreviewParent = new GameObject("Builds Previews");
         }
 
-        var builds = ConstructionConfig.Instance.constructionConfig;
+        var builds = ConstructionConfig.Instance.ConstructionConfigs;
 
-        foreach (var (key, item) in builds)
+        foreach (var (codeName, item) in builds)
         {
-            GameObject preview = Instantiate(item.loadedPrefab, BuildsPreviewParent.transform);
-            MakePreviewTransparent(preview);
-            preview.SetActive(false);
+            Dictionary<string, GameObject> prefabs = new Dictionary<string, GameObject>();
+            foreach ((string part, GameObject prefab) in item.loadedPrefabs)
+            {
+                GameObject preview = Instantiate(prefab, BuildsPreviewParent.transform);
+                MakePreviewTransparent(preview);
+                preview.SetActive(false);
+                prefabs[part] = preview;
+            }
+            
 
-            buildPreviews[key] = preview;
+            buildPreviews[codeName] = prefabs;
         }
     }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Text.RegularExpressions;
-using Data;
+using ConstructionSystem;
 using ResourceSystem;
 
 namespace Building
@@ -65,11 +65,11 @@ namespace Building
         {
             if (toDestroy == null) return false;
 
-            ConstructionData data = constructions[idToDestroy];
+            ConstructionInstance data = constructions[idToDestroy];
 
-            if (-ConstructionConfig.Instance.constructionConfig[data.type].recycleWorkCost >= ResourceManager.GetAmount(Resource.Work))
+            if (-data.Config.recycleWorkCost >= ResourceManager.GetAmount(Resource.Work))
             {
-                Debug.Log($"No hay sufiente trabajao para reciclar la {data.type} {data.id}");
+                Debug.Log($"No hay sufiente trabajao para reciclar la {data.Obj.name}");
                 RestoreHoverMaterials();
                 return false;
             }
@@ -77,7 +77,7 @@ namespace Building
             ResourceManager.RemoveConsumer(idToDestroy, recycle: true);
 
             // Liberar celdas ocupadas
-            foreach (int2 coord in data.support)
+            foreach (int2 coord in data.Support)
             {
                 int cx = coord.x;
                 int cz = coord.y;
@@ -93,7 +93,7 @@ namespace Building
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
-            foreach (int2 coord in data.boundarySupport)
+            foreach (int2 coord in data.BoundarySupport)
             {
                 int cx = coord.x;
                 int cz = coord.y;

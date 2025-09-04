@@ -1,7 +1,7 @@
 using UnityEngine;
 using DunefieldModel_DualMesh;
 using System.Collections.Generic;
-using Data;
+using ConstructionSystem;
 
 namespace Building
 {
@@ -18,14 +18,14 @@ namespace Building
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
-        public Data.ConstructionType currentConstructionType;
+        public string currentConstruction;
         public DualMesh.ActionMode currentActionMode;
         public DualMesh.PlayingMode inMode;
         public NativeGrid terrain;
         ConstructionGrid constructionGrid;
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
 
-        private Dictionary<int, ConstructionData> constructions;
+        private Dictionary<int, ConstructionInstance> constructions;
         private int currentConstructionID, currentCompositeConstructionID;
 
         private Coroutine shakeCoroutine;
@@ -46,13 +46,13 @@ namespace Building
         public BuildSystem(
             ModelDM model,
             DualMeshConstructor constructor,
-            Dictionary<int, ConstructionData> constructions,
+            Dictionary<int, ConstructionInstance> constructions,
             int currentConstructionID,
             int currentCompositeConstructionID,
             float pulledDownTime,
             DualMesh.PlayingMode inMode,
             DualMesh.BuildMode currentBuildMode,
-            Data.ConstructionType currentConstructionType,
+            string currentConstruction,
             DualMesh.ActionMode currentActionMode,
             NativeGrid terrain,
             GameObject activePreview,
@@ -71,9 +71,9 @@ namespace Building
             this.terrain = terrain;
             this.constructionGrid = constructionGrid;
             this.activePreview = activePreview;
-            this.currentConstructionType = currentConstructionType;
+            this.currentConstruction = currentConstruction;
 
-            wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews[ConstructionType.SegmentWall]);
+            wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews["wallSand"]["segmentWall"]);
             wallPreviewParent = new GameObject();
             wallPreviewParent.name = "Wall Previews";
 
@@ -83,7 +83,7 @@ namespace Building
             {
                 previewX = duneModel.xResolution / 2;
                 previewZ = duneModel.zResolution / 2;
-                GameObjectConstruction(ConstructionType.House, previewX, previewZ, Quaternion.identity, verify: true);
+                GameObjectConstruction("houseSand", "building", previewX, previewZ, Quaternion.identity, verify: true);
             }
         }
         #endregion

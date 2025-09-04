@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Linq;
-using Data;
+using ConstructionSystem;
 using ResourceSystem;
 
 namespace Building
@@ -11,10 +11,15 @@ namespace Building
     {
         #region Constructions of Game Object
         public GameObject GameObjectConstruction(
-            ConstructionType type, int posX, int posZ, Quaternion rotation,
-            Vector3? overridePosition = null, bool verify = true)
+            string codeName,
+            string part,
+            int posX,
+            int posZ,
+            Quaternion rotation,            
+            Vector3? overridePosition = null,
+            bool verify = true)
         {
-            Dictionary<ConstructionType, int> constructionDict = new Dictionary<ConstructionType, int> { { type, 1 } };
+            Dictionary<string, int> constructionDict = new Dictionary<string, int> { { codeName, 1 } };
             if (verify)
             {
                 if (!HasEnoughResourcesForBuild(constructionDict))
@@ -43,11 +48,27 @@ namespace Building
                 SetLayerRecursively(parentGO, LayerMask.NameToLayer("Constructions"));
             }
 
-            // Instanciar el prefab con el objeto padre
-            GameObject prefab = constructionsConfigs.constructionConfig[type].loadedPrefab;
+            var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
+            /*if (config.loadedPrefabs.Count == 0)
+            {
+                Debug.LogError($"No prefabs loaded for construction type: {codeName}");
+                return null;
+            }
+            else if (config.loadedPrefabs.Count > 1)
+            {
+                Debug.LogWarning($"Multiple prefabs found for construction type: {codeName}. Using the first one.");
+            }*/
+
+            if (!config.loadedPrefabs.ContainsKey(part))
+            {
+                Debug.LogError($"Part '{part}' not found in loaded prefabs for construction type: {codeName}");
+                return null;
+            }
+
+            GameObject prefab = config.loadedPrefabs[part];
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = type.ToString() + currentConstructionID;
+            prefabInstance.name = codeName + currentConstructionID + "_" + part;
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
@@ -95,7 +116,7 @@ namespace Building
                 prefabInstance,
                 centerPos,
                 prefabRotation,
-                type,
+                codeName,
                 support,
                 GetSupportBorder(support, duneModel.xResolution, duneModel.zResolution),
                 floorHeight,
@@ -124,50 +145,48 @@ namespace Building
             GameObject obj,
             Vector3 position,
             Quaternion rotation,
-            ConstructionType currentType,
+            string codeName,
             List<int2> support,
             List<int2> boundarySupport,
             float floorHeight,
             float buildHeight
         )
         {
-            var data = new ConstructionData
-            {
-                obj = obj,
-                position = position,
-                rotation = rotation,
-                type = currentType,
-                support = support,
-                boundarySupport = boundarySupport,
-                floorHeight = floorHeight,
-                buildHeight = buildHeight,
-                duration = durationBuild,
-                timeBuilt = Time.time
-            };
+            var instance = new ConstructionInstance(
+                obj,
+                position,
+                rotation,
+                ConstructionConfig.Instance.ConstructionConfigs[codeName],
+                support,
+                boundarySupport,
+                floorHeight,
+                buildHeight
+            );
+            
 
-            constructions.Add(currentConstructionID, data);
+            constructions.Add(currentConstructionID, instance);
 
             foreach (var cell in support)
             {
                 //constructionGrid[cell.x, cell.y] = currentConstructionID;
-                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
+                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, codeName);
             }
 
             foreach (var cell in boundarySupport)
             {
                 //constructionGrid[cell.x, cell.y] = currentConstructionID;
-                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, currentType);
+                constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, codeName);
             }
 
             bool wasAdded = ResourceManager.TryAddConsumer(
                 currentConstructionID,
-                currentType);
+                codeName);
             if (wasAdded)
             {
                 ResourcesLink link = obj.GetComponent<ResourcesLink>();
                 if (link != null) link.Init(
                     currentConstructionID,
-                    currentType);
+                    codeName);
             }
             currentConstructionID++;
         }
@@ -213,12 +232,12 @@ namespace Building
         #endregion
 
         #region Verificate resources for constructions
-        private bool HasEnoughResourcesForBuild(Dictionary<ConstructionType, int> amounts)
+        private bool HasEnoughResourcesForBuild(Dictionary<string, int> amounts)
         {
             Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
-            foreach (var (type, amount) in amounts)
+            foreach (var (codeName, amount) in amounts)
             {
-                var config = ConstructionConfig.Instance.constructionConfig[type];
+                var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
 
                 foreach ((Resource resource, float cost) in config.cost)
                 {
@@ -274,11 +293,11 @@ namespace Building
         #endregion  
 
         #region Consume resources
-        private void UpdateResources(Dictionary<ConstructionType, int> amounts)
+        private void UpdateResources(Dictionary<string, int> amounts)
         {
-            foreach (var (type, amount) in amounts)
+            foreach (var (codeName, amount) in amounts)
             {
-                for (int i=0; i<amount; i++) ResourceManager.TryUpdateResourcesByBuild(type);
+                for (int i=0; i<amount; i++) ResourceManager.TryUpdateResourcesByBuild(codeName);
             }
         }
         #endregion

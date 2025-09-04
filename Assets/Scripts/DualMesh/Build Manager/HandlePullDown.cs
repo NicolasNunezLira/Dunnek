@@ -1,5 +1,5 @@
 using System.Collections;
-using Data;
+using ConstructionSystem;
 using UnityEngine;
 using CameraManager;
 using Unity.Mathematics;
@@ -19,7 +19,7 @@ public partial class DualMesh
         foreach (var build in constructions.ToList()) // copia para evitar modificación durante iteración
         {
             int id = build.Key;
-            ConstructionData construction = build.Value;
+            ConstructionInstance construction = build.Value;
 
             if (construction.NeedPullDown())
             {
@@ -35,9 +35,9 @@ public partial class DualMesh
         isHandlingPullDown = false;
     }
 
-    private IEnumerator FocusAndCollapse(int id, ConstructionData construction)
+    private IEnumerator FocusAndCollapse(int id, ConstructionInstance construction)
     {
-        yield return StartCoroutine(CameraController.Instance.MoveCameraTo(construction.obj.transform.position));
+        yield return StartCoroutine(CameraController.Instance.MoveCameraTo(construction.Obj.transform.position));
 
         yield return new WaitForSeconds(0.5f);
 
@@ -53,11 +53,11 @@ public partial class DualMesh
     public bool DestroyBuildForID(int id, out string name)
     {
         if (!constructions.ContainsKey(id)) { name = null; return false; }
-        else{ name = constructions[id].obj.name; }
-        ConstructionData data = constructions[id];
+        else{ name = constructions[id].Obj.name; }
+        ConstructionInstance data = constructions[id];
 
         // Liberar celdas ocupadas
-        foreach (int2 coord in data.support)
+        foreach (int2 coord in data.Support)
         {
             int cx = coord.x;
             int cz = coord.y;
@@ -71,7 +71,7 @@ public partial class DualMesh
             duneModel.ActivateCell(cx, cz);
             duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
         }
-        foreach (int2 coord in data.boundarySupport)
+        foreach (int2 coord in data.BoundarySupport)
         {
             int cx = coord.x;
             int cz = coord.y;
@@ -86,8 +86,8 @@ public partial class DualMesh
             duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
         }
         
-        data.obj.SetActive(false);
-        GameObject.Destroy(data.obj, 1f);
+        data.Obj.SetActive(false);
+        GameObject.Destroy(data.Obj, 1f);
         constructions.Remove(id);
         return true;
     }

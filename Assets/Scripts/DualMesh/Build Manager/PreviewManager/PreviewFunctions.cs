@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ConstructionSystem;
 
 namespace Building
 {
@@ -30,12 +31,12 @@ namespace Building
                     {
                         tempWallEndPoint = point;
                         PreviewWall();
-                        PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower]?.SetActive(false);
+                        PreviewManager.Instance.buildPreviews[currentConstruction]["tower"]?.SetActive(false);
                         return;
                     }
                     else
                     {
-                        PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower]?.SetActive(
+                        PreviewManager.Instance.buildPreviews[currentConstruction]["tower"]?.SetActive(
                             DualMesh.Instance.inMode == DualMesh.PlayingMode.Build);
                         tempWallEndPoint = null;
                     }
@@ -54,7 +55,7 @@ namespace Building
                 switch (DualMesh.Instance.inMode)
                 {
                     case DualMesh.PlayingMode.Build:
-                        canBuild = HasEnoughResourcesForBuild(new Dictionary<Data.ConstructionType, int> { { DualMesh.Instance.currentConstructionType, 1 } });
+                        canBuild = HasEnoughResourcesForBuild(new Dictionary<string, int> { { DualMesh.Instance.currentConstruction, 1 } });
                         break;
                     case DualMesh.PlayingMode.Action:
                         canBuild = HasEnoughtResourcesForAction(currentActionMode);
@@ -103,14 +104,11 @@ namespace Building
 
             switch (currentBuildMode)
             {
-                case DualMesh.BuildMode.PlaceHouse:
-                    activePreview = PreviewManager.Instance.buildPreviews[Data.ConstructionType.House];
-                    break;
-                case DualMesh.BuildMode.PlaceCantera:
-                    activePreview = PreviewManager.Instance.buildPreviews[Data.ConstructionType.Cantera];
+                case DualMesh.BuildMode.PlaceBuild:
+                    activePreview = PreviewManager.Instance.buildPreviews[currentConstruction]["building"];
                     break;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
-                    activePreview = PreviewManager.Instance.buildPreviews[Data.ConstructionType.Tower];
+                    activePreview = PreviewManager.Instance.buildPreviews[currentConstruction]["tower"];
                     break;
             }
 
@@ -146,9 +144,9 @@ namespace Building
         {
             var buildPreviews = PreviewManager.Instance.buildPreviews;
 
-            foreach (GameObject preview in buildPreviews.Values)
+            foreach (var previews in buildPreviews.Values)
             {
-                preview?.SetActive(false);
+                foreach (var preview in previews.Values) preview.SetActive(false);
             }
             if (clearWall)
             {

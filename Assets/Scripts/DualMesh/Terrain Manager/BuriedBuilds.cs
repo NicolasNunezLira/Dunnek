@@ -1,5 +1,5 @@
 using UnityEngine;
-using Data;
+using ConstructionSystem;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using ResourceSystem;
@@ -15,7 +15,7 @@ namespace DunefieldModel_DualMesh
             List<int> ids = constructionGrid[checkX, checkZ];
             foreach (int id in ids)
             {
-                if (!constructions.TryGetValue(id, out ConstructionData currentConstruction))
+                if (!constructions.TryGetValue(id, out ConstructionInstance currentConstruction))
                 {
                     Debug.LogWarning($"ID {id} no encontrado en constructions.");
                     return;
@@ -35,7 +35,7 @@ namespace DunefieldModel_DualMesh
 
         public void DeleteBuild(int id)
         {
-            if (!constructions.TryGetValue(id, out ConstructionData data))
+            if (!constructions.TryGetValue(id, out ConstructionInstance data))
             {
                 Debug.LogWarning($"ID {id} no encontrado al intentar eliminar construcción.");
                 return;
@@ -43,13 +43,13 @@ namespace DunefieldModel_DualMesh
 
             if (!data.isBuried) return;
 
-            foreach (var cell in data.support)
+            foreach (var cell in data.Support)
             {
                 //constructionGrid[cell.x, cell.y] = 0;
                 constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
                 terrainShadow[cell.x, cell.y] = terrain[cell.x, cell.y];
             }
-            foreach (var cell in data.boundarySupport)
+            foreach (var cell in data.BoundarySupport)
             {
                 //constructionGrid[cell.x, cell.y] = 0;
                 constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
@@ -60,9 +60,9 @@ namespace DunefieldModel_DualMesh
             ResourceManager.RemoveConsumer(id, recycle: false);
 
 
-            if (data.obj != null)
+            if (data.Obj != null)
             {
-                UnityEngine.Object.Destroy(data.obj);
+                UnityEngine.Object.Destroy(data.Obj);
             }
 
             constructions.Remove(id);

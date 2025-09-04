@@ -1,14 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using Data;
+using ConstructionSystem;
 using Unity.Collections;
-using Unity.Mathematics;
-using Unity.VisualScripting;
-using ue=UnityEngine;
 
 namespace DunefieldModel_DualMesh
 {
@@ -44,7 +36,7 @@ namespace DunefieldModel_DualMesh
 
         private float erosionH, depositeH, aux;
 
-        public Dictionary<int, ConstructionData> constructions;
+        public Dictionary<int, ConstructionInstance> constructions;
 
         public int currentConstructionID, currentCompositeConstructionID;
 
@@ -65,7 +57,7 @@ namespace DunefieldModel_DualMesh
             int xResolution, int zResolution,
             float slope,
             //int dx, int dz,
-            ref Dictionary<int, ConstructionData> constructions,
+            ref Dictionary<int, ConstructionInstance> constructions,
             ref int currentConstructionID,
             ref int currentCompositeConstructionID,
             float depositeHeight, float erosionHeight,

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Data;
 using Utils;
 using ResourceSystem;
-
+/*
 public class ConstructionConfig : Singleton<ConstructionConfig>
 {
     public Dictionary<ConstructionType, ConfigData> constructionConfig = new();
@@ -117,4 +117,4 @@ public class ConstructionConfig : Singleton<ConstructionConfig>
         }
     }
 
-}
+}*/

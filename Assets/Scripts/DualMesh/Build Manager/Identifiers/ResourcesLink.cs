@@ -1,6 +1,6 @@
 using UnityEngine;
 using ResourceSystem;
-using Data;
+using ConstructionSystem;
 using System.Collections.Generic;
 using System.Text;
 using System;
@@ -11,10 +11,10 @@ public class ResourcesLink : MonoBehaviour
     public bool IsConsumer { get; private set; }
     public Dictionary<Resource, float> rates { get; private set; }
 
-    public void Init(int consumerId, ConstructionType type)
+    public void Init(int consumerId, string codeName)
     {
         ConsumerId = consumerId;
-        rates = ConstructionConfig.Instance.constructionConfig[type].rate;
+        rates = ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
         IsConsumer = false;
         foreach (float value in rates.Values)
         {

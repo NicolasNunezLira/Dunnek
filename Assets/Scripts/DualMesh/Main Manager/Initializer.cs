@@ -2,16 +2,16 @@ using UnityEngine;
 using DunefieldModel_DualMesh;
 using System.Collections.Generic;
 using Building;
-using Data;
+using ConstructionSystem;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
 {
     public void Initializer()
     {
-        constructions = new Dictionary<int, ConstructionData>();
+        constructions = new Dictionary<int, ConstructionInstance>();
 
-        compositeConstructions = new Dictionary<int, CompositeConstruction>();
+        compositeConstructions = new Dictionary<int, WallGroup>();
 
         constructionGrid = new ConstructionGrid(xResolution + 1, zResolution + 1);
 
@@ -69,8 +69,8 @@ public partial class DualMesh : MonoBehaviour
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
 
-        activePreview = PreviewManager.Instance.buildPreviews[ConstructionType.House];
-        currentConstructionType = ConstructionType.House;
+        activePreview = PreviewManager.Instance.buildPreviews["houseSand"]["building"];
+        currentConstruction = "houseSand";
 
         builder = new BuildSystem(
             duneModel,
@@ -81,7 +81,7 @@ public partial class DualMesh : MonoBehaviour
             pulledDownTime,
             inMode,
             currentBuildMode,
-            currentConstructionType,
+            currentConstruction,
             currentActionMode,
             terrain,
             activePreview,

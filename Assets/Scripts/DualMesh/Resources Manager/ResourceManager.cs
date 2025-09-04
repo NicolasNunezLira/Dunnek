@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Data;
 using UnityEngine;
+using ConstructionSystem;
 
 namespace ResourceSystem {
     public static class ResourceManager
@@ -62,9 +62,9 @@ namespace ResourceSystem {
             return false;
         }
 
-        public static void TryUpdateResourcesByBuild(ConstructionType type)
+        public static void TryUpdateResourcesByBuild(string codeName)
         {
-            if (!ConstructionConfig.Instance.constructionConfig.TryGetValue(type, out var config))
+            if (!ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(codeName, out var config))
             {
                 return;
             }
@@ -112,7 +112,7 @@ namespace ResourceSystem {
         #endregion
 
         #region Consumers Methods
-        public static bool TryAddConsumer(int id, ConstructionType type)
+        public static bool TryAddConsumer(int id, string codeName)
         {
             if (consumers.ContainsKey(id))
             {
@@ -120,7 +120,7 @@ namespace ResourceSystem {
                 return false;
             }
 
-            var rates = ConstructionConfig.Instance.constructionConfig[type].rate;
+            var rates = ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
             if (rates[Resource.Sand] == 0 && rates[Resource.Work] == 0) return false;
 
             /*
@@ -136,7 +136,7 @@ namespace ResourceSystem {
                 }
             }
             */
-            consumers[id] = new Consumer(id, type, false);
+            consumers[id] = new Consumer(id, codeName, false);
 
             return true;
         }
@@ -153,7 +153,7 @@ namespace ResourceSystem {
 
                 if (recycle)
                 {
-                    var config = ConstructionConfig.Instance.constructionConfig[consumer.type];
+                    var config = ConstructionConfig.Instance.ConstructionConfigs[consumer.codeName];
                     AddResource(Resource.Sand, -Mathf.Floor(config.cost[Resource.Sand] / 2));
                     AddResource(Resource.Work, config.recycleWorkCost); 
                 }
@@ -285,15 +285,15 @@ namespace ResourceSystem {
         public struct Consumer
         {
             public int id;
-            public ConstructionType type;
-            public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.constructionConfig[type].rate;
+            public string codeName;
+            public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
             public bool isOperative;
             public bool isForceToStop;
 
-            public Consumer(int id, ConstructionType type, bool isOperative)
+            public Consumer(int id, string codeName, bool isOperative)
             {
                 this.id = id;
-                this.type = type;
+                this.codeName = codeName;
                 this.isOperative = isOperative;
                 isForceToStop = false;
             }

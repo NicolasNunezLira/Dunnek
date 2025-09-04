@@ -1,14 +1,10 @@
 using Unity.Mathematics;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.Collections;
 
 namespace DunefieldModel_DualMesh
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Resources;
-    using Data;
-    using NUnit.Framework;
-    using Unity.Collections;
-
     #region Native Grid
     public struct NativeGrid
     {
@@ -158,7 +154,7 @@ namespace DunefieldModel_DualMesh
     #region ConstructionGrid
     public struct ConstructionGrid
     {
-        public Dictionary<int2, Dictionary<int, ConstructionType>> data;
+        public Dictionary<int2, Dictionary<int, string>> data;
         private int width;
         private int length;
 
@@ -167,7 +163,7 @@ namespace DunefieldModel_DualMesh
 
         public ConstructionGrid(int width, int length)
         {
-            data = new Dictionary<int2, Dictionary<int, ConstructionType>>();
+            data = new Dictionary<int2, Dictionary<int, string>>();
             this.width = width;
             this.length = length;
         }
@@ -183,13 +179,13 @@ namespace DunefieldModel_DualMesh
             }
         }
 
-        public void AddConstruction(int x, int z, int id, Data.ConstructionType type)
+        public void AddConstruction(int x, int z, int id, string codeName)
         {
             var key = new int2(x, z);
             if (!data.ContainsKey(key))
-                data[key] = new Dictionary<int, Data.ConstructionType>();
+                data[key] = new Dictionary<int, string>();
 
-            data[key][id] = type;
+            data[key][id] = codeName;
         }
 
         public bool TryRemoveConstruction(int x, int z, int id)
@@ -233,7 +229,7 @@ namespace DunefieldModel_DualMesh
             return !(x < 0 || z < 0 || x >= Width || z >= Length);
         }
 
-        public bool TryGetTypesAt(int x, int z, ConstructionType constructionType, out List<int> ids)
+        public bool TryGetTypesAt(int x, int z, string codeName, out List<int> ids)
         {
             ids = new List<int>();
             var key = new int2(x, z);
@@ -242,8 +238,8 @@ namespace DunefieldModel_DualMesh
             {
                 foreach (var kvp in innerDict)
                 {
-                    if (kvp.Value == constructionType)
-                        ids.Add(kvp.Key);
+                    if (kvp.Value.ToLower().Contains(codeName.ToLower()))
+                        ids.Add(kvp.Key);   
                 }
 
                 return ids.Count > 0;
@@ -252,7 +248,7 @@ namespace DunefieldModel_DualMesh
             return false;
         }
 
-        public bool TryGetConstructionTypesAt(int x, int z, out Dictionary<int, ConstructionType> innerDict)
+        public bool TryGetConstructionTypesAt(int x, int z, out Dictionary<int, string> innerDict)
         {
             return data.TryGetValue(new int2(x, z), out innerDict);
         }
@@ -264,7 +260,10 @@ namespace DunefieldModel_DualMesh
             if (data.TryGetValue(key, out var innerDict))
             {
                 // Si hay construcciones, revisa que todas sean del tipo Tower
-                return innerDict.Count > 0 && innerDict.Values.All(type => type == ConstructionType.Tower);
+                return innerDict.Count > 0
+                    && innerDict.Values.All(codeName =>
+                        codeName.Contains("Tower") || codeName.Contains("tower"));
+                    //&& innerDict.Values.All(type => type == ConstructionType.Tower);
             }
 
             return false; // No hay construcciones en la celda

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using Data;
+using ConstructionSystem;
 using Vector3 = UnityEngine.Vector3;
 using Quaternion = UnityEngine.Quaternion;
 
@@ -11,7 +11,7 @@ namespace Building
     {
         public void BuildWallBetween(Vector3 p1, Vector3 p2)
         {
-            CompositeConstruction Wall = new CompositeConstruction(currentCompositeConstructionID, CompositeConstruction.CompositeType.Wall);
+            WallGroup Wall = new WallGroup(currentCompositeConstructionID);
             int x, z, idTower2;
             // Coloca las torres en los extremos
             (p1, _, _, _) = TryBuildATower(p1, Wall);
@@ -37,7 +37,7 @@ namespace Building
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
                 Quaternion rotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z)) * Quaternion.Euler(0, 90, 0);
-                GameObject wall = GameObjectConstruction(ConstructionType.SegmentWall, x, z, rotation, adjusted);
+                GameObject wall = GameObjectConstruction(currentConstruction, "segmentWall", x, z, rotation, adjusted);
 
                 if (wall != null)
                 {
@@ -52,7 +52,7 @@ namespace Building
                 allSupport.Add(new int2(x, z));
             }
             currentCompositeConstructionID++;
-            activePreview = PreviewManager.Instance.buildPreviews[ConstructionType.Tower];
+            activePreview = PreviewManager.Instance.buildPreviews[currentConstruction]["tower"];
             activePreview.SetActive(false);
 
             //RestoreAllPreviews();
@@ -66,27 +66,27 @@ namespace Building
             return (x, z);
         }
 
-        private void AddPartToWall(CompositeConstruction wall)
+        private void AddPartToWall(WallGroup wall)
         {
             wall.AddPart(constructions[currentConstructionID - 1]);
-            constructions[currentConstructionID - 1].groupID = currentCompositeConstructionID;
+            constructions[currentConstructionID - 1].groupId = currentCompositeConstructionID;
         }
 
-        private (Vector3, int, int, int) TryBuildATower(Vector3 p, CompositeConstruction Wall)
+        private (Vector3, int, int, int) TryBuildATower(Vector3 p, WallGroup Wall)
         {
             int id;
             (int x, int z) = GridIndex(p);
-            if (!constructionGrid.TryGetTypesAt(x, z, ConstructionType.Tower, out List<int> ids))
+            if (!constructionGrid.TryGetTypesAt(x, z, "Wall", out List<int> ids))
             {
                 id = currentConstructionID;
-                GameObjectConstruction(ConstructionType.Tower, x, z,
+                GameObjectConstruction(currentConstruction, "tower", x, z,
                     Quaternion.LookRotation(Vector3.zero), new Vector3(p.x, Mathf.Max(duneModel.sand[x, z], duneModel.terrainShadow[x, z]), p.z));
                 AddPartToWall(Wall);
             }
             else
             {
                 id = ids[0];
-                p = constructions[id].position;
+                p = constructions[id].Position;
             }
             return (p, x, z, id);
         }

@@ -2,61 +2,90 @@ using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Text.RegularExpressions;
-using System;
 using DunefieldModel_DualMesh;
 
-namespace Data
+namespace ConstructionSystem
 {
     [System.Serializable]
-    public enum ConstructionType
-    { House, SegmentWall, Wall, Tower, Cantera };
-
-    [System.Serializable]
-    public class ConstructionData
+    public class ConstructionInstance
     {
-        #region Atributos
-        public GameObject obj;
-        public int id => int.Parse(Regex.Match(obj.name, @"\d+$").Value);
-        public Vector3 position;
-        public Quaternion rotation;
-        public ConstructionType type;
-        public List<int2> support;
-        public List<int2> boundarySupport;
+        #region Attributes
+        public GameObject Obj { get; private set; }
+        public int id => int.Parse(Regex.Match(Obj.name, @"\d+$").Value);
+        public ConstructionConfig.ConfigData Config { get; private set; }
+        public Vector3 Position { get; private set; }
+        public Quaternion Rotation { get; private set; }
+        public ConstructionCategory Category { get; private set; }
+        public List<int2> Support { get; private set; }
+        public List<int2> BoundarySupport { get; private set; }
         public float floorHeight;
         public float buildHeight;
-        public float duration;
         public float timeBuilt;
         public bool isBuried = false;
-        public int? groupID = null;
+        public int? groupId = null;
         #endregion
 
-        #region Metodos
+        #region Constructor
+        public ConstructionInstance(
+            GameObject obj,
+            Vector3 position,
+            Quaternion rotation,
+            ConstructionConfig.ConfigData config,
+            List<int2> support,
+            List<int2> boundarySupport,
+            float floorHeight,
+            float buildHeight
+        )
+        {
+            Obj = obj;
+            Position = position;
+            Rotation = rotation;
+            Config = config;
+            Support = support;
+            BoundarySupport = boundarySupport;
+
+            this.floorHeight = floorHeight;
+            this.buildHeight = buildHeight;
+
+            timeBuilt = TimeManager.Instance.turn;
+        }
+        #endregion
+
+        #region Place
+        //public abstract void Place();
+        #endregion
+
+        #region Is buried and erode
         public (bool, string, int, List<int2>) IsBuried(
             NativeGrid sandElev,
             ConstructionGrid constructionGrid,
             FrameVisualChanges sandChanges,
-            float tolerance = 0.05f, float supportThreshold = 0.6f, float boundaryThreshold = 0.3f)
+            float tolerance = 0.05f,
+            float supportThreshold = 0.6f,
+            float boundaryThreshold = 0.3f
+        )
         {
+
             int buriedSupport = 0;
-            foreach (var cell in support)
+            foreach (var cell in Support)
             {
                 if (sandElev[cell.x, cell.y] > floorHeight + tolerance)
                     buriedSupport++;
             }
 
             int buriedBoundary = 0;
-            foreach (var cell in boundarySupport)
+            foreach (var cell in BoundarySupport)
             {
                 if (sandElev[cell.x, cell.y] >= floorHeight + buildHeight - tolerance)
                     buriedBoundary++;
             }
 
-            float supportRatio = (float)buriedSupport / support.Count;
-            float boundaryRatio = (float)buriedBoundary / boundarySupport.Count;
+            float supportRatio = (float)buriedSupport / Support.Count;
+            float boundaryRatio = (float)buriedBoundary / BoundarySupport.Count;
 
             isBuried = supportRatio >= supportThreshold && boundaryRatio >= boundaryThreshold;
 
-            string constructionName = obj.name;
+            string constructionName = Obj.name;
 
             List<int2> needActivate = new List<int2>();
             if (isBuried)
@@ -78,28 +107,27 @@ namespace Data
 
             //return (isBuried, constructionName, int.Parse(Regex.Match(constructionName, @"\d+$").Value), needActivate);
         }
-
         public List<int2> ErodeBuild(
             NativeGrid sandElev,
             ConstructionGrid constructionGrid,
             FrameVisualChanges changes)
         {
             List<int2> needActivate = new List<int2>();
-            foreach (var cell in support)
+            foreach (var cell in Support)
             {
                 float sandHeight = sandElev[cell.x, cell.y];
 
                 if (sandHeight <= buildHeight + floorHeight)
                 {
                     needActivate.Add(cell);
-                    sandElev[cell.x, cell.y] = Math.Max(buildHeight + floorHeight, sandHeight);
+                    sandElev[cell.x, cell.y] = Mathf.Max(buildHeight + floorHeight, sandHeight);
                 }
 
                 //constructionGrid[cell.x, cell.y] = 0;
                 constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
                 changes.AddChanges(cell.x, cell.y);
             }
-            foreach (var cell in boundarySupport)
+            foreach (var cell in BoundarySupport)
             {
                 //constructionGrid[cell.x, cell.y] = 0;
                 constructionGrid.TryRemoveConstruction(cell.x, cell.y, id);
@@ -108,12 +136,14 @@ namespace Data
 
             return needActivate;
         }
+        #endregion
 
+        #region Pull Down
         public System.Collections.IEnumerator InitPulledDownCoroutine(NativeGrid sandElev, FrameVisualChanges sandChanges, float maxExtraHeight = 0.2f, float cellSize = 1f)
         {
-            if (obj == null) yield break;
+            if (Obj == null) yield break;
             // Activar animación de derrumbe
-            var pulled = obj.transform.Find("default")?.GetComponent<PulledDown>();
+            var pulled = Obj.transform.Find("default")?.GetComponent<PulledDown>();
             if (pulled != null)
             {
                 pulled.activatePulledDown = true;
@@ -123,13 +153,13 @@ namespace Data
             yield return new WaitUntil(() => pulled != null && pulled.IsCollapsing);
 
             // Calcular centro en coordenadas de grilla
-            float cx = position.x / cellSize;
-            float cz = position.z / cellSize;
+            float cx = Position.x / cellSize;
+            float cz = Position.z / cellSize;
 
-            // Unir support + boundary
+            // Unir Support + boundary
             List<int2> allCells = new List<int2>();
-            allCells.AddRange(support);
-            allCells.AddRange(boundarySupport);
+            allCells.AddRange(Support);
+            allCells.AddRange(BoundarySupport);
 
             // Calcular distancia máxima desde el centro
             List<(int2 cell, float dist)> distancias = new List<(int2, float)>();
@@ -172,12 +202,12 @@ namespace Data
 
         public bool NeedPullDown()
         {
-            return !isBuried && (Time.time - timeBuilt >= duration);
+            return !isBuried && (Time.time - timeBuilt >= Config.duration);
         }
 
         public void RestoreTerrain(float[,] terrainElev, float[,] duneTerrain)
         {
-            foreach (var cell in support)
+            foreach (var cell in Support)
             {
                 duneTerrain[cell.x, cell.y] = terrainElev[cell.x, cell.y];
             }
@@ -185,70 +215,15 @@ namespace Data
 
         public void MarkCells(int[,] grid, int id)
         {
-            foreach (var cell in support)
+            foreach (var cell in Support)
             {
                 grid[cell.x, cell.y] = id;
             }
         }
+        #endregion
+
+        #region Destroy
+        //public abstract void OnDestroy();
+        #endregion
     }
-    #endregion
-
-    #region Composite Builds
-    [System.Serializable]
-    public class CompositeConstruction
-    {
-        public enum CompositeType
-        {
-            Wall,
-            Road,
-            Fence,
-            Custom
-        }
-
-        public CompositeType Type;
-        public List<ConstructionData> Parts = new();
-        public int GroupId; // Un identificador único para esta construcción compuesta
-
-        public CompositeConstruction(int groupId, CompositeType type)
-        {
-            GroupId = groupId;
-            Type = type;
-        }
-
-        public void AddPart(ConstructionData part)
-        {
-            Parts.Add(part);
-        }
-
-        public bool IsBuried(NativeGrid sandElev, ConstructionGrid constructionGrid, FrameVisualChanges sandChanges)
-        {
-            bool allBuried = true;
-            foreach (var part in Parts)
-            {
-                var (buried, _, _, _) = part.IsBuried(sandElev, constructionGrid, sandChanges);
-                if (!buried) allBuried = false;
-            }
-            return allBuried;
-        }
-
-        public List<int2> ErodeAll(NativeGrid sandElev, ConstructionGrid constructionGrid, FrameVisualChanges changes)
-        {
-            var allCells = new List<int2>();
-            foreach (var part in Parts)
-            {
-                allCells.AddRange(part.ErodeBuild(sandElev, constructionGrid, changes));
-            }
-            return allCells;
-        }
-
-        public void Destroy()
-        {
-            foreach (var part in Parts)
-            {
-                GameObject.Destroy(part.obj);
-            }
-            Parts.Clear();
-        }
-    }
-    #endregion
 }

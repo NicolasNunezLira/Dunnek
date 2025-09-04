@@ -2,7 +2,7 @@ using UnityEngine;
 using DunefieldModel_DualMesh;
 using System.Collections.Generic;
 using Building;
-using Data;
+using ConstructionSystem;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
@@ -30,24 +30,24 @@ public partial class DualMesh : MonoBehaviour
     private BuildSystem builder;
     private GameObject activePreview;
 
-    public Data.ConstructionType currentConstructionType;
+    public string currentConstruction;
 
     public enum PlayingMode { Simulation, Build, Recycle, Action, Draft };
     public PlayingMode inMode { get; set; } = PlayingMode.Simulation;
 
     [SerializeField]
     public enum BuildMode
-    { PlaceHouse, PlaceWallBetweenPoints, PlaceCantera };
+    { PlaceBuild, PlaceWallBetweenPoints };
 
     [SerializeField]
     public enum ActionMode
     { Flat, AddSand, Dig };
 
-    private BuildMode currentBuildMode = BuildMode.PlaceHouse;
+    private BuildMode currentBuildMode = BuildMode.PlaceBuild;
     private ActionMode currentActionMode = ActionMode.Dig;
 
-    private Dictionary<int, ConstructionData> constructions;
-    private Dictionary<int, CompositeConstruction> compositeConstructions;
+    private Dictionary<int, ConstructionInstance> constructions;
+    private Dictionary<int, WallGroup> compositeConstructions;
     private int currentConstructionID = 1, currentCompositeConstructionID = 1;
 
     private bool isPaused = false, isWallReadyForConstruction = false;
