@@ -10,6 +10,7 @@ public partial class DualMesh : MonoBehaviour
         if (!builder.wallStartPoint.HasValue)
             builder.UpdateBuildPreviewVisual();
 
+        currentBuild = "houseSand";
         // Aplicar construcción actual
         SetBuildType(currentBuild);
 

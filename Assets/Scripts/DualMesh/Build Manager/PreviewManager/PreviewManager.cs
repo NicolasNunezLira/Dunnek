@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 using ConstructionSystem;
-using JetBrains.Annotations;
+
 public class PreviewManager : Singleton<PreviewManager>
 {
     public GameObject BuildsPreviewParent, ActionsPreviewParent;
@@ -10,9 +10,28 @@ public class PreviewManager : Singleton<PreviewManager>
 
     public Dictionary<DualMesh.ActionMode, GameObject> actionPreviews = new();
 
+    /*
     protected override void Awake()
     {
         base.Awake();
+        InitializeBuildPreviews();
+        InitializeActionPreviews();
+    }
+    */
+    
+    private void Start()
+    {
+        StartCoroutine(WaitForConstructionConfig());
+    }
+
+    private System.Collections.IEnumerator WaitForConstructionConfig()
+    {
+        // Espera hasta que ConstructionConfig singleton esté instanciado
+        yield return new WaitUntil(() => ConstructionConfig.Instance != null);
+        
+        // Espera un frame extra para asegurarnos de que Awake() haya corrido
+        yield return null;
+
         InitializeBuildPreviews();
         InitializeActionPreviews();
     }
@@ -28,15 +47,17 @@ public class PreviewManager : Singleton<PreviewManager>
 
         foreach (var (codeName, item) in builds)
         {
+            Debug.Log($"[PreviewManager] Generating previews for {codeName}");
             Dictionary<string, GameObject> prefabs = new Dictionary<string, GameObject>();
             foreach ((string part, GameObject prefab) in item.loadedPrefabs)
             {
+                Debug.Log($"[PreviewManager] Generating preview for {part} of {codeName}");
                 GameObject preview = Instantiate(prefab, BuildsPreviewParent.transform);
                 MakePreviewTransparent(preview);
                 preview.SetActive(false);
                 prefabs[part] = preview;
             }
-            
+
 
             buildPreviews[codeName] = prefabs;
         }

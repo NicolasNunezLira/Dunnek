@@ -44,6 +44,7 @@ namespace ConstructionSystem
             }
         }
 
+        [System.Serializable]
         public class PrefabData
         {
             public string part;

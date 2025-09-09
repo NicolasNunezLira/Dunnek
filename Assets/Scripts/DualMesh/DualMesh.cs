@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -17,8 +18,9 @@ public partial class DualMesh :MonoBehaviour
 
     #region Start
 
-    void Start()
+    private IEnumerator Start()
     {
+        yield return new WaitUntil(() => PreviewManager.Instance.buildPreviews.Count > 0);
         Initializer();
     }
     #endregion
@@ -27,6 +29,7 @@ public partial class DualMesh :MonoBehaviour
     void Update()
     {
         //float before = duneModel.TotalSand();
+        if (builder == null) return;
         
         if (!isPaused)
         {
@@ -79,7 +82,7 @@ public partial class DualMesh :MonoBehaviour
                         DraftSystem.DraftManager.Instance.StartDraft();
                         break;
                     }
-                #endregion
+                    #endregion
             }
 
             if (constructed)
