@@ -18,7 +18,7 @@ namespace Building
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
-        public string currentConstruction;
+        public string currentBuild;
         public DualMesh.ActionMode currentActionMode;
         public DualMesh.PlayingMode inMode;
         public NativeGrid terrain;
@@ -71,7 +71,7 @@ namespace Building
             this.terrain = terrain;
             this.constructionGrid = constructionGrid;
             this.activePreview = activePreview;
-            this.currentConstruction = currentConstruction;
+            this.currentBuild = currentConstruction;
 
             wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews["wallSand"]["segmentWall"]);
             wallPreviewParent = new GameObject();

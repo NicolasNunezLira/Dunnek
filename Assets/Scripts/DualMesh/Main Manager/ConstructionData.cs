@@ -1,3 +1,4 @@
+/*
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -252,3 +253,4 @@ namespace Data
     }
     #endregion
 }
+*/

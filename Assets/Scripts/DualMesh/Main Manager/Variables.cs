@@ -32,7 +32,7 @@ public partial class DualMesh : MonoBehaviour
 
     public string currentConstruction;
 
-    public enum PlayingMode { Simulation, Build, Recycle, Action, Draft };
+    public enum PlayingMode { Simulation, Build, Action, Draft };
     public PlayingMode inMode { get; set; } = PlayingMode.Simulation;
 
     [SerializeField]
@@ -41,7 +41,7 @@ public partial class DualMesh : MonoBehaviour
 
     [SerializeField]
     public enum ActionMode
-    { Flat, AddSand, Dig };
+    { Flat, AddSand, Dig, Recycle };
 
     private BuildMode currentBuildMode = BuildMode.PlaceBuild;
     private ActionMode currentActionMode = ActionMode.Dig;

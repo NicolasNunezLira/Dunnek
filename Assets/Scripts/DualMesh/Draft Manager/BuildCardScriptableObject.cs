@@ -1,4 +1,4 @@
-using Data;
+using ConstructionSystem;
 using UnityEngine;
 
 namespace DraftSystem
@@ -8,7 +8,7 @@ namespace DraftSystem
     {
         public string cardName;
         public Sprite icon;
-        public ConstructionType constructionType;
+        public string constructionType;
         public Rarity rarity;
         [TextArea] public string description;
         public int cost;

@@ -1,6 +1,3 @@
-using Data;
-using ResourceSystem;
-
 namespace Building
 {
     public partial class BuildSystem
@@ -15,12 +12,21 @@ namespace Building
 
             switch (currentBuildMode)
             {
-                case DualMesh.BuildMode.PlaceHouse:
-                    GameObjectConstruction(ConstructionType.House, previewX, previewZ, prefabRotation);
-                    return true;
-                case DualMesh.BuildMode.PlaceCantera:
-                    GameObjectConstruction(ConstructionType.Cantera, previewX, previewZ, prefabRotation);
-                    return true;
+                case DualMesh.BuildMode.PlaceBuild:
+                    if (!string.IsNullOrEmpty(DualMesh.Instance.currentBuild))
+                    {
+                        // Usar currentBuild como id de construcción
+                        GameObjectConstruction(
+                            DualMesh.Instance.currentBuild,
+                            "building",        // parte principal por convención
+                            previewX,
+                            previewZ,
+                            prefabRotation
+                        );
+                        return true;
+                    }
+                    break;
+
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
                     if (wallStartPoint.HasValue && wallEndPoint.HasValue)
                     {
@@ -32,9 +38,12 @@ namespace Building
                     }
                     break;
             }
+
             return false;
         }
         #endregion
+
+        #region Confirm action
 
         public bool ConfirmAction()
         {
@@ -49,14 +58,24 @@ namespace Building
                 case DualMesh.ActionMode.Dig:
                     DigAction(previewX, previewZ, buildRadius, digDepth);
                     return true;
+
                 case DualMesh.ActionMode.Flat:
                     FlatSand(previewX, previewZ, 3 * buildRadius);
                     return true;
+
                 case DualMesh.ActionMode.AddSand:
                     AddSandCone(previewX, previewZ, 0.5f * buildRadius, 6f * buildRadius);
                     return true;
+
+                /*
+                case DualMesh.ActionMode.Recycle: // Recycle como acción
+                RecycleAt(previewX, previewZ);
+                return true;
+                */
             }
+
             return false;
         }
+        #endregion
     }
 }

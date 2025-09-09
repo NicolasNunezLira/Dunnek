@@ -31,12 +31,12 @@ namespace Building
                     {
                         tempWallEndPoint = point;
                         PreviewWall();
-                        PreviewManager.Instance.buildPreviews[currentConstruction]["tower"]?.SetActive(false);
+                        PreviewManager.Instance.buildPreviews[currentBuild]["tower"]?.SetActive(false);
                         return;
                     }
                     else
                     {
-                        PreviewManager.Instance.buildPreviews[currentConstruction]["tower"]?.SetActive(
+                        PreviewManager.Instance.buildPreviews[currentBuild]["tower"]?.SetActive(
                             DualMesh.Instance.inMode == DualMesh.PlayingMode.Build);
                         tempWallEndPoint = null;
                     }
@@ -55,7 +55,7 @@ namespace Building
                 switch (DualMesh.Instance.inMode)
                 {
                     case DualMesh.PlayingMode.Build:
-                        canBuild = HasEnoughResourcesForBuild(new Dictionary<string, int> { { DualMesh.Instance.currentConstruction, 1 } });
+                        canBuild = HasEnoughResourcesForBuild(new Dictionary<string, int> { { DualMesh.Instance.currentBuild, 1 } });
                         break;
                     case DualMesh.PlayingMode.Action:
                         canBuild = HasEnoughtResourcesForAction(currentActionMode);
@@ -105,10 +105,10 @@ namespace Building
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceBuild:
-                    activePreview = PreviewManager.Instance.buildPreviews[currentConstruction]["building"];
+                    activePreview = PreviewManager.Instance.buildPreviews[currentBuild]["building"];
                     break;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
-                    activePreview = PreviewManager.Instance.buildPreviews[currentConstruction]["tower"];
+                    activePreview = PreviewManager.Instance.buildPreviews[currentBuild]["tower"];
                     break;
             }
 

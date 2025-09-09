@@ -1,62 +1,69 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Data;
-using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
 {
     public void ConstructionMode()
     {
-        if (!builder.wallStartPoint.HasValue) builder.UpdateBuildPreviewVisual();
+        // Actualizar preview si no hay un inicio de muro
+        if (!builder.wallStartPoint.HasValue)
+            builder.UpdateBuildPreviewVisual();
 
-        SetBuildType(currentBuildMode);
+        // Aplicar construcción actual
+        SetBuildType(currentBuild);
 
+        // Cambiar modo con Tab (alternar entre PlaceBuild y PlaceWallBetweenPoints)
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
-                //currentBuildMode = (BuildMode)(((int)currentBuildMode - 1 + System.Enum.GetValues(typeof(BuildMode)).Length) % System.Enum.GetValues(typeof(BuildMode)).Length);
             }
             else
             {
-                //currentBuildMode = (BuildMode)(((int)currentBuildMode + 1) % System.Enum.GetValues(typeof(BuildMode)).Length);
                 currentBuildMode = (BuildMode)(((int)currentBuildMode - 1 + System.Enum.GetValues(typeof(BuildMode)).Length) % System.Enum.GetValues(typeof(BuildMode)).Length);
             }
 
-            SetBuildType(currentBuildMode);
+            // Actualizar modo según BuildMode
+            UpdateBuildModeFromCurrentBuild();
         }
 
+        // Evitar interacción si el mouse está sobre UI
         if (EventSystem.current.IsPointerOverGameObject())
         {
             builder.HideAllPreviews();
             return;
         }
 
+        // Preview de construcción
         builder.HandleBuildPreview();
 
+        // Preview de muralla si corresponde
         if (currentBuildMode == BuildMode.PlaceWallBetweenPoints && builder.wallStartPoint.HasValue)
         {
             builder.PreviewWall();
         }
 
+        // Rotar muro con R
         if (Input.GetKeyDown(KeyCode.R))
         {
             builder.RotateWallPreview();
         }
 
+        // Confirmar construcción con click izquierdo
         if (Input.GetMouseButtonDown(0))
         {
             if (currentBuildMode != BuildMode.PlaceWallBetweenPoints)
             {
                 constructed = builder.ConfirmBuild();
                 inMode = !constructed ? inMode : PlayingMode.Simulation;
-                uiController.UpdateButtonVisuals(inMode);
+                uiController.UpdateMainButtonVisuals(inMode);
             }
             else
             {
-                if (Input.GetMouseButtonDown(0) && builder.canPlaceWall)
+                // Muro: confirmar solo si se puede colocar
+                if (builder.canPlaceWall)
                 {
                     isWallReadyForConstruction = builder.SetPointsForWall();
                     if (isWallReadyForConstruction)
@@ -64,10 +71,33 @@ public partial class DualMesh : MonoBehaviour
                         builder.ClearWallPreview();
                         constructed = builder.ConfirmBuild();
                         inMode = !constructed ? inMode : PlayingMode.Simulation;
-                        uiController.UpdateButtonVisuals(inMode);
+                        uiController.UpdateMainButtonVisuals(inMode);
                     }
                 }
             }
         }
-    }  
+    }
+
+    /// <summary>
+    /// Actualiza el BuildMode según la construcción actual (muro o genérica)
+    /// </summary>
+    private void UpdateBuildModeFromCurrentBuild()
+    {
+        if (string.IsNullOrEmpty(currentBuild))
+            return;
+
+        if (!ConstructionSystem.ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(currentBuild, out var config))
+            return;
+
+        currentBuildMode = (config.category == ConstructionSystem.ConstructionCategory.Wall)
+            ? BuildMode.PlaceWallBetweenPoints
+            : BuildMode.PlaceBuild;
+
+        builder.currentBuildMode = currentBuildMode;
+        builder.UpdateBuildPreviewVisual();
+
+        // UI: actualizar pestaña y botón seleccionado
+        uiController.ShowCategory(config.category.ToString());
+        uiController.UpdateSelectedVisual(currentBuild);
+    }
 }

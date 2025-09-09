@@ -7,10 +7,10 @@ public class ResourceTooltip : MonoBehaviour
     private int consumerID;
     private bool isActive;
 
-    public void Setup(int consumerId, bool currentState)
+    public void Setup(int id, bool currentState)
     {
-        this.consumerID = consumerID;
-        this.isActive = isActive;
+        this.consumerID = id;
+        this.isActive = currentState;
         UpdateButtonText();
 
         toggleButton.onClick.RemoveAllListeners();

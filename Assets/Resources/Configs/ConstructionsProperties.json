@@ -1,7 +1,9 @@
 {
-  "configs": [
+    "configs": [
     {
-        "type": "House",
+        "codeName": "houseSand",
+        "constructionCategory": "Housing",
+        "iconPath": "Icons/houseSandIcon",
         "costList": [
             { "type": "Work", "value": -1 },
             { "type": "Sand", "value": -10 }
@@ -11,10 +13,15 @@
             { "type": "Sand", "value": 0 }
         ],
         "recycleWorkCost": 0,
-        "prefab": "Prefabs/Dunek01"
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/Dunek01" }
+        ]
     },
     {
-        "type": "SegmentWall",
+        "codeName": "wallSand",
+        "category": "Wall",
+        "iconPath": "Icons/wallSandIcon",
         "costList": [
             { "type": "Work", "value": -1 },
             { "type": "Sand", "value": -5 }
@@ -24,23 +31,16 @@
             { "type": "Sand", "value": 0 }
         ],
         "recycleWorkCost": -2,
-        "prefab": "Prefabs/wall2"
+        "duration": 1000,
+        "prefabs": [
+            { "part": "segmentWall", "path": "Prefabs/wall2" },
+            { "part": "tower", "path": "Prefabs/tower" }
+        ]
     },
     {
-        "type": "Tower",
-        "costList": [
-            { "type": "Work", "value": -2 },
-            { "type": "Sand", "value": -10 }
-        ],
-        "rateList": [
-            { "type": "Work", "value": 0 },
-            { "type": "Sand", "value": 0 }
-        ],
-        "recycleWorkCost": -5,
-        "prefab": "Prefabs/tower"
-    },
-    {
-        "type": "Cantera",
+        "codeName": "Cantera",
+        "constructionCategory": "Consumer",
+        "iconPath": "Icons/canteraIcon",
         "costList": [
             { "type": "Work", "value": 0 },
             { "type": "Sand", "value": 0 }
@@ -50,7 +50,27 @@
             { "type": "Sand", "value": 2 }
         ],
         "recycleWorkCost": -10,
-        "prefab": "Prefabs/Cantera"
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/Cantera" }
+        ]
+    },
+    {
+        "codeName": "initialTemple",
+        "constructionCategory": "BonusProvider",
+        "iconPath": "Icons/initialTempleIcon",
+        "costList": [
+            { "type": "Work", "value": 10},
+            { "type": "Sand", "value": 10}
+        ],
+        "bonus": [
+            { "type" : "Work", "value": { "radius": 10, "pct": 0.1 } }
+        ],
+        "recycleWorkCost": 20,
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/Dunek TorreArena" }
+        ]
     }
   ]
 }

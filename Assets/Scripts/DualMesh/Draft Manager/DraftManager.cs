@@ -2,7 +2,7 @@ using Utils;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Data;
+using ConstructionSystem;
 
 namespace DraftSystem
 {
@@ -99,7 +99,7 @@ namespace DraftSystem
             UnlockConstruction(card.constructionType);
         }
 
-        public void UnlockConstruction(ConstructionType type)
+        public void UnlockConstruction(string type)
         {
             ConstructionUnlockerManager.UnlockConstruction(type);
         }

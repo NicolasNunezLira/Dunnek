@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Data;
+using ConstructionSystem;
 
 namespace DunefieldModel_DualMesh
 {
@@ -93,7 +93,7 @@ namespace DunefieldModel_DualMesh
                         
                         foreach (int id in ids)
                         {
-                            constructions.TryGetValue(id, out ConstructionData currentConstruction);;
+                            constructions.TryGetValue(id, out ConstructionInstance currentConstruction);;
                             int xPrev = checkX - dx;
                             int zPrev = checkZ - dz;
 

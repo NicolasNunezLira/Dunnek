@@ -36,9 +36,20 @@ public partial class DualMesh : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            constructed = builder.ConfirmAction();
+            bool constructed = builder.ConfirmAction();
+
+            // Si se ejecutó correctamente la acción, volver a Simulation
             inMode = !constructed ? inMode : PlayingMode.Simulation;
-            uiController.UpdateButtonVisuals(inMode);
+
+            // Actualizar UI
+            uiController.UpdateMainButtonVisuals(inMode);
+
+            // Si estamos en acciones, mantener la pestaña abierta
+            if (inMode == PlayingMode.Action)
+            {
+                uiController.ShowCategory("Actions");
+                uiController.UpdateActionsButtonVisual(currentActionMode.ToString().ToLower());
+            }
         }
     }
 }

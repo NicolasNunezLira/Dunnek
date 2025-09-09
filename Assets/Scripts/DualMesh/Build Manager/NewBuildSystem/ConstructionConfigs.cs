@@ -85,6 +85,7 @@ namespace ConstructionSystem
         {
             public string codeName;
             public string constructionCategory;
+            public string iconPath;
 
             // Estos se usan solo para cargar desde JSON
             public List<ResourceAmount> costList;
@@ -99,6 +100,7 @@ namespace ConstructionSystem
             [System.NonSerialized] public ResourceCost rate;
             [System.NonSerialized] public Dictionary<string, GameObject> loadedPrefabs;
             [System.NonSerialized] public ConstructionCategory category;
+            [System.NonSerialized] public Sprite icon;
 
             public void InitializeResources()
             {
@@ -115,7 +117,7 @@ namespace ConstructionSystem
                 }
 
                 loadedPrefabs = new Dictionary<string, GameObject>();
-                foreach ( PrefabData prefab in prefabs)
+                foreach (PrefabData prefab in prefabs)
                 {
                     var go = Resources.Load<GameObject>(prefab.path);
                     if (go != null)
@@ -127,6 +129,12 @@ namespace ConstructionSystem
                         Debug.LogError($"Prefab not foun in Resources/{prefab.path}");
                     }
                 }
+
+                if (!string.IsNullOrEmpty(iconPath))
+                {
+                    icon = Resources.Load<Sprite>(iconPath);
+                }
+
             }
         }
 
@@ -166,6 +174,7 @@ Example for json structure:
     {
         "codeName": "houseSand",
         "constructionCategory": "Housing",
+        "iconPath": "Icons/houseSandIcon",
         "costList": [
             { "type": "Work", "value": -1 },
             { "type": "Sand", "value": -10 }
@@ -183,6 +192,7 @@ Example for json structure:
     {
         "codeName": "wallSand",
         "category": "Wall",
+        "iconPath": "Icons/wallSandIcon",
         "costList": [
             { "type": "Work", "value": -1 },
             { "type": "Sand", "value": -5 }
@@ -201,6 +211,7 @@ Example for json structure:
     {
         "codeName": "Cantera",
         "constructionCategory": "Consumer",
+        "iconPath": "Icons/canteraIcon",
         "costList": [
             { "type": "Work", "value": 0 },
             { "type": "Sand", "value": 0 }
@@ -218,6 +229,7 @@ Example for json structure:
     {
         "codeName": "initialTemple",
         "constructionCategory": "BonusProvider",
+        "iconPath": "Icons/initialTempleIcon",
         "costList": [
             { "type": "Work", "value": 10},
             { "type": "Sand", "value": 10}

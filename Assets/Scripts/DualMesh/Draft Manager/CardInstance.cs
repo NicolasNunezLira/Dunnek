@@ -1,4 +1,3 @@
-using Data;
 using UnityEngine;
 
 namespace DraftSystem
@@ -21,6 +20,6 @@ namespace DraftSystem
         public string Description => cardData.description;
         public int Cost => cardData.cost;
         public Rarity Rarity => cardData.rarity;
-        public ConstructionType Type => cardData.constructionType;
+        public string Type => cardData.constructionType;
     }
 }

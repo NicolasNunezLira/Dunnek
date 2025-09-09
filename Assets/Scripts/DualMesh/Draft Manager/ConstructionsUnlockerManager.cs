@@ -1,39 +1,45 @@
 using System.Collections.Generic;
-using Data;
 using UnityEngine;
+using ConstructionSystem;
 
 public static class ConstructionUnlockerManager
 {
-    static private HashSet<ConstructionType> unlockedConstructions = new();
-    static public IReadOnlyCollection<ConstructionType> UnlockedConstructions => unlockedConstructions;
+    // Ahora usamos string en lugar de ConstructionType
+    static private HashSet<string> unlockedConstructions = new();
+    static public IReadOnlyCollection<string> UnlockedConstructions => unlockedConstructions;
 
+    // Inicialización con construcciones desbloqueadas por defecto
     public static void Awake()
     {
-        unlockedConstructions.Add(ConstructionType.House);
-        unlockedConstructions.Add(ConstructionType.Tower);
-        unlockedConstructions.Add(ConstructionType.SegmentWall);
+        // Ejemplo: desbloqueadas desde el inicio
+        unlockedConstructions.Add("houseSand");
+        unlockedConstructions.Add("initialTower"); // o cualquier codeName válido
+        unlockedConstructions.Add("wallSand");
     }
 
-    static public bool IsConstructionUnlocked(ConstructionType type)
+    // Verifica si una construcción está desbloqueada
+    static public bool IsConstructionUnlocked(string codeName)
     {
-        return unlockedConstructions.Contains(type);
+        return unlockedConstructions.Contains(codeName);
     }
 
-    static public IEnumerable<ConstructionType> GetUnlockedConstructions()
+    // Devuelve todas las construcciones desbloqueadas
+    static public IEnumerable<string> GetUnlockedConstructions()
     {
         return unlockedConstructions;
     }
 
-    static public void UnlockConstruction(ConstructionType type)
+    // Desbloquea una construcción por su codeName
+    static public void UnlockConstruction(string codeName)
     {
-        if (!unlockedConstructions.Contains(type))
+        if (!unlockedConstructions.Contains(codeName))
         {
-            unlockedConstructions.Add(type);
-            Debug.Log($"Construction {type} unlocked");
+            unlockedConstructions.Add(codeName);
+            Debug.Log($"Construction {codeName} unlocked");
         }
         else
         {
-            Debug.LogWarning($"Construction {type} is already unlocked");
+            Debug.LogWarning($"Construction {codeName} is already unlocked");
         }
     }
 }

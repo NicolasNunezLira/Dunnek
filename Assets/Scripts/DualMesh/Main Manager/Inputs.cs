@@ -6,17 +6,19 @@ public partial class DualMesh : MonoBehaviour
     #region Handle Input
     public void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.C) && inMode != PlayingMode.Recycle)
+        if (Input.GetKeyDown(KeyCode.C))
         {
             PlayingMode newMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
             SetMode(newMode);
         }
 
+        /*
         if (Input.GetKeyDown(KeyCode.X) && inMode != PlayingMode.Build)
         {
             PlayingMode newMode = (inMode == PlayingMode.Recycle) ? PlayingMode.Simulation : PlayingMode.Recycle;
             SetMode(newMode);
         }
+        */
 
         if (Input.GetKeyDown(KeyCode.V))
         {
@@ -41,15 +43,14 @@ public partial class DualMesh : MonoBehaviour
     public void SetMode(PlayingMode newMode)
     {
         builder.HideAllPreviews();
-        if (inMode == newMode)
-        {
-            inMode = PlayingMode.Simulation;
-        }
-        else
-        {
-            inMode = newMode;
-        }
 
+        // Toggle: si ya está en este modo, vuelve a Simulation
+        if (inMode == newMode)
+            inMode = PlayingMode.Simulation;
+        else
+            inMode = newMode;
+
+        // Limpieza si volvemos a Simulation
         if (inMode == PlayingMode.Simulation)
         {
             builder.HideAllPreviews();
@@ -57,13 +58,36 @@ public partial class DualMesh : MonoBehaviour
             builder.ClearPoints();
         }
 
+        // Actualizar la UI principal
         if (uiController != null)
+        {
+            uiController.UpdateMainButtonVisuals(inMode);
+
+            switch (inMode)
             {
-                uiController.UpdateButtonVisuals(inMode);
+                case PlayingMode.Build:
+                    // mostrar panel de construcciones
+                    uiController.buildOptionsPanel.SetActive(true);
+                    // mostrar la pestaña que estaba activa antes o la inicial
+                    uiController.ShowCategory(uiController.currentCategory ?? "Housing");
+                    break;
+
+                case PlayingMode.Action:
+                    // mostrar pestaña de acciones
+                    uiController.buildOptionsPanel.SetActive(true);
+                    uiController.ShowCategory("Actions");
+                    break;
+
+                case PlayingMode.Simulation:
+                    // ocultar panel de construcciones/acciones
+                    uiController.buildOptionsPanel.SetActive(false);
+                    break;
             }
+        }
 
         UpdateMeshColliders();
     }
+
 
     void UpdateMeshColliders()
     {

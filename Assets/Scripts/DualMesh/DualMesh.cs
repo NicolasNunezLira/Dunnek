@@ -43,6 +43,7 @@ public partial class DualMesh :MonoBehaviour
                     }
                 #endregion
 
+                /*
                 #region Destroy Mode
                 case PlayingMode.Recycle:
                     {
@@ -51,6 +52,7 @@ public partial class DualMesh :MonoBehaviour
                         break;
                     }
                 #endregion
+                */
 
                 #region Action Mode
                 case PlayingMode.Action:
