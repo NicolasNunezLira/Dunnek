@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using ConstructionSystem;
+using System.Linq;
 
 public class UIController : MonoBehaviour
 {
@@ -45,6 +46,11 @@ public class UIController : MonoBehaviour
         buildOutline = buildButton.GetComponent<Outline>();
 
         // Ocultar panel inicial
+        housingPanel.SetActive(false);
+        wallPanel.SetActive(false);
+        consumerPanel.SetActive(false);
+        bonusPanel.SetActive(false);
+        actionsPanel.SetActive(false);
         buildOptionsPanel.SetActive(false);
 
         // Mapear categorías
@@ -72,6 +78,7 @@ public class UIController : MonoBehaviour
     #region --- Main Button ---
     void OnBuildClicked()
     {
+        ShowCategory(currentCategory ?? "Housing");
         DualMesh.Instance.SetMode(DualMesh.PlayingMode.Build);
         UpdateMainButtonVisuals(DualMesh.PlayingMode.Build);
     }
@@ -132,8 +139,7 @@ public class UIController : MonoBehaviour
 
     bool IsUnlocked(string codeName)
     {
-        // TODO: lógica de desbloqueo
-        return true;
+        return ConstructionUnlockerManager.UnlockedConstructions.Contains(codeName);
     }
 
     void OnConstructionClicked(string codeName)

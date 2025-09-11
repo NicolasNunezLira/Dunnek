@@ -47,11 +47,11 @@ public class PreviewManager : Singleton<PreviewManager>
 
         foreach (var (codeName, item) in builds)
         {
-            Debug.Log($"[PreviewManager] Generating previews for {codeName}");
+            //Debug.Log($"[PreviewManager] Generating previews for {codeName}");
             Dictionary<string, GameObject> prefabs = new Dictionary<string, GameObject>();
             foreach ((string part, GameObject prefab) in item.loadedPrefabs)
             {
-                Debug.Log($"[PreviewManager] Generating preview for {part} of {codeName}");
+                //Debug.Log($"[PreviewManager] Generating preview for {part} of {codeName}");
                 GameObject preview = Instantiate(prefab, BuildsPreviewParent.transform);
                 MakePreviewTransparent(preview);
                 preview.SetActive(false);

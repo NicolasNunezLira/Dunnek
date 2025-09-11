@@ -11,9 +11,8 @@ public static class ConstructionUnlockerManager
     // Inicialización con construcciones desbloqueadas por defecto
     public static void Awake()
     {
-        // Ejemplo: desbloqueadas desde el inicio
         unlockedConstructions.Add("houseSand");
-        unlockedConstructions.Add("initialTower"); // o cualquier codeName válido
+        unlockedConstructions.Add("initialTower");
         unlockedConstructions.Add("wallSand");
     }
 
