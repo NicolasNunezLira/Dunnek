@@ -67,13 +67,22 @@ public class ActionConfig : Singleton<ActionConfig>
         public ResourceCost production;
 
         public string prefab;
+        public string iconPath;
+
         [System.NonSerialized]
         public GameObject loadedPrefab;
+
+        [System.NonSerialized] public Sprite icon;
 
         public void InitializeResources()
         {
             cost = new ResourceCost(costList);
             production = new ResourceCost(productionList);
+
+            if (!string.IsNullOrEmpty(iconPath))
+            {
+                icon = Resources.Load<Sprite>(iconPath);
+            }
         }
     }
 
@@ -103,7 +112,8 @@ public class ActionConfig : Singleton<ActionConfig>
                 continue;
             }
 
-            item.InitializeResources(); // Convierte listas a diccionarios
+            // Convierte listas a diccionarios
+            item.InitializeResources(); 
 
             item.loadedPrefab = Resources.Load<GameObject>(item.prefab);
             if (item.loadedPrefab == null)

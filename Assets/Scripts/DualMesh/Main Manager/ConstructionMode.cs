@@ -10,7 +10,6 @@ public partial class DualMesh : MonoBehaviour
         if (!builder.wallStartPoint.HasValue)
             builder.UpdateBuildPreviewVisual();
 
-        currentBuild = "houseSand";
         // Aplicar construcción actual
         SetBuildType(currentBuild);
 
@@ -59,7 +58,7 @@ public partial class DualMesh : MonoBehaviour
             {
                 constructed = builder.ConfirmBuild();
                 inMode = !constructed ? inMode : PlayingMode.Simulation;
-                uiController.UpdateMainButtonVisuals(inMode);
+                UIController.Instance.UpdateMainButtonVisuals(inMode);
             }
             else
             {
@@ -72,7 +71,7 @@ public partial class DualMesh : MonoBehaviour
                         builder.ClearWallPreview();
                         constructed = builder.ConfirmBuild();
                         inMode = !constructed ? inMode : PlayingMode.Simulation;
-                        uiController.UpdateMainButtonVisuals(inMode);
+                        UIController.Instance.UpdateMainButtonVisuals(inMode);
                     }
                 }
             }
@@ -98,7 +97,7 @@ public partial class DualMesh : MonoBehaviour
         builder.UpdateBuildPreviewVisual();
 
         // UI: actualizar pestaña y botón seleccionado
-        uiController.ShowCategory(config.category.ToString());
-        uiController.UpdateSelectedVisual(currentBuild);
+        UIController.Instance.ShowCategory(config.category.ToString());
+        UIController.Instance.UpdateSelectedVisual(currentBuild);
     }
 }

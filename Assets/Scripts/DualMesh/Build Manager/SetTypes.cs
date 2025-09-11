@@ -40,11 +40,6 @@ public partial class DualMesh : MonoBehaviour
         }
 
         builder.UpdateBuildPreviewVisual();
-
-        // Actualizar UI
-        uiController.UpdateMainButtonVisuals(PlayingMode.Build);
-        uiController.ShowCategory(config.category.ToString());
-        uiController.UpdateSelectedVisual(codeName);
     }
     #endregion
 
@@ -60,11 +55,6 @@ public partial class DualMesh : MonoBehaviour
         builder.currentActionMode = mode;
 
         builder.UpdateActionPreviewVisual();
-
-        // Actualizar UI
-        uiController.UpdateMainButtonVisuals(PlayingMode.Action);
-        uiController.ShowCategory("Actions");
-        uiController.UpdateActionsButtonVisual(mode.ToString().ToLower());
     }
     #endregion
 }

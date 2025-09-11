@@ -69,8 +69,8 @@ public partial class DualMesh : MonoBehaviour
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
 
-        activePreview = PreviewManager.Instance.buildPreviews["houseSand"]["building"];
-        currentConstruction = "houseSand";
+        //activePreview = PreviewManager.Instance.buildPreviews["houseSand"]["building"];
+        //currentConstruction = "houseSand";
 
         builder = new BuildSystem(
             duneModel,

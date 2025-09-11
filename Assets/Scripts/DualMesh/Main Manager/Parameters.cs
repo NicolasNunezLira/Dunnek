@@ -4,9 +4,6 @@ using UnityEngine;
 public partial class DualMesh : MonoBehaviour
 {
     #region Program Parameters
-    [Header("User Interface controllers")]
-    [Tooltip("Construction UI controller")]
-    public UIController uiController;
 
     [Header("Plane Settings")]
     [Range(31, 511)]

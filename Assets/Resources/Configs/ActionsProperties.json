@@ -10,7 +10,8 @@
             {"type": "Work", "value": 0},
             {"type": "Sand", "value": 1}
         ],
-        "prefab": "Prefabs/PalaDunnek"
+        "prefab": "Prefabs/PalaDunnek",
+        "iconPath": "Icons/digIcon"
     },
     {
         "type": "Flat",
@@ -22,7 +23,8 @@
             {"type": "Work", "value": 0},
             {"type": "Sand", "value": 0}
         ],
-        "prefab": "Prefabs/BuildPreview"
+        "prefab": "Prefabs/BuildPreview",
+        "iconPath": "Icons/flatIcon"
     },
     {
         "type": "AddSand",
@@ -34,7 +36,13 @@
             {"type": "Work", "value": 0},
             {"type": "Sand", "value": 0}
         ],
-        "prefab": "Prefabs/Balde"
+        "prefab": "Prefabs/Balde",
+        "iconPath": "Icons/addIcon"
+    },
+    {
+        "type": "Recycle",
+        "prefab": "Prefabs/Recycle",
+        "iconPath": "Icons/recycleIcon"
     }
   ]
 }

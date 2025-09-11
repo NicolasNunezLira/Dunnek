@@ -74,6 +74,11 @@ public class PreviewManager : Singleton<PreviewManager>
 
         foreach (var (key, item) in actions)
         {
+            if (item.loadedPrefab == null)
+            {
+                Debug.LogError($"Action {key} has no loaded prefab");
+                continue;
+            }
             GameObject preview = Instantiate(item.loadedPrefab, BuildsPreviewParent.transform);
             MakePreviewTransparent(preview);
             preview.SetActive(false);

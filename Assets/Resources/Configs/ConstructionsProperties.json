@@ -20,7 +20,7 @@
     },
     {
         "codeName": "wallSand",
-        "category": "Wall",
+        "constructionCategory": "Wall",
         "iconPath": "Icons/wallSandIcon",
         "costList": [
             { "type": "Work", "value": -1 },

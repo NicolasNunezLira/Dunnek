@@ -42,6 +42,9 @@ public partial class DualMesh : MonoBehaviour
             inMode = !constructed ? inMode : PlayingMode.Simulation;
 
             // Actualizar UI
+            UIController uiController = UIController.Instance;
+
+            
             uiController.UpdateMainButtonVisuals(inMode);
 
             // Si estamos en acciones, mantener la pestaña abierta

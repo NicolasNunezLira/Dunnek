@@ -14,6 +14,8 @@ namespace Building
         #region Handle
         public void HandleBuildPreview()
         {
+            if (string.IsNullOrEmpty(currentBuild)) { HideAllPreviews(); return;}
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain")))
@@ -101,6 +103,8 @@ namespace Building
         public void UpdateBuildPreviewVisual()
         {
             HideAllPreviews();
+
+            if (string.IsNullOrEmpty(currentBuild)) return;
 
             switch (currentBuildMode)
             {

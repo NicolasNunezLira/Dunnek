@@ -19,6 +19,8 @@ namespace Building
             Vector3? overridePosition = null,
             bool verify = true)
         {
+            if (string.IsNullOrEmpty(codeName.Trim())) return null;
+
             Dictionary<string, int> constructionDict = new Dictionary<string, int> { { codeName, 1 } };
             if (verify)
             {
@@ -237,6 +239,8 @@ namespace Building
             Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
             foreach (var (codeName, amount) in amounts)
             {
+                if (string.IsNullOrEmpty(codeName)) continue;
+                
                 var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
 
                 foreach ((Resource resource, float cost) in config.cost)

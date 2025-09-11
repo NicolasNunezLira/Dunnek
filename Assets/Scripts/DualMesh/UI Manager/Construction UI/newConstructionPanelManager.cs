@@ -3,8 +3,8 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using ConstructionSystem;
 using System.Linq;
-
-public class UIController : MonoBehaviour
+using Utils;
+public class UIController : Singleton<UIController>
 {
     [Header("Main Buttons")]
     [SerializeField] public Button buildButton; // único botón principal
@@ -34,8 +34,14 @@ public class UIController : MonoBehaviour
     private Dictionary<string, UIButtonReference> constructionButtons = new();
     private Dictionary<string, UIButtonReference> actionButtons = new();
     private Dictionary<string, GameObject> categoryPanels = new();
+    private Dictionary<string, Button> tabButtons = new();
 
-    public string currentCategory { get; private set; }
+    public string currentCategory { get; private set; } = "Housing";
+    public string currentConstruction { get; private set; }
+    public string currentAction { get; private set; }
+
+    private Color selectedColor = Color.green;
+    private Color defaultColor = new Color(0, 0, 0, 0);
 
     void Start()
     {
@@ -67,33 +73,35 @@ public class UIController : MonoBehaviour
         bonusTabButton.onClick.AddListener(() => ShowCategory("BonusProvider"));
         actionsTabButton.onClick.AddListener(() => ShowCategory("Actions"));
 
+        // Mapear botones de tabs
+        tabButtons["Housing"] = housingTabButton;
+        tabButtons["Wall"] = wallTabButton;
+        tabButtons["Consumer"] = consumerTabButton;
+        tabButtons["BonusProvider"] = bonusTabButton;
+        tabButtons["Actions"] = actionsTabButton;
+
         // Inicializar botones
         GenerateConstructionButtons();
         InitializeActionButtons();
-
-        // Pestaña inicial
-        ShowCategory("Housing");
     }
 
     #region --- Main Button ---
     void OnBuildClicked()
     {
-        ShowCategory(currentCategory ?? "Housing");
+        ShowCategory(currentCategory);
         DualMesh.Instance.SetMode(DualMesh.PlayingMode.Build);
-        UpdateMainButtonVisuals(DualMesh.PlayingMode.Build);
+        UpdateMainButtonVisuals(DualMesh.Instance.inMode);
     }
 
     public void UpdateMainButtonVisuals(DualMesh.PlayingMode mode)
     {
-        Color selectedColor = Color.green;
-        Color defaultColor = new Color(0, 0, 0, 0);
 
         buildOutline.effectColor = (mode == DualMesh.PlayingMode.Build) ? selectedColor : defaultColor;
         buildOptionsPanel.SetActive(mode == DualMesh.PlayingMode.Build);
     }
     #endregion
 
-    #region --- Construcciones ---
+    #region --- Constructions ---
     void GenerateConstructionButtons()
     {
         foreach (var kvp in ConstructionConfig.Instance.ConstructionConfigs)
@@ -123,6 +131,8 @@ public class UIController : MonoBehaviour
         if (config.icon != null && btnRef.iconImage != null)
             btnRef.iconImage.sprite = config.icon;
 
+        btnRef.label.text = config.codeName;
+
         // listener
         btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName));
 
@@ -132,9 +142,14 @@ public class UIController : MonoBehaviour
     public void ShowCategory(string category)
     {
         currentCategory = category;
+        Debug.Log($"Current Category {currentCategory}");
 
         foreach (var kvp in categoryPanels)
-            kvp.Value.SetActive(kvp.Key == category);
+        {
+            tabButtons[kvp.Key].GetComponent<Outline>().effectColor = (currentCategory == kvp.Key) ? selectedColor : defaultColor;
+            kvp.Value.SetActive(kvp.Key == category);            
+        }
+
     }
 
     bool IsUnlocked(string codeName)
@@ -149,17 +164,16 @@ public class UIController : MonoBehaviour
         var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
         Debug.Log($"Construcción seleccionada: {config.codeName} ({config.category})");
 
-        // Llamar a tu sistema de construcción
-        // ConstructionSystemManager.Instance.Select(config);
+        currentConstruction = codeName;
+        currentCategory = config.category.ToString();
+        
+        DualMesh.Instance.SetBuildType(codeName);
 
         UpdateSelectedVisual(codeName);
     }
 
     public void UpdateSelectedVisual(string selectedID)
     {
-        Color selectedColor = Color.green;
-        Color defaultColor = new Color(0, 0, 0, 0);
-
         foreach (var kvp in constructionButtons)
             kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
     }
@@ -174,15 +188,33 @@ public class UIController : MonoBehaviour
     }
     #endregion
 
-    #region --- Acciones ---
+    #region --- Actions ---
     void InitializeActionButtons()
     {
-        foreach (var btnRef in actionsPanel.GetComponentsInChildren<UIButtonReference>())
+        foreach (var (_, config) in ActionConfig.Instance.actionsConfig)
         {
-            string id = btnRef.buttonID;
-            actionButtons[id] = btnRef;
-            btnRef.button.onClick.AddListener(() => OnActionOptionClicked(id));
+            CreateActionButton(config);
         }
+    }
+
+    void CreateActionButton(ActionConfig.ConfigData config)
+    {
+        Transform parentPanel = categoryPanels["Actions"].transform;
+        GameObject btnGO = Instantiate(constructionButtonPrefab, parentPanel);
+
+        UIButtonReference btnRef = btnGO.GetComponent<UIButtonReference>();
+        btnRef.buttonID = config.type;
+
+        // si tiene sprite, mostrarlo
+        if (config.icon != null && btnRef.iconImage != null)
+            btnRef.iconImage.sprite = config.icon;
+
+        btnRef.label.text = config.type;
+
+        // listener
+        btnRef.button.onClick.AddListener(() => OnActionOptionClicked(config.type));
+
+        actionButtons[config.type] = btnRef;
     }
 
     void OnActionOptionClicked(string id)
@@ -210,9 +242,6 @@ public class UIController : MonoBehaviour
 
     public void UpdateActionsButtonVisual(string selectedID)
     {
-        Color selectedColor = Color.green;
-        Color defaultColor = new Color(0, 0, 0, 0);
-
         foreach (var kvp in actionButtons)
             kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
     }

@@ -44,13 +44,11 @@ public partial class DualMesh : MonoBehaviour
     {
         builder.HideAllPreviews();
 
-        // Toggle: si ya está en este modo, vuelve a Simulation
         if (inMode == newMode)
             inMode = PlayingMode.Simulation;
         else
             inMode = newMode;
 
-        // Limpieza si volvemos a Simulation
         if (inMode == PlayingMode.Simulation)
         {
             builder.HideAllPreviews();
@@ -58,6 +56,7 @@ public partial class DualMesh : MonoBehaviour
             builder.ClearPoints();
         }
 
+        UIController uiController = UIController.Instance;
         // Actualizar la UI principal
         if (uiController != null)
         {
@@ -66,20 +65,16 @@ public partial class DualMesh : MonoBehaviour
             switch (inMode)
             {
                 case PlayingMode.Build:
-                    // mostrar panel de construcciones
                     uiController.buildOptionsPanel.SetActive(true);
-                    // mostrar la pestaña que estaba activa antes o la inicial
                     uiController.ShowCategory(uiController.currentCategory ?? "Housing");
                     break;
 
                 case PlayingMode.Action:
-                    // mostrar pestaña de acciones
                     uiController.buildOptionsPanel.SetActive(true);
                     uiController.ShowCategory("Actions");
                     break;
 
                 case PlayingMode.Simulation:
-                    // ocultar panel de construcciones/acciones
                     uiController.buildOptionsPanel.SetActive(false);
                     break;
             }
