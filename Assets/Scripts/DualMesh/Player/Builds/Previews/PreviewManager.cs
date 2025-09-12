@@ -3,12 +3,12 @@ using UnityEngine;
 using Utils;
 using ConstructionSystem;
 
-public class PreviewManager : Singleton<PreviewManager>
+public static class PreviewManager// : Singleton<PreviewManager>
 {
-    public GameObject BuildsPreviewParent, ActionsPreviewParent;
-    public Dictionary<string, Dictionary<string, GameObject>> buildPreviews = new();
+    public static GameObject BuildsPreviewParent, ActionsPreviewParent;
+    public static Dictionary<string, Dictionary<string, GameObject>> buildPreviews = new();
 
-    public Dictionary<DualMesh.ActionMode, GameObject> actionPreviews = new();
+    public static Dictionary<DualMesh.ActionMode, GameObject> actionPreviews = new();
 
     /*
     protected override void Awake()
@@ -18,7 +18,8 @@ public class PreviewManager : Singleton<PreviewManager>
         InitializeActionPreviews();
     }
     */
-    
+
+    /*
     private void Start()
     {
         StartCoroutine(WaitForConstructionConfig());
@@ -35,8 +36,15 @@ public class PreviewManager : Singleton<PreviewManager>
         InitializeBuildPreviews();
         InitializeActionPreviews();
     }
+    */
 
-    private void InitializeBuildPreviews()
+    public static void Initialize()
+    {
+        InitializeBuildPreviews();
+        InitializeActionPreviews();
+    }
+
+    private static void InitializeBuildPreviews()
     {
         if (BuildsPreviewParent == null)
         {
@@ -52,7 +60,7 @@ public class PreviewManager : Singleton<PreviewManager>
             foreach ((string part, GameObject prefab) in item.loadedPrefabs)
             {
                 //Debug.Log($"[PreviewManager] Generating preview for {part} of {codeName}");
-                GameObject preview = Instantiate(prefab, BuildsPreviewParent.transform);
+                GameObject preview = GameObject.Instantiate(prefab, BuildsPreviewParent.transform);
                 MakePreviewTransparent(preview);
                 preview.SetActive(false);
                 prefabs[part] = preview;
@@ -63,7 +71,7 @@ public class PreviewManager : Singleton<PreviewManager>
         }
     }
 
-    private void InitializeActionPreviews()
+    private static void InitializeActionPreviews()
     {
         if (BuildsPreviewParent == null)
         {
@@ -79,7 +87,7 @@ public class PreviewManager : Singleton<PreviewManager>
                 Debug.LogError($"Action {key} has no loaded prefab");
                 continue;
             }
-            GameObject preview = Instantiate(item.loadedPrefab, BuildsPreviewParent.transform);
+            GameObject preview = GameObject.Instantiate(item.loadedPrefab, BuildsPreviewParent.transform);
             MakePreviewTransparent(preview);
             preview.SetActive(false);
 
@@ -87,7 +95,7 @@ public class PreviewManager : Singleton<PreviewManager>
         }
     }
     
-    void MakePreviewTransparent(GameObject obj)
+    private static void MakePreviewTransparent(GameObject obj)
     {
         foreach (var rend in obj.GetComponentsInChildren<Renderer>())
         {

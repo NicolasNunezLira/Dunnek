@@ -73,7 +73,7 @@ namespace Building
             this.activePreview = activePreview;
             this.currentBuild = currentConstruction;
 
-            wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews["wallSand"]["segmentWall"]);
+            wallPrefabLength = CalculateWallPrefabLength(PreviewManager.buildPreviews["wallSand"]["segmentWall"]);
             wallPreviewParent = new GameObject();
             wallPreviewParent.name = "Wall Previews";
 

@@ -12,14 +12,6 @@ public partial class DualMesh : MonoBehaviour
             SetMode(newMode);
         }
 
-        /*
-        if (Input.GetKeyDown(KeyCode.X) && inMode != PlayingMode.Build)
-        {
-            PlayingMode newMode = (inMode == PlayingMode.Recycle) ? PlayingMode.Simulation : PlayingMode.Recycle;
-            SetMode(newMode);
-        }
-        */
-
         if (Input.GetKeyDown(KeyCode.V))
         {
             PlayingMode newMode = (inMode == PlayingMode.Action) ? PlayingMode.Simulation : PlayingMode.Action;
@@ -40,6 +32,10 @@ public partial class DualMesh : MonoBehaviour
     }
 
     #region Methods for inputs
+    /// <summary>
+    /// Fija el modo del juego ( simulación, constriccion, acciones, drafteo), y actualiza la ui en función de esto.
+    /// </summary>
+    /// <param name="newMode"></param>
     public void SetMode(PlayingMode newMode)
     {
         builder.HideAllPreviews();
@@ -57,7 +53,6 @@ public partial class DualMesh : MonoBehaviour
         }
 
         UIController uiController = UIController.Instance;
-        // Actualizar la UI principal
         if (uiController != null)
         {
             uiController.UpdateMainButtonVisuals(inMode);

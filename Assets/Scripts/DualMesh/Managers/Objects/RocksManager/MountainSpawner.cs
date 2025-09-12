@@ -22,7 +22,10 @@ public class MountainPrefabSpawner : Singleton<MountainPrefabSpawner>
     private float size;
     NativeGrid terrain, terrainShadow;
 
-    private bool[,] mountainElements;
+    /// <summary>
+    /// Indica si en la posición (x, y) de la grilla existe un elemento de tipo montaña
+    /// </summary>
+    public bool[,] MountainElements { get; private set; }
     #endregion
 
     #region Awake
@@ -43,13 +46,13 @@ public class MountainPrefabSpawner : Singleton<MountainPrefabSpawner>
 
         Random.InitState(seed);
 
-        mountainElements = new bool[xDOF, zDOF];
+        MountainElements = new bool[xDOF, zDOF];
 
         for (int x = 0; x < xDOF; x++)
         {
             for (int z = 0; z < zDOF; z++)
             {
-                if (mountainElements[x, z]) continue;
+                if (MountainElements[x, z]) continue;
                 float height = terrain[x, z];
                 float nx = (float)x / xDOF;
                 float nz = (float)z / zDOF;
@@ -92,7 +95,7 @@ public class MountainPrefabSpawner : Singleton<MountainPrefabSpawner>
         {
             for (int z = zMin; z <= zMax; z++)
             {
-                if (mountainElements[x, z])
+                if (MountainElements[x, z])
                 {
                     Destroy(temp);
                     return;
@@ -124,7 +127,7 @@ public class MountainPrefabSpawner : Singleton<MountainPrefabSpawner>
                 if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, mountainLayer))
                 {
                     terrainShadow[x, z] = hit.point.y;
-                    mountainElements[x, z] = true;
+                    MountainElements[x, z] = true;
                 }
             }
         }

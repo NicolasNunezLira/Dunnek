@@ -42,8 +42,6 @@ public partial class DualMesh : MonoBehaviour
         MountainPrefabSpawner.Instance.Spawn();
         
         VegetationManager.Instance.Spawn();
-        
-        //RockPrefabSpawner.Instance.Spawn();
 
         duneModel = new ModelDM(
             slopeFinder,
@@ -52,7 +50,6 @@ public partial class DualMesh : MonoBehaviour
             size,
             xResolution + 1, zResolution + 1,
             slope,
-            //(int)windDirection.x, (int)windDirection.y,
             ref constructions,
             ref currentConstructionID,
             ref currentCompositeConstructionID,
@@ -68,9 +65,6 @@ public partial class DualMesh : MonoBehaviour
         duneModel.SetOpenEnded(openEnded);
         duneModel.InitAvalancheQueue();
         grainsForAvalanche = duneModel.avalancheQueue.Count;
-
-        //activePreview = PreviewManager.Instance.buildPreviews["houseSand"]["building"];
-        //currentConstruction = "houseSand";
 
         builder = new BuildSystem(
             duneModel,

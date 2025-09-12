@@ -20,7 +20,7 @@ public partial class DualMesh :MonoBehaviour
 
     private IEnumerator Start()
     {
-        yield return new WaitUntil(() => PreviewManager.Instance.buildPreviews.Count > 0);
+        yield return new WaitUntil(() => PreviewManager.buildPreviews.Count > 0);
         Initializer();
     }
     #endregion

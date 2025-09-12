@@ -14,7 +14,7 @@ namespace Building
         public void PreviewWall()
         {
             //towerPreviewGO?.SetActive(false);
-            PreviewManager.Instance.buildPreviews[currentBuild]["tower"].SetActive(false);
+            PreviewManager.buildPreviews[currentBuild]["tower"].SetActive(false);
             ClearWallPreview();
 
             if (!wallStartPoint.HasValue || !tempWallEndPoint.HasValue) return;
@@ -47,7 +47,7 @@ namespace Building
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
                 GameObject wallSegment = GameObject.Instantiate(
-                    PreviewManager.Instance.buildPreviews[currentBuild]["segmentWall"],
+                    PreviewManager.buildPreviews[currentBuild]["segmentWall"],
                     adjusted, Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0));
                 wallSegment.name = $"WallPreview_{i}";
                 wallSegment.transform.SetParent(wallPreviewParent.transform);
@@ -93,9 +93,9 @@ namespace Building
                 return;
             }
 
-            PreviewManager.Instance.buildPreviews[currentBuild]["tower"]?.SetActive(false);
+            PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(false);
             GameObject previewTower = GameObject.Instantiate(
-                PreviewManager.Instance.buildPreviews[currentBuild]["tower"], finalPos, Quaternion.identity);
+                PreviewManager.buildPreviews[currentBuild]["tower"], finalPos, Quaternion.identity);
             previewTower.SetActive(true);
             previewTower.name = "TowerPreview" + (wallStartPoint.HasValue ? "Start" : "End");
             previewTower.transform.SetParent(wallPreviewParent.transform);
@@ -124,12 +124,12 @@ namespace Building
                 GameObject towerHit = TryGetTowerUnderCursor();
                 if (towerHit != null)
                 {
-                    PreviewManager.Instance.buildPreviews[currentBuild]["tower"]?.SetActive(false);
+                    PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(false);
                     clickedPoint = towerHit.transform.position;
                 }
                 else
                 {
-                    PreviewManager.Instance.buildPreviews[currentBuild]["tower"]?.SetActive(true);
+                    PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(true);
                 }
 
                 if (!wallStartPoint.HasValue)

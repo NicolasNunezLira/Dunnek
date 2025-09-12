@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public class VegetationManager : Singleton<VegetationManager>
 {
-    #region Variables
+    #region --- Variables ---
     public GameObject[] treePrefabs;
     public GameObject[] bushPrefabs;
 
@@ -42,7 +42,10 @@ public class VegetationManager : Singleton<VegetationManager>
         {VegetationType.Bush, new List<float> {0.05f, 0.1f}}
     };
 
-    public VegetationGrid vegetationGrid;
+    /// <summary>
+    /// Información de vegetación en la grilla
+    /// </summary>
+    public VegetationGrid vegetationGrid { get; private set; }
     public int currentID = 0;
     #endregion
 
@@ -125,6 +128,9 @@ public class VegetationManager : Singleton<VegetationManager>
     #region VegetationGrid
     public class VegetationGrid
     {
+        /// <summary>
+        /// Elementos Vegetation Data.
+        /// </summary>
         public Dictionary<int2, VegetationData> data;
 
         public VegetationGrid(bool initialize = true)
