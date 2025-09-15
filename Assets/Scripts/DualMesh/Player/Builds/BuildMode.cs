@@ -8,7 +8,7 @@ namespace Building
     [System.Serializable]
     public partial class BuildSystem
     {
-        #region Variables
+        #region --- Variables ---
         public GameObject activePreview;
         public ModelDM duneModel;
         public DualMeshConstructor dualMeshConstructor;
@@ -18,7 +18,7 @@ namespace Building
         private int previewX, previewZ;
         private UnityEngine.Vector3 point;
         public DualMesh.BuildMode currentBuildMode;
-        public string currentBuild;
+        public string currentConstruction;
         public DualMesh.ActionMode currentActionMode;
         public DualMesh.PlayingMode inMode;
         public NativeGrid terrain;
@@ -42,7 +42,7 @@ namespace Building
 
         #endregion
 
-        #region Init Build System
+        #region --- Init Build System ---
         public BuildSystem(
             ModelDM model,
             DualMeshConstructor constructor,
@@ -71,7 +71,7 @@ namespace Building
             this.terrain = terrain;
             this.constructionGrid = constructionGrid;
             this.activePreview = activePreview;
-            this.currentBuild = currentConstruction;
+            this.currentConstruction = currentConstruction;
 
             wallPrefabLength = CalculateWallPrefabLength(PreviewManager.buildPreviews["wallSand"]["segmentWall"]);
             wallPreviewParent = new GameObject();

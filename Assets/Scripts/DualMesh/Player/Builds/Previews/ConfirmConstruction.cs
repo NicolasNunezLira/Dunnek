@@ -3,27 +3,28 @@ namespace Building
     public partial class BuildSystem
     {
         #region Confirm build
-
         public bool ConfirmBuild()
         {
             if (!canBuild) return false;
 
             activePreview.SetActive(false);
 
+            bool wasBuilt = false;
+
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceBuild:
-                    if (!string.IsNullOrEmpty(DualMesh.Instance.currentBuild))
+                    if (!string.IsNullOrEmpty(DualMesh.Instance.currentConstruction))
                     {
-                        // Usar currentBuild como id de construcción
+                        // Usar currentConstruction como id de construcción
                         GameObjectConstruction(
-                            DualMesh.Instance.currentBuild,
+                            DualMesh.Instance.currentConstruction,
                             "building",        // parte principal por convención
                             previewX,
                             previewZ,
                             prefabRotation
                         );
-                        return true;
+                        wasBuilt = true;
                     }
                     break;
 
@@ -34,11 +35,17 @@ namespace Building
                         wallStartPoint = null;
                         wallEndPoint = null;
                         isWallPreviewActive = false;
-                        return true;
+                        wasBuilt = true;
                     }
                     break;
             }
 
+            if (wasBuilt)
+            {
+                currentConstruction = null;
+                // Actualizar la ui
+                return true;
+            }
             return false;
         }
         #endregion

@@ -14,7 +14,7 @@ namespace Building
         #region Handle
         public void HandleBuildPreview()
         {
-            if (string.IsNullOrEmpty(currentBuild)) { HideAllPreviews(); return;}
+            if (string.IsNullOrEmpty(currentConstruction)) { HideAllPreviews(); return;}
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -33,12 +33,12 @@ namespace Building
                     {
                         tempWallEndPoint = point;
                         PreviewWall();
-                        PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(false);
+                        PreviewManager.buildPreviews[currentConstruction]["tower"]?.SetActive(false);
                         return;
                     }
                     else
                     {
-                        PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(
+                        PreviewManager.buildPreviews[currentConstruction]["tower"]?.SetActive(
                             DualMesh.Instance.inMode == DualMesh.PlayingMode.Build);
                         tempWallEndPoint = null;
                     }
@@ -57,7 +57,7 @@ namespace Building
                 switch (DualMesh.Instance.inMode)
                 {
                     case DualMesh.PlayingMode.Build:
-                        canBuild = HasEnoughResourcesForBuild(new Dictionary<string, int> { { DualMesh.Instance.currentBuild, 1 } });
+                        canBuild = HasEnoughResourcesForBuild(new Dictionary<string, int> { { DualMesh.Instance.currentConstruction, 1 } });
                         break;
                     case DualMesh.PlayingMode.Action:
                         canBuild = HasEnoughtResourcesForAction(currentActionMode);
@@ -104,15 +104,15 @@ namespace Building
         {
             HideAllPreviews();
 
-            if (string.IsNullOrEmpty(currentBuild)) return;
+            if (string.IsNullOrEmpty(currentConstruction)) return;
 
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceBuild:
-                    activePreview = PreviewManager.buildPreviews[currentBuild]["building"];
+                    activePreview = PreviewManager.buildPreviews[currentConstruction]["building"];
                     break;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
-                    activePreview = PreviewManager.buildPreviews[currentBuild]["tower"];
+                    activePreview = PreviewManager.buildPreviews[currentConstruction]["tower"];
                     break;
             }
 

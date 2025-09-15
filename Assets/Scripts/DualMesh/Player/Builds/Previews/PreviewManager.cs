@@ -3,23 +3,20 @@ using UnityEngine;
 using Utils;
 using ConstructionSystem;
 
-public static class PreviewManager// : Singleton<PreviewManager>
+public class PreviewManager : Singleton<PreviewManager>
 {
     public static GameObject BuildsPreviewParent, ActionsPreviewParent;
     public static Dictionary<string, Dictionary<string, GameObject>> buildPreviews = new();
 
     public static Dictionary<DualMesh.ActionMode, GameObject> actionPreviews = new();
 
-    /*
     protected override void Awake()
     {
         base.Awake();
         InitializeBuildPreviews();
         InitializeActionPreviews();
     }
-    */
 
-    /*
     private void Start()
     {
         StartCoroutine(WaitForConstructionConfig());
@@ -36,7 +33,6 @@ public static class PreviewManager// : Singleton<PreviewManager>
         InitializeBuildPreviews();
         InitializeActionPreviews();
     }
-    */
 
     public static void Initialize()
     {

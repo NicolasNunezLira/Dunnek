@@ -753,8 +753,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5354862a98581c4b98a89307dab78fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentBuild: 
-  previewParentGO: {fileID: 0}
   xResolution: 250
   zResolution: 250
   size: 100
@@ -7300,8 +7298,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbd2f1b1098e83544abb0e52c176dfcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BuildsPreviewParent: {fileID: 0}
-  ActionsPreviewParent: {fileID: 0}
 --- !u!1 &1620790112
 GameObject:
   m_ObjectHideFlags: 0

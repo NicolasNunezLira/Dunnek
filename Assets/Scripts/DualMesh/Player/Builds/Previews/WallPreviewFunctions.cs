@@ -14,7 +14,7 @@ namespace Building
         public void PreviewWall()
         {
             //towerPreviewGO?.SetActive(false);
-            PreviewManager.buildPreviews[currentBuild]["tower"].SetActive(false);
+            PreviewManager.buildPreviews[currentConstruction]["tower"].SetActive(false);
             ClearWallPreview();
 
             if (!wallStartPoint.HasValue || !tempWallEndPoint.HasValue) return;
@@ -30,7 +30,7 @@ namespace Building
 
             canPlaceWall = HasEnoughResourcesForBuild(new Dictionary<string, int>
             {
-                { currentBuild, segments}
+                { currentConstruction, segments}
                 /*
                 { ConstructionType.Tower, 2},
                 {ConstructionType.SegmentWall, segments - 2}
@@ -47,7 +47,7 @@ namespace Building
                 Vector3 adjusted = new Vector3(pos.x, y, pos.z);
 
                 GameObject wallSegment = GameObject.Instantiate(
-                    PreviewManager.buildPreviews[currentBuild]["segmentWall"],
+                    PreviewManager.buildPreviews[currentConstruction]["segmentWall"],
                     adjusted, Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0));
                 wallSegment.name = $"WallPreview_{i}";
                 wallSegment.transform.SetParent(wallPreviewParent.transform);
@@ -93,9 +93,9 @@ namespace Building
                 return;
             }
 
-            PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(false);
+            PreviewManager.buildPreviews[currentConstruction]["tower"]?.SetActive(false);
             GameObject previewTower = GameObject.Instantiate(
-                PreviewManager.buildPreviews[currentBuild]["tower"], finalPos, Quaternion.identity);
+                PreviewManager.buildPreviews[currentConstruction]["tower"], finalPos, Quaternion.identity);
             previewTower.SetActive(true);
             previewTower.name = "TowerPreview" + (wallStartPoint.HasValue ? "Start" : "End");
             previewTower.transform.SetParent(wallPreviewParent.transform);
@@ -115,7 +115,7 @@ namespace Building
         #region Set points for wall
         public bool SetPointsForWall()
         {
-            if (!HasEnoughResourcesForBuild(new Dictionary<string, int> { { currentBuild, 1 } })) return false;
+            if (!HasEnoughResourcesForBuild(new Dictionary<string, int> { { currentConstruction, 1 } })) return false;
             Ray ray1 = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray1, out RaycastHit hit1, 100f, LayerMask.GetMask("Terrain")))
             {
@@ -124,12 +124,12 @@ namespace Building
                 GameObject towerHit = TryGetTowerUnderCursor();
                 if (towerHit != null)
                 {
-                    PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(false);
+                    PreviewManager.buildPreviews[currentConstruction]["tower"]?.SetActive(false);
                     clickedPoint = towerHit.transform.position;
                 }
                 else
                 {
-                    PreviewManager.buildPreviews[currentBuild]["tower"]?.SetActive(true);
+                    PreviewManager.buildPreviews[currentConstruction]["tower"]?.SetActive(true);
                 }
 
                 if (!wallStartPoint.HasValue)

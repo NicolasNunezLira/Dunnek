@@ -3,29 +3,29 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
 {
-    public string currentBuild;
+    //public string currentBuild;
 
     #region --- Build ---
     public void SetBuildType(string codeName)
     {
-        // Cambiar modo a Build
+        Debug.Log($"Set Build Type called with codeName = {codeName}.");
+
+        currentConstruction = codeName;
+
         if (inMode != PlayingMode.Build)
             inMode = PlayingMode.Build;
 
-        // Ocultar previews de acciones
         builder.HideAllActionsPreviews();
 
-        // Guardar id de construcción
         currentConstruction = codeName;
+        builder.currentConstruction = codeName;
 
-        // Buscar configuración
         if (!ConstructionSystem.ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(codeName, out var config))
         {
             Debug.LogWarning($"Construcción no encontrada: {codeName}");
             return;
         }
 
-        // Determinar BuildMode: murallas tienen lógica especial
         currentBuildMode = (config.category == ConstructionSystem.ConstructionCategory.Wall)
             ? BuildMode.PlaceWallBetweenPoints
             : BuildMode.PlaceBuild;

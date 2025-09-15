@@ -7,11 +7,11 @@ public partial class DualMesh : MonoBehaviour
     public void ConstructionMode()
     {
         // Actualizar preview si no hay un inicio de muro
-        if (!builder.wallStartPoint.HasValue)
+        if (builder.wallStartPoint.HasValue)
             builder.UpdateBuildPreviewVisual();
 
         // Aplicar construcción actual
-        SetBuildType(currentBuild);
+        //SetBuildType(currentConstruction);
 
         // Cambiar modo con Tab (alternar entre PlaceBuild y PlaceWallBetweenPoints)
         if (Input.GetKeyDown(KeyCode.Tab))
@@ -83,10 +83,10 @@ public partial class DualMesh : MonoBehaviour
     /// </summary>
     private void UpdateBuildModeFromCurrentBuild()
     {
-        if (string.IsNullOrEmpty(currentBuild))
+        if (string.IsNullOrEmpty(currentConstruction))
             return;
 
-        if (!ConstructionSystem.ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(currentBuild, out var config))
+        if (!ConstructionSystem.ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(currentConstruction, out var config))
             return;
 
         currentBuildMode = (config.category == ConstructionSystem.ConstructionCategory.Wall)
@@ -98,6 +98,6 @@ public partial class DualMesh : MonoBehaviour
 
         // UI: actualizar pestaña y botón seleccionado
         UIController.Instance.ShowCategory(config.category.ToString());
-        UIController.Instance.UpdateSelectedVisual(currentBuild);
+        UIController.Instance.UpdateSelectedVisual(currentConstruction);
     }
 }

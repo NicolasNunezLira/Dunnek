@@ -19,8 +19,8 @@ public class SandDuneSimulationGPU : MonoBehaviour
     [SerializeField] private int hopLength = 10;
     [SerializeField] private float slopeThreshold = 0.1f;
     [SerializeField] private float pSand = 0.8f;
-    [SerializeField] private float pNoSand = 0.1f;
-    [SerializeField] private int maxCellsPerFrame = 100;
+    [SerializeField] private float pNoSand = 0.2f;
+    //[SerializeField] private int maxCellsPerFrame = 100;
     
     [Header("Input Textures")]
     public Texture2D initialSandTexture;

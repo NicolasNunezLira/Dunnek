@@ -143,6 +143,7 @@ namespace DunefieldModel_DualMesh
             if (changes.IsCreated)
                 changes.Clear();
         }
+        
         public void Dispose()
         {
             if (changes.IsCreated)
