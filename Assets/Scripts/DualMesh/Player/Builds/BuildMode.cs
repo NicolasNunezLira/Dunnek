@@ -25,7 +25,7 @@ namespace Building
         ConstructionGrid constructionGrid;
         private UnityEngine.Quaternion prefabRotation = UnityEngine.Quaternion.identity;
 
-        private Dictionary<int, ConstructionInstance> constructions;
+        public Dictionary<int, ConstructionInstance> constructions { get; private set; }
         private int currentConstructionID, currentCompositeConstructionID;
 
         private Coroutine shakeCoroutine;
@@ -73,7 +73,7 @@ namespace Building
             this.activePreview = activePreview;
             this.currentConstruction = currentConstruction;
 
-            wallPrefabLength = CalculateWallPrefabLength(PreviewManager.buildPreviews["wallSand"]["segmentWall"]);
+            wallPrefabLength = CalculateWallPrefabLength(PreviewManager.Instance.buildPreviews["wallSand"]["segmentWall"]);
             wallPreviewParent = new GameObject();
             wallPreviewParent.name = "Wall Previews";
 

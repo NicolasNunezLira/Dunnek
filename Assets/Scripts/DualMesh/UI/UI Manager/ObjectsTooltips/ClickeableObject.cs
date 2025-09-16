@@ -4,6 +4,8 @@ public class ClickeableObject : MonoBehaviour
 {
     [SerializeField] private string tooltipInfo = "Clickeable Object";
 
+
+    
     private void OnMouseDown()
     {
         if (DualMesh.Instance.inMode != DualMesh.PlayingMode.Simulation) return;

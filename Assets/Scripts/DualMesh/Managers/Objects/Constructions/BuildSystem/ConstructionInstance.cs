@@ -51,10 +51,6 @@ namespace ConstructionSystem
         }
         #endregion
 
-        #region Place
-        //public abstract void Place();
-        #endregion
-
         #region Is buried and erode
         public (bool, string, int, List<int2>) IsBuried(
             NativeGrid sandElev,

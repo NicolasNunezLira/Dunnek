@@ -31,17 +31,19 @@ namespace ConstructionSystem
         }
 
         [System.Serializable]
-        public class BonusData
+        public class BonusEffect
         {
-            public string type;
-            public BonusEffect value;
+            public string resource;
+            public float pct;
+        }
 
-            [System.Serializable]
-            public class BonusEffect
-            {
-                public float radius;
-                public float pct;
-            }
+        [System.Serializable]
+        public class BonusEntry
+        {
+            public string bonusType;            // "Global" o "Local"
+            public string target;               // "Production" o "Consumption"
+            public float radius;                // solo si es local
+            public List<BonusEffect> effects;
         }
 
         [System.Serializable]
@@ -88,15 +90,15 @@ namespace ConstructionSystem
             public string constructionCategory;
             public string iconPath;
 
-            // Estos se usan solo para cargar desde JSON
+            // JSON input
             public List<ResourceAmount> costList;
             public List<ResourceAmount> rateList;
             public float recycleWorkCost;
-            public int duration; // Duration in turns until pull down is needed 
+            public int duration;
             public List<PrefabData> prefabs;
-            public List<BonusData> bonus;
+            public List<BonusEntry> bonusList;
 
-            // Estos son los diccionarios reales que se usarán en código
+            // Diccionarios procesados
             [System.NonSerialized] public ResourceCost cost;
             [System.NonSerialized] public ResourceCost rate;
             [System.NonSerialized] public Dictionary<string, GameObject> loadedPrefabs;
@@ -105,9 +107,11 @@ namespace ConstructionSystem
 
             public void InitializeResources()
             {
+                // Costos y tasas
                 cost = new ResourceCost(costList);
                 rate = new ResourceCost(rateList);
 
+                // Categoría
                 if (System.Enum.TryParse(constructionCategory, out ConstructionCategory parsed))
                 {
                     category = parsed;
@@ -117,6 +121,7 @@ namespace ConstructionSystem
                     Debug.LogWarning($"Category not found: {constructionCategory}");
                 }
 
+                // Prefabs
                 loadedPrefabs = new Dictionary<string, GameObject>();
                 foreach (PrefabData prefab in prefabs)
                 {
@@ -127,17 +132,37 @@ namespace ConstructionSystem
                     }
                     else
                     {
-                        Debug.LogError($"Prefab not foun in Resources/{prefab.path}");
+                        Debug.LogError($"Prefab not found in Resources/{prefab.path}");
                     }
                 }
 
+                // Icono
                 if (!string.IsNullOrEmpty(iconPath))
                 {
                     icon = Resources.Load<Sprite>(iconPath);
                 }
+            }
 
+            public string GetBonusDescription()
+            {
+                if (bonusList == null || bonusList.Count == 0) return null;
+
+                string text = "";
+                foreach (var bonus in bonusList)
+                {
+                    string type = bonus.bonusType;
+                    string target = bonus.target;
+                    string radiusText = bonus.bonusType == "Local" ? $" (Radio {bonus.radius})" : "";
+
+                    foreach (var eff in bonus.effects)
+                    {
+                        text += $"• {type} {target}: +{eff.pct * 100}% {eff.resource}{radiusText}\n";
+                    }
+                }
+                return text;
             }
         }
+
 
         [System.Serializable]
         public class ConfigDataList
@@ -167,6 +192,7 @@ namespace ConstructionSystem
     }
 }
 
+#region - Json example
 /*
 Example for json structure:
 
@@ -192,7 +218,7 @@ Example for json structure:
     },
     {
         "codeName": "wallSand",
-        "category": "Wall",
+        "constructionCategory": "Wall",
         "iconPath": "Icons/wallSandIcon",
         "costList": [
             { "type": "Work", "value": -1 },
@@ -235,10 +261,25 @@ Example for json structure:
             { "type": "Work", "value": 10},
             { "type": "Sand", "value": 10}
         ],
-        "bonus": [
-            { "type" : "Work", "value": { "radius": 10, "pct": 0.1 } }
-        ]
-        "recycleWorkCost" : 20,
+        "bonusList": [
+            {
+                "bonusType": "Global",
+                "target": "Production",
+                "effects": [
+                    { "resource": "Work", "pct": 0.1 }
+                ]
+            },
+            {
+                "bonusType": "Local",
+                "target": "Consumption",
+                "radius": 10,
+                "effects": [
+                    { "resource": "Sand", "pct": 0.25 },
+                    { "resource": "Work", "pct": 0.05 }
+                ]
+            }
+        ],
+        "recycleWorkCost": 20,
         "duration": 1000,
         "prefabs": [
             { "part": "building", "path": "Prefabs/Dunek TorreArena" }
@@ -247,3 +288,4 @@ Example for json structure:
   ]
 }
 */
+#endregion

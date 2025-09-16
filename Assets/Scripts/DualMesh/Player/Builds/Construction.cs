@@ -4,18 +4,30 @@ using Unity.Mathematics;
 using System.Linq;
 using ConstructionSystem;
 using ResourceSystem;
+using BonusSystem;
 
 namespace Building
 {
     public partial class BuildSystem
     {
-        #region Constructions of Game Object
+        #region - Constructions of Game Object
+        /// <summary>
+        /// Crea el gameobject del preview correspondiente si se cumplen los requisitos de construcción.
+        /// </summary>
+        /// <param name="codeName"></param>
+        /// <param name="part"></param>
+        /// <param name="posX"></param>
+        /// <param name="posZ"></param>
+        /// <param name="rotation"></param>
+        /// <param name="overridePosition"></param>
+        /// <param name="verify"></param>
+        /// <returns></returns>
         public GameObject GameObjectConstruction(
             string codeName,
             string part,
             int posX,
             int posZ,
-            Quaternion rotation,            
+            Quaternion rotation,
             Vector3? overridePosition = null,
             bool verify = true)
         {
@@ -70,7 +82,7 @@ namespace Building
             GameObject prefab = config.loadedPrefabs[part];
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
             SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
-            prefabInstance.name = codeName + currentConstructionID + "_" + part;
+            prefabInstance.name = codeName + "_" + part + "-" + currentConstructionID;
 
             activePreview.SetActive(false);
             prefabInstance.SetActive(true);
@@ -141,8 +153,18 @@ namespace Building
             }
         }
 
-        #region Save constructions
-
+        #region - Save constructions
+        /// <summary>
+        /// Añade un objeto a la lista de construcciones, inicializando los componentes para el tooltip del objeto y marcando los nodos usados.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        /// <param name="codeName"></param>
+        /// <param name="support"></param>
+        /// <param name="boundarySupport"></param>
+        /// <param name="floorHeight"></param>
+        /// <param name="buildHeight"></param>
         public void AddConstructionToList(
             GameObject obj,
             Vector3 position,
@@ -170,32 +192,83 @@ namespace Building
 
             foreach (var cell in support)
             {
-                //constructionGrid[cell.x, cell.y] = currentConstructionID;
                 constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, codeName);
             }
 
             foreach (var cell in boundarySupport)
             {
-                //constructionGrid[cell.x, cell.y] = currentConstructionID;
                 constructionGrid.AddConstruction(cell.x, cell.y, currentConstructionID, codeName);
             }
 
-            bool wasAdded = ResourceManager.TryAddConsumer(
-                currentConstructionID,
-                codeName);
-            if (wasAdded)
+            // Link para los tooltips
+            ResourcesLink link;
+            var configs = ConstructionConfig.Instance.ConstructionConfigs;
+            switch (configs[codeName].category)
             {
-                ResourcesLink link = obj.GetComponent<ResourcesLink>();
-                if (link != null) link.Init(
-                    currentConstructionID,
-                    codeName);
+                case ConstructionCategory.Housing:
+                case ConstructionCategory.Consumer:
+                    bool wasAdded = ResourceManager.TryAddConsumer(
+                        currentConstructionID,
+                        codeName);
+                    if (wasAdded)
+                    {
+                        link = obj.GetComponent<ResourcesLink>();
+                        if (link != null) link.Init(
+                            codeName,
+                            currentConstructionID);
+                    }
+                    break;
+                case ConstructionCategory.BonusProvider:
+                    link = obj.GetComponent<ResourcesLink>();
+                    if (link != null) link.Init(codeName);
+
+                    var config = configs[codeName];
+                    if (config.bonusList != null)
+                    {
+                        foreach (var bonusDef in config.bonusList)
+                        {
+                            foreach (var eff in bonusDef.effects)
+                            {
+                                if (!System.Enum.TryParse(eff.resource, out Resource resource))
+                                {
+                                    Debug.LogWarning($"Recurso desconocido en bonus: {eff.resource}");
+                                    continue;
+                                }
+
+                                BonusTarget target = bonusDef.target == "Production" ? BonusTarget.Production : BonusTarget.Consumption;
+
+                                if (bonusDef.bonusType == "Global")
+                                {
+                                    var globalBonus = new GlobalBonus(resource, 1f + eff.pct, target);
+                                    BonusSystem.BonusManager.AddBonus(globalBonus);
+                                }
+                                else if (bonusDef.bonusType == "Local")
+                                {
+                                    Vector2Int pos2D = new Vector2Int(
+                                        Mathf.RoundToInt(position.x),
+                                        Mathf.RoundToInt(position.z)
+                                    );
+
+                                    int radius = Mathf.RoundToInt(bonusDef.radius);
+
+                                    var localBonus = new LocalBonus(resource, 1f + eff.pct, target, pos2D, radius);
+                                    BonusSystem.BonusManager.AddBonus(localBonus);
+
+                                    // Registrar consumidores existentes en rango
+                                    foreach (var consumer in ResourceManager.GetAllConsumers().Values)
+                                        localBonus.AddConsumerIfInRange(consumer);
+                                }
+                            }
+                        }
+                    }
+            break;
             }
+
             currentConstructionID++;
         }
         #endregion
 
-        #region Support functions
-
+        #region - Support functions
         List<int2> GetSupportBorder(List<int2> support, int xMax, int zMax)
         {
             HashSet<int2> supportSet = new HashSet<int2>();
@@ -233,7 +306,7 @@ namespace Building
         }
         #endregion
 
-        #region Verificate resources for constructions
+        #region - Verificate resources for constructions
         private bool HasEnoughResourcesForBuild(Dictionary<string, int> amounts)
         {
             Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
@@ -267,7 +340,7 @@ namespace Building
         }
         #endregion
 
-        #region Verificate resources for actions
+        #region - Verificate resources for actions
         public bool HasEnoughtResourcesForAction(DualMesh.ActionMode action)
         {
             Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
@@ -296,7 +369,7 @@ namespace Building
         }
         #endregion  
 
-        #region Consume resources
+        #region - Consume resources
         private void UpdateResources(Dictionary<string, int> amounts)
         {
             foreach (var (codeName, amount) in amounts)

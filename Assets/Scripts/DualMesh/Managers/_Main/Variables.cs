@@ -27,7 +27,7 @@ public partial class DualMesh : MonoBehaviour
     private int grainsForAvalanche = 0;
 
     private bool constructed = false, destructed = false, isHandlingPullDown = false;
-    private BuildSystem builder;
+    public BuildSystem builder { get; private set; }
     private GameObject activePreview;
 
     public string currentConstruction;

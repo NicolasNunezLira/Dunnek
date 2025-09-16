@@ -17,6 +17,11 @@ namespace BonusSystem
             activeBonuses.Remove(bonus);
         }
 
+        public static void ClearAllBonuses()
+        {
+            activeBonuses.Clear();
+        }
+
         public static float ApplyBonuses(
             float baseValue,
             Resource resource,
@@ -32,6 +37,17 @@ namespace BonusSystem
                 }
             }
             return result;
+        }
+
+        public static void RegisterConsumerInLocalBonuses(ResourceManager.Consumer consumer)
+        {
+            foreach (var bonus in activeBonuses)
+            {
+                if (bonus is LocalBonus localBonus)
+                {
+                    localBonus.AddConsumerIfInRange(consumer);
+                }
+            }
         }
     }
 }

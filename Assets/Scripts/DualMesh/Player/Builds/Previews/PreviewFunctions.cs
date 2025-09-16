@@ -33,15 +33,19 @@ namespace Building
                     {
                         tempWallEndPoint = point;
                         PreviewWall();
-                        PreviewManager.buildPreviews[currentConstruction]["tower"]?.SetActive(false);
+                        PreviewManager.Instance.buildPreviews[currentConstruction]["tower"]?.SetActive(false);
                         return;
                     }
                     else
                     {
-                        PreviewManager.buildPreviews[currentConstruction]["tower"]?.SetActive(
+                        PreviewManager.Instance.buildPreviews[currentConstruction]["tower"]?.SetActive(
                             DualMesh.Instance.inMode == DualMesh.PlayingMode.Build);
                         tempWallEndPoint = null;
                     }
+                }
+                else
+                {
+                    activePreview.SetActive(true);
                 }
 
                 Renderer rend = activePreview.GetComponentInChildren<Renderer>();
@@ -109,10 +113,10 @@ namespace Building
             switch (currentBuildMode)
             {
                 case DualMesh.BuildMode.PlaceBuild:
-                    activePreview = PreviewManager.buildPreviews[currentConstruction]["building"];
+                    activePreview = PreviewManager.Instance.buildPreviews[currentConstruction]["building"];
                     break;
                 case DualMesh.BuildMode.PlaceWallBetweenPoints:
-                    activePreview = PreviewManager.buildPreviews[currentConstruction]["tower"];
+                    activePreview = PreviewManager.Instance.buildPreviews[currentConstruction]["tower"];
                     break;
             }
 
@@ -123,7 +127,7 @@ namespace Building
         {
             HideAllPreviews();
 
-            activePreview = PreviewManager.actionPreviews[currentActionMode];
+            activePreview = PreviewManager.Instance.actionPreviews[currentActionMode];
            
             activePreview.SetActive(true);
         }
@@ -136,7 +140,7 @@ namespace Building
 
         public void HideAllActionsPreviews()
         {
-            var actionPreviews = PreviewManager.actionPreviews;
+            var actionPreviews = PreviewManager.Instance.actionPreviews;
 
             foreach (GameObject preview in actionPreviews.Values)
             {
@@ -146,7 +150,7 @@ namespace Building
 
         public void HideAllBuildsPreviews(bool clearWall=false)
         {
-            var buildPreviews = PreviewManager.buildPreviews;
+            var buildPreviews = PreviewManager.Instance.buildPreviews;
 
             foreach (var previews in buildPreviews.Values)
             {

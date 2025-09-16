@@ -60,11 +60,26 @@
         "constructionCategory": "BonusProvider",
         "iconPath": "Icons/initialTempleIcon",
         "costList": [
-            { "type": "Work", "value": 10},
-            { "type": "Sand", "value": 10}
+            { "type": "Work", "value": -10},
+            { "type": "Sand", "value": -10}
         ],
-        "bonus": [
-            { "type" : "Work", "value": { "radius": 10, "pct": 0.1 } }
+        "bonusList": [
+            {
+                "bonusType": "Global",
+                "target": "Production",
+                "effects": [
+                    { "resource": "Work", "pct": 0.1 }
+                ]
+            },
+            {
+                "bonusType": "Local",
+                "target": "Consumption",
+                "radius": 10,
+                "effects": [
+                    { "resource": "Sand", "pct": 0.25 },
+                    { "resource": "Work", "pct": 0.05 }
+                ]
+            }
         ],
         "recycleWorkCost": 20,
         "duration": 1000,

@@ -1,5 +1,7 @@
 using UnityEngine;
 using ResourceSystem;
+using System.Collections.Generic;
+using Vector2 = UnityEngine.Vector2;
 
 namespace BonusSystem
 {
@@ -52,27 +54,46 @@ namespace BonusSystem
     #region Local Bonus
     public class LocalBonus : Bonus
     {
-        private int sourceConsumerId;
+        private Vector2Int sourcePos;
+        private int radius;
 
-        public LocalBonus(Resource resource, float multiplier, BonusTarget target, int sourceId)
+        private readonly List<ResourceManager.Consumer> affectedBuildings = new();
+
+        public LocalBonus(Resource resource, float multiplier, BonusTarget target, Vector2Int source, int radius)
             : base(resource, multiplier, target)
         {
             Type = BonusType.Local;
-            sourceConsumerId = sourceId;
+            sourcePos = source;
+            this.radius = radius;
+        }
+
+        public void AddConsumerIfInRange(ResourceManager.Consumer consumer)
+        {
+            Vector2 pos = new Vector2(
+                consumer.instance.Position.x, consumer.instance.Position.z);
+            if (IsWithinRadius(sourcePos, pos, radius) &&
+                !affectedBuildings.Contains(consumer))
+            {
+                affectedBuildings.Add(consumer);
+            }
+        }
+
+        public void RemoveConsumer(ResourceManager.Consumer consumer)
+        {
+            affectedBuildings.Remove(consumer);
         }
 
         public override float Apply(float baseValue, ResourceManager.Consumer consumer)
         {
-            if (IsAdjacent(sourceConsumerId, consumer.id))
-            {
+            if (affectedBuildings.Contains(consumer))
                 return baseValue * Multiplier;
-            }
+
             return baseValue;
         }
 
-        private bool IsAdjacent(int sourceId, int targerId)
+        private bool IsWithinRadius(Vector2 source, Vector2 target, int radius)
         {
-            return true;
+            return (source - target).sqrMagnitude <= radius * radius;
         }
     }
     #endregion

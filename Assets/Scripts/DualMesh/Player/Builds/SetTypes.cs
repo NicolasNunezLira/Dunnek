@@ -3,8 +3,6 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public partial class DualMesh : MonoBehaviour
 {
-    //public string currentBuild;
-
     #region --- Build ---
     public void SetBuildType(string codeName)
     {

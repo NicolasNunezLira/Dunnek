@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ConstructionSystem;
+using System.Linq;
+using BonusSystem;
 
 namespace ResourceSystem {
     public static class ResourceManager
@@ -14,8 +16,8 @@ namespace ResourceSystem {
         #region Awake
         public static void Awake()
         {
-            RegisterResource(Resource.Work, 40f);
-            RegisterResource(Resource.Sand, 40f);
+            RegisterResource(Resource.Work, 1000f);
+            RegisterResource(Resource.Sand, 1000f);
         }
         #endregion
 
@@ -121,23 +123,11 @@ namespace ResourceSystem {
             }
 
             var rates = ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
-            if (rates[Resource.Sand] == 0 && rates[Resource.Work] == 0) return false;
+            if (rates.Values.All(v => v == 0)) return false;
 
-            /*
-            bool isOperative = true;
-            foreach ((Resource resource, float rate) in rates)
-            {
-                if (rate >= 0) continue;
-
-                if (-rate < GetAmount(resource))
-                {
-                    isOperative = false;
-                    break;
-                }
-            }
-            */
             consumers[id] = new Consumer(id, codeName, false);
 
+            BonusManager.RegisterConsumerInLocalBonuses(consumers[id]);
             return true;
         }
 
@@ -287,8 +277,10 @@ namespace ResourceSystem {
             public int id;
             public string codeName;
             public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
+            public ConstructionInstance instance;
             public bool isOperative;
             public bool isForceToStop;
+            public Vector3 Position => instance.Position;
 
             public Consumer(int id, string codeName, bool isOperative)
             {
@@ -296,6 +288,7 @@ namespace ResourceSystem {
                 this.codeName = codeName;
                 this.isOperative = isOperative;
                 isForceToStop = false;
+                DualMesh.Instance.builder.constructions.TryGetValue(id, out this.instance);
             }
         }
         #endregion

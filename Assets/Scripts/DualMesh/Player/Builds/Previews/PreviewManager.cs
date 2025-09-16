@@ -5,10 +5,10 @@ using ConstructionSystem;
 
 public class PreviewManager : Singleton<PreviewManager>
 {
-    public static GameObject BuildsPreviewParent, ActionsPreviewParent;
-    public static Dictionary<string, Dictionary<string, GameObject>> buildPreviews = new();
+    public GameObject BuildsPreviewParent, ActionsPreviewParent;
+    public Dictionary<string, Dictionary<string, GameObject>> buildPreviews = new();
 
-    public static Dictionary<DualMesh.ActionMode, GameObject> actionPreviews = new();
+    public Dictionary<DualMesh.ActionMode, GameObject> actionPreviews = new();
 
     protected override void Awake()
     {
@@ -34,13 +34,13 @@ public class PreviewManager : Singleton<PreviewManager>
         InitializeActionPreviews();
     }
 
-    public static void Initialize()
+    /*public static void Initialize()
     {
         InitializeBuildPreviews();
         InitializeActionPreviews();
-    }
+    }*/
 
-    private static void InitializeBuildPreviews()
+    private void InitializeBuildPreviews()
     {
         if (BuildsPreviewParent == null)
         {
@@ -67,7 +67,7 @@ public class PreviewManager : Singleton<PreviewManager>
         }
     }
 
-    private static void InitializeActionPreviews()
+    private void InitializeActionPreviews()
     {
         if (BuildsPreviewParent == null)
         {
