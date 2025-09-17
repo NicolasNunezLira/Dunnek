@@ -370,13 +370,37 @@ namespace Building
         #endregion  
 
         #region - Consume resources
-        private void UpdateResources(Dictionary<string, int> amounts)
+        private void UpdateResources(Dictionary<string, int> constructionAmounts)
         {
-            foreach (var (codeName, amount) in amounts)
+            foreach (var (codeName, count) in constructionAmounts)
             {
-                for (int i=0; i<amount; i++) ResourceManager.TryUpdateResourcesByBuild(codeName);
+                if (!ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(codeName, out var config))
+                {
+                    Debug.LogWarning($"No se encontró config para {codeName}");
+                    continue;
+                }
+
+                for (int i = 0; i < count; i++)
+                {
+                    // 1. Consumir los recursos del costo de la construcción
+                    foreach ((Resource resource, float cost) in config.cost)
+                    {
+                        bool success = ResourceManager.TryConsumeResource(resource, cost);
+                        if (!success)
+                        {
+                            Debug.LogWarning($"No hay suficiente {resource} para construir {codeName}");
+                        }
+                    }
+
+                    // 2. Registrar el consumer si corresponde (ya lo haces en AddConstructionToList)
+                    // ResourceManager.TryAddConsumer(...) se llama desde AddConstructionToList
+                }
+
+                // 3. Actualizar todos los recursos para reflejar tasas de producción/consumo actuales
+                ResourceManager.UpdateResources();
             }
         }
+
         #endregion
     }    
 }

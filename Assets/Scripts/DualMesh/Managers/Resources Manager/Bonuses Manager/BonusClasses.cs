@@ -5,12 +5,12 @@ using Vector2 = UnityEngine.Vector2;
 
 namespace BonusSystem
 {
-    #region Enums
+    #region - Enums
     public enum BonusType { Local, Global }
     public enum BonusTarget { Production, Consumption, Cost }
     #endregion
 
-    #region Abstract Bonus
+    #region - Abstract Bonus
     public abstract class Bonus
     {
         public BonusType Type { get; protected set; }
@@ -35,7 +35,7 @@ namespace BonusSystem
     }
     #endregion
 
-    #region Global Bonus
+    #region - Global Bonus
     public class GlobalBonus : Bonus
     {
         public GlobalBonus(Resource resource, float multiplier, BonusTarget target)
@@ -51,11 +51,11 @@ namespace BonusSystem
     }
     #endregion
 
-    #region Local Bonus
+    #region - Local Bonus
     public class LocalBonus : Bonus
     {
         private Vector2Int sourcePos;
-        private int radius;
+        public int Radius { get; private set; }
 
         private readonly List<ResourceManager.Consumer> affectedBuildings = new();
 
@@ -64,15 +64,13 @@ namespace BonusSystem
         {
             Type = BonusType.Local;
             sourcePos = source;
-            this.radius = radius;
+            this.Radius = radius;
         }
 
         public void AddConsumerIfInRange(ResourceManager.Consumer consumer)
         {
-            Vector2 pos = new Vector2(
-                consumer.instance.Position.x, consumer.instance.Position.z);
-            if (IsWithinRadius(sourcePos, pos, radius) &&
-                !affectedBuildings.Contains(consumer))
+            Vector2 pos = new Vector2(consumer.instance.Position.x, consumer.instance.Position.z);
+            if (IsWithinRadius(sourcePos, pos, Radius) && !affectedBuildings.Contains(consumer))
             {
                 affectedBuildings.Add(consumer);
             }
@@ -83,9 +81,14 @@ namespace BonusSystem
             affectedBuildings.Remove(consumer);
         }
 
+        public bool AffectsConsumer(ResourceManager.Consumer consumer)
+        {
+            return affectedBuildings.Contains(consumer);
+        }
+
         public override float Apply(float baseValue, ResourceManager.Consumer consumer)
         {
-            if (affectedBuildings.Contains(consumer))
+            if (AffectsConsumer(consumer))
                 return baseValue * Multiplier;
 
             return baseValue;

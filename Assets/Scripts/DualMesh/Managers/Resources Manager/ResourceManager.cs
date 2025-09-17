@@ -8,6 +8,192 @@ namespace ResourceSystem {
     public static class ResourceManager
     {
         #region Variables
+        static private Dictionary<Resource, ResourceClass> resources = new();
+        static private Dictionary<int, Consumer> consumers = new();
+        public static IReadOnlyDictionary<int, Consumer> AllConsumers => consumers;
+        #endregion
+
+        #region Awake
+        public static void Awake()
+        {
+            RegisterResource(Resource.Work, 1000f);
+            RegisterResource(Resource.Sand, 1000f);
+        }
+        #endregion
+
+        #region Resources Methods
+        public static void RegisterResource(Resource name, float initialAmount)
+        {
+            if (!resources.ContainsKey(name))
+            {
+                resources[name] = new ResourceClass(name, initialAmount);
+            }
+        }
+
+        public static void AddResource(Resource name, float amount)
+        {
+            if (resources.TryGetValue(name, out var res))
+            {
+                res.Add(amount);
+            }
+            else
+            {
+                Debug.LogWarning($"Trying to add to unregistered resource: {name}");
+            }
+        }
+
+        public static bool TryConsumeResource(Resource name, float amount)
+        {
+            if (resources.TryGetValue(name, out var res))
+            {
+                return res.TryConsume(amount);
+            }
+            Debug.LogWarning($"Trying to consume from unregistered resource: {name}");
+            return false;
+        }
+
+        public static float GetAmount(Resource name)
+        {
+            return resources.TryGetValue(name, out var res) ? res.Amount : 0f;
+        }
+
+        public static Dictionary<Resource, ResourceClass> GetAllResources()
+        {
+            return resources;
+        }
+
+        public static bool HasEnough(Resource name, float amount)
+        {
+            return resources.ContainsKey(name) && resources[name].Amount >= amount;
+        }
+
+        /// <summary>
+        /// Aplica los cambios de producción/consumo efectivos de cada consumidor (considerando bonuses).
+        /// </summary>
+        public static void UpdateResources()
+        {
+            foreach (var res in resources.Values)
+            {
+                res.UpdateFromConsumers(consumers); 
+            }
+            foreach (var res in resources.Values)
+            {
+                res.UpdateAmount();
+            }
+
+        }
+        #endregion
+
+        #region Consumers Methods
+        public static bool TryAddConsumer(int id, string codeName)
+        {
+            if (consumers.ContainsKey(id))
+            {
+                Debug.LogWarning($"Consumer with ID {id} already exists.");
+                return false;
+            }
+
+            var rates = ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
+            if (rates.Values.All(v => v == 0)) return false;
+
+            consumers[id] = new Consumer(id, codeName, false);
+
+            // Ahora BonusManager se encarga de verificar si este consumidor
+            // está dentro de algún bonus local y de registrarlo en consecuencia.
+            BonusManager.RegisterConsumerInLocalBonuses(consumers[id]);
+            return true;
+        }
+
+        public static void RemoveConsumer(int id, bool recycle = false)
+        {
+            if (consumers.ContainsKey(id))
+            {
+                Consumer consumer = consumers[id];
+
+                // Avisar al BonusManager que este consumidor deja de existir
+                BonusManager.UnregisterConsumerFromLocalBonuses(consumer);
+
+                if (recycle)
+                {
+                    var config = ConstructionConfig.Instance.ConstructionConfigs[consumer.codeName];
+                    AddResource(Resource.Sand, -Mathf.Floor(config.cost[Resource.Sand] / 2));
+                    AddResource(Resource.Work, config.recycleWorkCost); 
+                }
+
+                consumers.Remove(id);
+            }
+        }
+
+        public static void UpdateConsumers()
+        {
+            foreach (var kvp in consumers.ToList())
+            {
+                var consumer = kvp.Value;
+
+                if (consumer.isForceToStop)
+                {
+                    consumer.isOperative = false;
+                }
+                else
+                {
+                    // Se activa si tiene recursos suficientes
+                    consumer.isOperative = consumer.rates.All(r =>
+                        r.Value >= 0 || GetAmount(r.Key) >= -r.Value);
+                }
+
+                consumers[kvp.Key] = consumer;
+            }
+        }
+
+        public static void SetConsumerActive(int id, bool isForceToStop)
+        {
+            if (!consumers.ContainsKey(id)) return;
+
+            Consumer consumer = consumers[id];
+            consumer.isForceToStop = isForceToStop;
+            consumers[id] = consumer;
+        }
+
+        public static Dictionary<int, Consumer> GetAllConsumers()
+        {
+            return consumers;
+        }
+
+        public struct Consumer
+        {
+            public int id;
+            public string codeName;
+            public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
+            public ConstructionInstance instance;
+            public bool isOperative;
+            public bool isForceToStop;
+            public Vector3 Position => instance.Position;
+
+            public Consumer(int id, string codeName, bool isOperative)
+            {
+                this.id = id;
+                this.codeName = codeName;
+                this.isOperative = isOperative;
+                isForceToStop = false;
+                DualMesh.Instance.builder.constructions.TryGetValue(id, out this.instance);
+            }
+        }
+        #endregion
+    }
+}
+
+
+/*
+using System.Collections.Generic;
+using UnityEngine;
+using ConstructionSystem;
+using System.Linq;
+using BonusSystem;
+
+namespace ResourceSystem {
+    public static class ResourceManager
+    {
+        #region Variables
         static private Dictionary<Resource, ResourceClass> resources = new Dictionary<Resource, ResourceClass>();
         static private Dictionary<int, Consumer> consumers = new Dictionary<int, Consumer>();
         static private Dictionary<int, bool> forcedToStopConsumers = new Dictionary<int, bool>();
@@ -81,7 +267,7 @@ namespace ResourceSystem {
             {
                 TryAddRate(resource, rate); // Aqui
             }
-            */
+            
         }
 
         public static float GetAmount(Resource name)
@@ -272,25 +458,26 @@ namespace ResourceSystem {
             return consumers;
         }
 
-        public struct Consumer
-        {
-            public int id;
-            public string codeName;
-            public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
-            public ConstructionInstance instance;
-            public bool isOperative;
-            public bool isForceToStop;
-            public Vector3 Position => instance.Position;
+public struct Consumer
+{
+    public int id;
+    public string codeName;
+    public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
+    public ConstructionInstance instance;
+    public bool isOperative;
+    public bool isForceToStop;
+    public Vector3 Position => instance.Position;
 
-            public Consumer(int id, string codeName, bool isOperative)
-            {
-                this.id = id;
-                this.codeName = codeName;
-                this.isOperative = isOperative;
-                isForceToStop = false;
-                DualMesh.Instance.builder.constructions.TryGetValue(id, out this.instance);
-            }
-        }
+    public Consumer(int id, string codeName, bool isOperative)
+    {
+        this.id = id;
+        this.codeName = codeName;
+        this.isOperative = isOperative;
+        isForceToStop = false;
+        DualMesh.Instance.builder.constructions.TryGetValue(id, out this.instance);
+    }
+}
         #endregion
     }
 }
+*/
