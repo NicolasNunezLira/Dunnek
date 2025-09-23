@@ -223,16 +223,16 @@ public class UIController : Singleton<UIController>
 
         switch (id)
         {
-            case "dig":
+            case "Dig":
                 DualMesh.Instance.SetActionType(DualMesh.ActionMode.Dig);
                 break;
-            case "add":
+            case "AddSand":
                 DualMesh.Instance.SetActionType(DualMesh.ActionMode.AddSand);
                 break;
-            case "flat":
+            case "Flat":
                 DualMesh.Instance.SetActionType(DualMesh.ActionMode.Flat);
                 break;
-            case "recycle":
+            case "Recycle":
                 DualMesh.Instance.SetActionType(DualMesh.ActionMode.Recycle);
                 break;
         }

@@ -57,6 +57,15 @@ namespace DunefieldModel_DualMesh
                 //AddChanges(terrainShadowChanges, cell.x, cell.y);
             }
 
+            ResourcesLink link = data.Obj.GetComponent<ResourcesLink>();
+
+            if (link != null && link.IsBonusProvider)
+            {
+                // Remover todos los bonuses locales que esta construcción proveía
+                BonusSystem.BonusManager.RemoveLocalBonusesByProvider(data.Obj);
+            }
+
+
             ResourceManager.RemoveConsumer(id, recycle: false);
 
 

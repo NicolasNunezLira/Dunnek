@@ -11,6 +11,7 @@ public partial class DualMesh : MonoBehaviour
 
     public int simXResolution => openEnded ? xResolution + 40 : xResolution;
     public int simZResolution => openEnded ? zResolution + 40 : zResolution;
+    public float tileSize => size / simXResolution;
 
     public GameObject terrainGO, sandGO;
 

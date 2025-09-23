@@ -14,7 +14,7 @@ namespace Building
         #region Handle
         public void HandleBuildPreview()
         {
-            if (string.IsNullOrEmpty(currentConstruction)) { HideAllPreviews(); return;}
+            if (DualMesh.Instance.inMode == DualMesh.PlayingMode.Build && string.IsNullOrEmpty(currentConstruction)) { HideAllPreviews(); return;}
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 

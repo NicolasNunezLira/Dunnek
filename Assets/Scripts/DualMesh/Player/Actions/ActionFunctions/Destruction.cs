@@ -105,6 +105,15 @@ namespace Building
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
             }
 
+            ResourcesLink link = toDestroy.GetComponent<ResourcesLink>();
+
+            if (link != null && link.IsBonusProvider)
+            {
+                // Remover todos los bonuses locales que esta construcción proveía
+                BonusSystem.BonusManager.RemoveLocalBonusesByProvider(toDestroy);
+            }
+
+
             constructionGrid.RemoveConstructionById(idToDestroy);
 
             constructions.Remove(idToDestroy);

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ResourceSystem;
+using UnityEngine;
 
 namespace BonusSystem
 {
@@ -46,92 +47,116 @@ namespace BonusSystem
         }
         #endregion
 
-        #region Application
+        #region - Application
+        /// <summary>
+        /// Versión simplificada: aplica todos los bonus aditivamente.
+        /// </summary>
         public static float ApplyBonuses(
             float baseValue,
             Resource resource,
             ResourceManager.Consumer consumer
         )
         {
-            float result = baseValue;
+            float totalPct = 0f;
 
-            // Aplicar globales
+            // Globales
             foreach (var global in globalBonuses)
             {
                 if (global.Resource == resource)
-                {
-                    result = global.Apply(result, consumer);
-                }
+                    totalPct += global.Multiplier - 1f; // convertir multiplicador en delta porcentual
             }
 
-            // Aplicar locales
+            // Locales
             foreach (var local in localBonuses)
             {
-                if (local.Resource == resource)
-                {
-                    result = local.Apply(result, consumer);
-                }
+                if (local.Resource == resource && local.AffectsConsumer(consumer))
+                    totalPct += local.Multiplier - 1f;
             }
 
-            return result;
+            return baseValue * (1f + totalPct);
         }
 
-        // Nuevo: devuelve detalle de aplicación de bonuses
-        public static BonusApplicationResult ApplyBonusesDetailed(float baseValue, Resource resource, ResourceManager.Consumer consumer)
+        /// <summary>
+        /// Versión detallada que devuelve desglose de bonus aplicados.
+        /// </summary>
+        public static BonusApplicationResult ApplyBonusesDetailed(
+            float baseValue,
+            Resource resource,
+            ResourceManager.Consumer consumer
+        )
         {
             var result = new BonusApplicationResult();
             result.FinalValue = baseValue;
 
-            // Aplicar globales: multiplicativo
+            float totalPct = 0f;
+
+            // Globales
             foreach (var g in globalBonuses)
             {
                 if (g.Resource != resource) continue;
-                // asumimos g.Multiplier está en forma multiplicativa (1.1 para +10%)
-                result.GlobalMultiplier *= g.Multiplier;
-                result.AppliedBonuses.Add(new BonusAppliedInfo
+
+                float delta = g.Multiplier - 1f;
+                totalPct += delta;
+
+                var info = new BonusAppliedInfo
                 {
                     OriginType = BonusOriginType.Global,
-                    ProviderId = (g as IProviderInfo)?.ProviderId, // ver nota abajo
+                    ProviderId = (g as IProviderInfo)?.ProviderId,
                     ProviderName = (g as IProviderInfo)?.ProviderName,
                     Multiplier = g.Multiplier,
-                    Description = $"Global: x{g.Multiplier}"
-                });
+                    AppliedAmount = baseValue * delta,
+                    Description = $"Global: +{delta * 100f:0.#}%"
+                };
+                result.AppliedBonuses.Add(info);
             }
 
-            // Aplicar locales: solo si el local realmente afecta al consumer
+            // Locales
             foreach (var l in localBonuses)
             {
                 if (l.Resource != resource) continue;
-                // Comprobamos si el local afecta al consumer (método público en LocalBonus)
                 if (!l.AffectsConsumer(consumer)) continue;
 
-                result.LocalMultiplier *= l.Multiplier;
-                result.AppliedBonuses.Add(new BonusAppliedInfo
+                float delta = l.Multiplier - 1f;
+                totalPct += delta;
+
+                var info = new BonusAppliedInfo
                 {
                     OriginType = BonusOriginType.Local,
                     ProviderId = (l as IProviderInfo)?.ProviderId,
                     ProviderName = (l as IProviderInfo)?.ProviderName,
                     Multiplier = l.Multiplier,
-                    Description = $"Local: x{l.Multiplier} (radius {l.Radius})"
-                });
+                    AppliedAmount = baseValue * delta,
+                    Description = $"Local: +{delta * 100f:0.#}% (radius {l.Radius})"
+                };
+                result.AppliedBonuses.Add(info);
             }
 
-            // Final
-            result.FinalValue = baseValue * result.GlobalMultiplier * result.LocalMultiplier;
+            // Valor final = base * (1 + suma de porcentajes)
+            result.FinalValue = baseValue * (1f + totalPct);
 
-            // Para cada applied bonus también calculamos su "applied amount" informativo:
-            foreach (var b in result.AppliedBonuses)
-            {
-                // applied amount = efecto marginal sobre la base, aproximado:
-                // Si es global: base * (multiplier - 1)
-                // If local: base * globalMultiplier * (localMultiplierPiece - 1)
-                if (b.OriginType == BonusOriginType.Global)
-                    b.AppliedAmount = baseValue * (b.Multiplier - 1f);
-                else
-                    b.AppliedAmount = baseValue * result.GlobalMultiplier * (b.Multiplier - 1f);
-            }
+            // Guardar acumulados para referencia
+            result.GlobalMultiplier = 1f + SumGlobalPct(resource);
+            result.LocalMultiplier = 1f + SumLocalPct(resource, consumer);
 
             return result;
+        }
+
+        private static float SumGlobalPct(Resource resource)
+        {
+            float pct = 0f;
+            foreach (var g in globalBonuses)
+                if (g.Resource == resource)
+                    pct += g.Multiplier - 1f;
+            return pct;
+        }
+
+        private static float SumLocalPct(Resource resource, ResourceManager.Consumer consumer)
+        {
+            float pct = 0f;
+            foreach (var l in localBonuses)
+                if (l.Resource == resource && l.AffectsConsumer(consumer))
+                    pct += l.Multiplier - 1f;
+            return pct;
         }
         #endregion
 
@@ -151,9 +176,14 @@ namespace BonusSystem
                 local.RemoveConsumer(consumer);
             }
         }
+
+        public static void RemoveLocalBonusesByProvider(GameObject providerObj)
+        {
+            localBonuses.RemoveAll(lb => lb.Obj == providerObj);
+        }
         #endregion
 
-        #region Debug/Tooltip
+        #region - Debug/Tooltip
         public static IEnumerable<GlobalBonus> GetGlobalBonuses() => globalBonuses;
         public static IEnumerable<LocalBonus> GetLocalBonuses() => localBonuses;
         #endregion
@@ -163,5 +193,6 @@ namespace BonusSystem
     {
         int? ProviderId { get; }
         string ProviderName { get; }
+        GameObject ProviderObject { get; }
     }
 }

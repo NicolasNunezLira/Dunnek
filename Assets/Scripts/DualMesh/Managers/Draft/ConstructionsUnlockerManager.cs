@@ -12,6 +12,7 @@ public static class ConstructionUnlockerManager
     public static void Awake()
     {
         unlockedConstructions.Add("houseSand");
+        unlockedConstructions.Add("houseClay");
         unlockedConstructions.Add("Cantera");
         unlockedConstructions.Add("initialTemple");
         unlockedConstructions.Add("wallSand");

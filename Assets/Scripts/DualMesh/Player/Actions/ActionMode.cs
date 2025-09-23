@@ -44,7 +44,7 @@ public partial class DualMesh : MonoBehaviour
             // Actualizar UI
             UIController uiController = UIController.Instance;
 
-            
+
             uiController.UpdateMainButtonVisuals(inMode);
 
             // Si estamos en acciones, mantener la pestaña abierta

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System;
 using BonusSystem;
+using Building;
 
 public class ResourcesLink : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class ResourcesLink : MonoBehaviour
     public List<ConstructionConfig.BonusEntry> bonus { get; private set; }
     public List<ConstructionConfig.BonusEntry> GlobalBonuses { get; private set; }
     public List<ConstructionConfig.BonusEntry> LocalBonuses { get; private set; }
+    public List<ConstructionInstance> AffectingProviders { get; private set; }
 
     private string codeName;
 
@@ -49,7 +51,7 @@ public class ResourcesLink : MonoBehaviour
         {
             GlobalBonuses = new List<ConstructionConfig.BonusEntry>();
             LocalBonuses = new List<ConstructionConfig.BonusEntry>();
-            
+
             foreach (var b in bonus)
             {
                 if (b.bonusType == "Global")
@@ -59,6 +61,30 @@ public class ResourcesLink : MonoBehaviour
                 else if (b.bonusType == "Local")
                 {
                     LocalBonuses.Add(b);
+                }
+            }
+        }
+    }
+
+    public void RefreshAffectingProviders()
+    {
+        AffectingProviders.Clear();
+
+        if (ConsumerId == null) return;
+
+        var consumers = ResourceManager.GetAllConsumers();
+        if (!consumers.ContainsKey(ConsumerId.Value)) return;
+
+        var consumer = consumers[ConsumerId.Value];
+
+        foreach (var local in BonusManager.GetLocalBonuses())
+        {
+            if (local.AffectsConsumer(consumer))
+            {
+                var providerId = (local as IProviderInfo)?.ProviderId;
+                if (providerId != null && DualMesh.Instance.builder.constructions.TryGetValue(providerId.Value, out var providerInstance))
+                {
+                    AffectingProviders.Add(providerInstance);
                 }
             }
         }
@@ -103,13 +129,54 @@ public class ResourcesLink : MonoBehaviour
                 foreach (var l in LocalBonuses)
                 {
                     foreach (var effects in l.effects)
-                    sb.AppendLine($"• {effects.resource} {effects.pct * 100}% (radius {l.radius})");
+                        sb.AppendLine($"• {effects.resource} {effects.pct * 100}% (radius {l.radius})");
                 }
                 sb.AppendLine();
             }
         }
 
         return sb.Length > 0 ? sb.ToString() : null;
+    }
+    
+    public string GetInfoStringWithBonuses()
+    {
+        if (ConsumerId == null)
+            return GetInfoString(); // si no es consumidor, mostramos lo mismo que antes
+
+        var sb = new StringBuilder();
+
+        // Obtenemos el consumer desde ResourceManager
+        var consumers = ResourceManager.GetAllConsumers();
+        if (!consumers.ContainsKey(ConsumerId.Value))
+            return GetInfoString();
+
+        var consumer = consumers[ConsumerId.Value];
+
+        sb.AppendLine("<b>Production rates:</b>");
+
+        foreach (var (resource, baseRate) in consumer.rates)
+        {
+            if (Mathf.Approximately(baseRate, 0f)) continue;
+
+            // usamos el cálculo detallado
+            var detail = BonusManager.ApplyBonusesDetailed(baseRate, resource, consumer);
+
+            string sign = detail.FinalValue > 0 ? "+" : "-";
+            sb.AppendLine($"• {resource}: {sign}{Mathf.Abs(detail.FinalValue):0.00}");
+
+            // extra: mostrar desglose
+            if (detail.GlobalMultiplier != 1f)
+                sb.AppendLine($"    Global x{detail.GlobalMultiplier:0.00}");
+            if (detail.LocalMultiplier != 1f)
+                sb.AppendLine($"    Local x{detail.LocalMultiplier:0.00}");
+
+            /*
+            foreach (var applied in detail.AppliedBonuses)
+                sb.AppendLine($"    - {applied.ProviderName} ({applied.OriginType}) x{applied.Multiplier:0.00}");
+            */
+        }
+
+        return sb.ToString();
     }
 }
 

@@ -239,7 +239,7 @@ namespace Building
 
                                 if (bonusDef.bonusType == "Global")
                                 {
-                                    var globalBonus = new GlobalBonus(resource, 1f + eff.pct, target);
+                                    var globalBonus = new GlobalBonus(resource, 1f + eff.pct, target, obj);
                                     BonusSystem.BonusManager.AddBonus(globalBonus);
                                 }
                                 else if (bonusDef.bonusType == "Local")
@@ -251,12 +251,15 @@ namespace Building
 
                                     int radius = Mathf.RoundToInt(bonusDef.radius);
 
-                                    var localBonus = new LocalBonus(resource, 1f + eff.pct, target, pos2D, radius);
+                                    var localBonus = new LocalBonus(resource, 1f + eff.pct, target, obj, pos2D, radius);
                                     BonusSystem.BonusManager.AddBonus(localBonus);
 
                                     // Registrar consumidores existentes en rango
-                                    foreach (var consumer in ResourceManager.GetAllConsumers().Values)
+                                    /*foreach (var consumer in ResourceManager.GetAllConsumers().Values)
                                         localBonus.AddConsumerIfInRange(consumer);
+                                        */
+
+                                    localBonus.RecalculateAffectedBuildings(ResourceManager.GetAllConsumers().Values);
                                 }
                             }
                         }

@@ -6,7 +6,7 @@ public partial class DualMesh : MonoBehaviour
     #region --- Build ---
     public void SetBuildType(string codeName)
     {
-        Debug.Log($"Set Build Type called with codeName = {codeName}.");
+        //Debug.Log($"Set Build Type called with codeName = {codeName}.");
 
         currentConstruction = codeName;
 

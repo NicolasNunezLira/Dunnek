@@ -46,6 +46,7 @@ public partial class DualMesh :MonoBehaviour
                     }
                 #endregion
 
+                
                 /*
                 #region Destroy Mode
                 case PlayingMode.Recycle:
@@ -56,14 +57,20 @@ public partial class DualMesh :MonoBehaviour
                     }
                 #endregion
                 */
+                
 
                 #region Action Mode
                 case PlayingMode.Action:
+                    TimeManager.Instance.Pause();
+                    if (currentActionMode != ActionMode.Recycle)
                     {
-                        TimeManager.Instance.Pause();
                         ActionsMode();
-                        break;
                     }
+                    else
+                    {
+                        RecycleMode();
+                    }
+                    break;
                 #endregion
 
                 #region Simulation Mode

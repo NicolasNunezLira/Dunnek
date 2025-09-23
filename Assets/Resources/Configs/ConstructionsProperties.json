@@ -19,6 +19,24 @@
         ]
     },
     {
+        "codeName": "houseClay",
+        "constructionCategory": "Housing",
+        "iconPath": "Icons/houseSandIcon",
+        "costList": [
+            { "type": "Work", "value": -1 },
+            { "type": "Sand", "value": -10 }
+        ],
+        "rateList": [
+            { "type": "Work", "value": 1 },
+            { "type": "Sand", "value": 0 }
+        ],
+        "recycleWorkCost": 0,
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/lowpoly_egyptian_house_001" }
+        ]
+    },
+    {
         "codeName": "wallSand",
         "constructionCategory": "Wall",
         "iconPath": "Icons/wallSandIcon",
