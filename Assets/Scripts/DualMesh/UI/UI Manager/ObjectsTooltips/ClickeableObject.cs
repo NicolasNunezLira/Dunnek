@@ -1,12 +1,13 @@
 using BonusSystem;
 using ResourceSystem;
 using UnityEngine;
+using Utils;
 
 public class ClickeableObject : MonoBehaviour
 {
     [SerializeField] private string tooltipInfo = "Clickeable Object";
     private BonusRadiusVisualizer radiusVisualizer;
-    private bool isInitialized = false;
+    private bool isInitialized = false, isClicked = false;
 
     private void OnMouseDown()
     {
@@ -27,22 +28,23 @@ public class ClickeableObject : MonoBehaviour
 
         if (link.IsConsumer && link.ConsumerId.HasValue)
         {
-            var consumer = ResourceManager.AllConsumers[link.ConsumerId.Value];
+            var consumer = ResourceManager.AllBuildings[link.ConsumerId.Value];
 
             foreach (var local in BonusManager.GetLocalBonuses())
             {
-                if (local.AffectsConsumer(consumer) &&
-                    local is IProviderInfo provider && provider.ProviderObject != null)
+                if (local.AffectsBuilding(consumer.instance) &&
+                    local is IProviderInfo provider && provider.ProviderBuilding.Obj != null
+                    && !isClicked)
                 {
-                    var marker = provider.ProviderObject.GetComponent<BonusMarker>();
-                    if (marker != null)
-                    {
-                        marker.ShowMarker();
-                        BonusVisualizerManager.Instance.RegisterMarker(marker);
-                    }
+                    GameObject obj = provider.ProviderBuilding.Obj;
+
+                    BonusVisualizerManager.Instance.RegisterHighlightedObject(obj);
+
+                    RecursivelyFunctions.SetLayerRecursively(obj, 12);
                 }
             }
         }
+
 
         if (link.IsBonusProvider && link.LocalBonuses.Count > 0)
         {
@@ -58,6 +60,7 @@ public class ClickeableObject : MonoBehaviour
         }
 
         isInitialized = true;
+        isClicked = true;
     }
 
     private void Update()
@@ -73,6 +76,7 @@ public class ClickeableObject : MonoBehaviour
                     BonusVisualizerManager.Instance.ClearVisuals();
                     TooltipManager.Instance.HideTooltip();
                     isInitialized = false;
+                    isClicked = false;
                 }
             }
             else
@@ -80,9 +84,8 @@ public class ClickeableObject : MonoBehaviour
                 BonusVisualizerManager.Instance.ClearVisuals();
                 TooltipManager.Instance.HideTooltip();
                 isInitialized = false;
+                isClicked = false;
             }
         }
-    }
-
-    
+    } 
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using ConstructionSystem;
 using ResourceSystem;
 using BonusSystem;
+using Utils;
 
 namespace Building
 {
@@ -59,7 +60,7 @@ namespace Building
             if (parentGO == null)
             {
                 parentGO = new GameObject("Construcciones");
-                SetLayerRecursively(parentGO, LayerMask.NameToLayer("Constructions"));
+                RecursivelyFunctions.SetLayerRecursively(parentGO, LayerMask.NameToLayer("Constructions"));
             }
 
             var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
@@ -81,7 +82,7 @@ namespace Building
 
             GameObject prefab = config.loadedPrefabs[part];
             GameObject prefabInstance = GameObject.Instantiate(prefab, centerPos, rotation, parentGO.transform);
-            SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
+            RecursivelyFunctions.SetLayerRecursively(prefabInstance, LayerMask.NameToLayer("Constructions"));
             prefabInstance.name = codeName + "_" + part + "-" + currentConstructionID;
 
             activePreview.SetActive(false);
@@ -140,19 +141,7 @@ namespace Building
             return prefabInstance;
         }
         #endregion
-
-        // Helper method to set layer recursively
-        private void SetLayerRecursively(GameObject obj, int newLayer)
-        {
-            if (obj == null) return;
-            obj.layer = newLayer;
-            foreach (Transform child in obj.transform)
-            {
-                if (child == null) continue;
-                SetLayerRecursively(child.gameObject, newLayer);
-            }
-        }
-
+        
         #region - Save constructions
         /// <summary>
         /// Añade un objeto a la lista de construcciones, inicializando los componentes para el tooltip del objeto y marcando los nodos usados.
@@ -186,7 +175,7 @@ namespace Building
                 floorHeight,
                 buildHeight
             );
-            
+
 
             constructions.Add(currentConstructionID, instance);
 
@@ -239,7 +228,7 @@ namespace Building
 
                                 if (bonusDef.bonusType == "Global")
                                 {
-                                    var globalBonus = new GlobalBonus(resource, 1f + eff.pct, target, obj);
+                                    var globalBonus = new GlobalBonus(resource, 1f + eff.pct, target, instance);
                                     BonusSystem.BonusManager.AddBonus(globalBonus);
                                 }
                                 else if (bonusDef.bonusType == "Local")
@@ -251,20 +240,17 @@ namespace Building
 
                                     int radius = Mathf.RoundToInt(bonusDef.radius);
 
-                                    var localBonus = new LocalBonus(resource, 1f + eff.pct, target, obj, pos2D, radius);
+                                    var localBonus = new LocalBonus(resource, 1f + eff.pct, target, instance, pos2D, radius);
                                     BonusSystem.BonusManager.AddBonus(localBonus);
 
-                                    // Registrar consumidores existentes en rango
-                                    /*foreach (var consumer in ResourceManager.GetAllConsumers().Values)
-                                        localBonus.AddConsumerIfInRange(consumer);
-                                        */
-
-                                    localBonus.RecalculateAffectedBuildings(ResourceManager.GetAllConsumers().Values);
+                                    // TODO: Revisar este cambio en caso de error
+                                    //localBonus.RecalculateAffectedBuildings(ResourceManager.GetAllConsumers().Values);
+                                    localBonus.RecalculateAffectedBuildings();
                                 }
                             }
                         }
                     }
-            break;
+                    break;
             }
 
             currentConstructionID++;

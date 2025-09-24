@@ -3,14 +3,15 @@ using UnityEngine;
 using ConstructionSystem;
 using System.Linq;
 using BonusSystem;
+using Unity.VisualScripting;
 
 namespace ResourceSystem {
     public static class ResourceManager
     {
         #region Variables
         static private Dictionary<Resource, ResourceClass> resources = new();
-        static private Dictionary<int, Consumer> consumers = new();
-        public static IReadOnlyDictionary<int, Consumer> AllConsumers => consumers;
+        static private Dictionary<int, ResourceBuilding> buildings = new();
+        public static IReadOnlyDictionary<int, ResourceBuilding> AllBuildings => buildings;
         #endregion
 
         #region Awake
@@ -74,7 +75,7 @@ namespace ResourceSystem {
         {
             foreach (var res in resources.Values)
             {
-                res.UpdateFromConsumers(consumers); 
+                res.UpdateFromConsumers(buildings); 
             }
             foreach (var res in resources.Values)
             {
@@ -87,7 +88,7 @@ namespace ResourceSystem {
         #region Consumers Methods
         public static bool TryAddConsumer(int id, string codeName)
         {
-            if (consumers.ContainsKey(id))
+            if (buildings.ContainsKey(id))
             {
                 Debug.LogWarning($"Consumer with ID {id} already exists.");
                 return false;
@@ -96,37 +97,37 @@ namespace ResourceSystem {
             var rates = ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
             if (rates.Values.All(v => v == 0)) return false;
 
-            consumers[id] = new Consumer(id, codeName, false);
+            buildings[id] = new ResourceBuilding(id, codeName, false);
 
             // Ahora BonusManager se encarga de verificar si este consumidor
             // está dentro de algún bonus local y de registrarlo en consecuencia.
-            BonusManager.RegisterConsumerInLocalBonuses(consumers[id]);
+            BonusManager.RegisterConsumerInLocalBonuses(buildings[id]);
             return true;
         }
 
         public static void RemoveConsumer(int id, bool recycle = false)
         {
-            if (consumers.ContainsKey(id))
+            if (buildings.ContainsKey(id))
             {
-                Consumer consumer = consumers[id];
+                ResourceBuilding building = buildings[id];
 
                 // Avisar al BonusManager que este consumidor deja de existir
-                BonusManager.UnregisterConsumerFromLocalBonuses(consumer);
+                BonusManager.UnregisterConsumerFromLocalBonuses(building);
 
                 if (recycle)
                 {
-                    var config = ConstructionConfig.Instance.ConstructionConfigs[consumer.codeName];
+                    var config = ConstructionConfig.Instance.ConstructionConfigs[building.codeName];
                     AddResource(Resource.Sand, -Mathf.Floor(config.cost[Resource.Sand] / 2));
                     AddResource(Resource.Work, config.recycleWorkCost); 
                 }
 
-                consumers.Remove(id);
+                buildings.Remove(id);
             }
         }
 
         public static void UpdateConsumers()
         {
-            foreach (var kvp in consumers.ToList())
+            foreach (var kvp in buildings.ToList())
             {
                 var consumer = kvp.Value;
 
@@ -141,25 +142,25 @@ namespace ResourceSystem {
                         r.Value >= 0 || GetAmount(r.Key) >= -r.Value);
                 }
 
-                consumers[kvp.Key] = consumer;
+                buildings[kvp.Key] = consumer;
             }
         }
 
         public static void SetConsumerActive(int id, bool isForceToStop)
         {
-            if (!consumers.ContainsKey(id)) return;
+            if (!buildings.ContainsKey(id)) return;
 
-            Consumer consumer = consumers[id];
+            ResourceBuilding consumer = buildings[id];
             consumer.isForceToStop = isForceToStop;
-            consumers[id] = consumer;
+            buildings[id] = consumer;
         }
 
-        public static Dictionary<int, Consumer> GetAllConsumers()
+        public static Dictionary<int, ResourceBuilding> GetAllConsumers()
         {
-            return consumers;
+            return buildings;
         }
 
-        public struct Consumer
+        public struct ResourceBuilding
         {
             public int id;
             public string codeName;
@@ -168,14 +169,21 @@ namespace ResourceSystem {
             public bool isOperative;
             public bool isForceToStop;
             public Vector3 Position => instance.Position;
+            public List<LocalBonus> Bonuses { get; private set; }
 
-            public Consumer(int id, string codeName, bool isOperative)
+            public ResourceBuilding(int id, string codeName, bool isOperative)
             {
                 this.id = id;
                 this.codeName = codeName;
                 this.isOperative = isOperative;
                 isForceToStop = false;
                 DualMesh.Instance.builder.constructions.TryGetValue(id, out this.instance);
+                Bonuses = new();
+            }
+
+            public void AddLocalBonus(LocalBonus bonus)
+            {
+                Bonuses.Add(bonus);
             }
         }
         #endregion

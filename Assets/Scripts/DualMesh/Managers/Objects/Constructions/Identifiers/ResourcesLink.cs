@@ -66,6 +66,7 @@ public class ResourcesLink : MonoBehaviour
         }
     }
 
+    /*
     public void RefreshAffectingProviders()
     {
         AffectingProviders.Clear();
@@ -89,6 +90,7 @@ public class ResourcesLink : MonoBehaviour
             }
         }
     }
+    */
 
     public string GetInfoString()
     {
@@ -168,7 +170,7 @@ public class ResourcesLink : MonoBehaviour
             if (detail.GlobalMultiplier != 1f)
                 sb.AppendLine($"    Global x{detail.GlobalMultiplier:0.00}");
             if (detail.LocalMultiplier != 1f)
-                sb.AppendLine($"    Local x{detail.LocalMultiplier:0.00}");
+                sb.AppendLine($"    Local x{detail.LocalMultiplier:0.00}");// (Radius {detail.Radius})");
 
             /*
             foreach (var applied in detail.AppliedBonuses)

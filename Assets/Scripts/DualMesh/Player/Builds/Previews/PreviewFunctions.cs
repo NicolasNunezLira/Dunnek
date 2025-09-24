@@ -10,11 +10,11 @@ namespace Building
         public Dictionary<Renderer, Material[]> originalTowerMaterials = new();
         private Vector3? tempWallEndPoint;
         public bool canPlaceWall = true, isWallPreviewActive, thereIsATower = false;
-        
+
         #region Handle
         public void HandleBuildPreview()
         {
-            if (DualMesh.Instance.inMode == DualMesh.PlayingMode.Build && string.IsNullOrEmpty(currentConstruction)) { HideAllPreviews(); return;}
+            if (DualMesh.Instance.inMode == DualMesh.PlayingMode.Build && string.IsNullOrEmpty(currentConstruction)) { HideAllPreviews(); return; }
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -57,7 +57,7 @@ namespace Building
                 int xMax = Mathf.Clamp(Mathf.CeilToInt(bounds.max.x / cellSize), 0, duneModel.xResolution - 1);
                 int zMin = Mathf.Clamp(Mathf.FloorToInt(bounds.min.z / cellSize), 0, duneModel.zResolution - 1);
                 int zMax = Mathf.Clamp(Mathf.CeilToInt(bounds.max.z / cellSize), 0, duneModel.zResolution - 1);
-                
+
                 switch (DualMesh.Instance.inMode)
                 {
                     case DualMesh.PlayingMode.Build:
@@ -93,8 +93,15 @@ namespace Building
                 Color color = canBuild ? green : red;
                 foreach (var rend_ in activePreview.GetComponentsInChildren<Renderer>())
                 {
-                    if (rend_.material.HasProperty("_Color"))
-                        rend_.material.color = color;
+                    Material[] mats = rend_.materials;
+
+                    for (int i = 0; i < mats.Length; i++)
+                    {
+                        if (mats[i].HasProperty("_Color"))
+                            mats[i].color = color;
+                    }
+
+                    rend_.materials = mats;
                 }
 
                 previewX = x;
@@ -128,7 +135,7 @@ namespace Building
             HideAllPreviews();
 
             activePreview = PreviewManager.Instance.actionPreviews[currentActionMode];
-           
+
             activePreview.SetActive(true);
         }
 
@@ -148,7 +155,7 @@ namespace Building
             }
         }
 
-        public void HideAllBuildsPreviews(bool clearWall=false)
+        public void HideAllBuildsPreviews(bool clearWall = false)
         {
             var buildPreviews = PreviewManager.Instance.buildPreviews;
 
@@ -160,7 +167,7 @@ namespace Building
             {
                 ClearWallPreview();
                 ClearPoints();
-            }               
+            }
         }
 
         public void RotateWallPreview()
@@ -169,7 +176,7 @@ namespace Building
 
             prefabRotation *= UnityEngine.Quaternion.Euler(0, 45f, 0);
             activePreview.transform.rotation = prefabRotation;
-        }      
+        }
         #endregion
     }
 }

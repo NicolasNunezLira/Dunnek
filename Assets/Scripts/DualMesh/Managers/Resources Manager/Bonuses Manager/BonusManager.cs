@@ -21,9 +21,10 @@ namespace BonusSystem
                 localBonuses.Add(local);
 
                 // Al añadir un bonus local, registrar consumidores ya existentes
-                foreach (var consumer in ResourceManager.AllConsumers.Values)
+                foreach (var building in ResourceManager.AllBuildings.Values)
                 {
-                    local.AddConsumerIfInRange(consumer);
+                    local.AddBuildingIfInRange(building.instance);
+                    building.AddLocalBonus(local);
                 }
             }
         }
@@ -54,7 +55,7 @@ namespace BonusSystem
         public static float ApplyBonuses(
             float baseValue,
             Resource resource,
-            ResourceManager.Consumer consumer
+            ResourceManager.ResourceBuilding building
         )
         {
             float totalPct = 0f;
@@ -69,7 +70,7 @@ namespace BonusSystem
             // Locales
             foreach (var local in localBonuses)
             {
-                if (local.Resource == resource && local.AffectsConsumer(consumer))
+                if (local.Resource == resource && local.AffectsBuilding(building.instance))
                     totalPct += local.Multiplier - 1f;
             }
 
@@ -82,7 +83,7 @@ namespace BonusSystem
         public static BonusApplicationResult ApplyBonusesDetailed(
             float baseValue,
             Resource resource,
-            ResourceManager.Consumer consumer
+            ResourceManager.ResourceBuilding building
         )
         {
             var result = new BonusApplicationResult();
@@ -114,7 +115,7 @@ namespace BonusSystem
             foreach (var l in localBonuses)
             {
                 if (l.Resource != resource) continue;
-                if (!l.AffectsConsumer(consumer)) continue;
+                if (!l.AffectsBuilding(building.instance)) continue;
 
                 float delta = l.Multiplier - 1f;
                 totalPct += delta;
@@ -125,9 +126,11 @@ namespace BonusSystem
                     ProviderId = (l as IProviderInfo)?.ProviderId,
                     ProviderName = (l as IProviderInfo)?.ProviderName,
                     Multiplier = l.Multiplier,
+                    Radius = (int?)l.Radius,
                     AppliedAmount = baseValue * delta,
-                    Description = $"Local: +{delta * 100f:0.#}% (radius {l.Radius})"
+                    Description = $"Local: +{delta * 100f:0.#}%" //(radius {l.Radius})"
                 };
+                result.Radius = (int?)l.Radius;
                 result.AppliedBonuses.Add(info);
             }
 
@@ -136,7 +139,7 @@ namespace BonusSystem
 
             // Guardar acumulados para referencia
             result.GlobalMultiplier = 1f + SumGlobalPct(resource);
-            result.LocalMultiplier = 1f + SumLocalPct(resource, consumer);
+            result.LocalMultiplier = 1f + SumLocalPct(resource, building);
 
             return result;
         }
@@ -150,36 +153,36 @@ namespace BonusSystem
             return pct;
         }
 
-        private static float SumLocalPct(Resource resource, ResourceManager.Consumer consumer)
+        private static float SumLocalPct(Resource resource, ResourceManager.ResourceBuilding building)
         {
             float pct = 0f;
             foreach (var l in localBonuses)
-                if (l.Resource == resource && l.AffectsConsumer(consumer))
+                if (l.Resource == resource && l.AffectsBuilding(building.instance))
                     pct += l.Multiplier - 1f;
             return pct;
         }
         #endregion
 
         #region - Consumers
-        public static void RegisterConsumerInLocalBonuses(ResourceManager.Consumer consumer)
+        public static void RegisterConsumerInLocalBonuses(ResourceManager.ResourceBuilding building)
         {
             foreach (var local in localBonuses)
             {
-                local.AddConsumerIfInRange(consumer);
+                local.AddBuildingIfInRange(building.instance);
             }
         }
 
-        public static void UnregisterConsumerFromLocalBonuses(ResourceManager.Consumer consumer)
+        public static void UnregisterConsumerFromLocalBonuses(ResourceManager.ResourceBuilding building)
         {
             foreach (var local in localBonuses)
             {
-                local.RemoveConsumer(consumer);
+                local.RemoveBuilding(building.instance);
             }
         }
 
         public static void RemoveLocalBonusesByProvider(GameObject providerObj)
         {
-            localBonuses.RemoveAll(lb => lb.Obj == providerObj);
+            localBonuses.RemoveAll(lb => lb.Building.Obj == providerObj);
         }
         #endregion
 
@@ -187,12 +190,5 @@ namespace BonusSystem
         public static IEnumerable<GlobalBonus> GetGlobalBonuses() => globalBonuses;
         public static IEnumerable<LocalBonus> GetLocalBonuses() => localBonuses;
         #endregion
-    }
-
-    public interface IProviderInfo
-    {
-        int? ProviderId { get; }
-        string ProviderName { get; }
-        GameObject ProviderObject { get; }
     }
 }

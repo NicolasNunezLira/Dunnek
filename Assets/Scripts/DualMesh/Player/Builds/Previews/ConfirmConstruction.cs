@@ -43,7 +43,11 @@ namespace Building
             if (wasBuilt)
             {
                 currentConstruction = null;
+                prefabRotation = UnityEngine.Quaternion.identity;
+
                 // Actualizar la ui
+                UIController.Instance.UpdateSelectedVisual(currentConstruction);
+
                 return true;
             }
             return false;

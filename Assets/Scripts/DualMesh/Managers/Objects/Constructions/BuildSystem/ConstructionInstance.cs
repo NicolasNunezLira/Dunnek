@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System.Text.RegularExpressions;
 using DunefieldModel_DualMesh;
+using BonusSystem;
+using Unity.VisualScripting;
 
 namespace ConstructionSystem
 {
@@ -23,6 +25,7 @@ namespace ConstructionSystem
         public float timeBuilt;
         public bool isBuried = false;
         public int? groupId = null;
+        public Dictionary<int, List<LocalBonus>> AffectingBonuses { get; private set; } = new();
         #endregion
 
         #region Constructor
@@ -217,6 +220,60 @@ namespace ConstructionSystem
             }
         }
         #endregion
+
+        #region - Bonus Manegement
+        public void AddAffectingBonus(LocalBonus bonus)
+        {
+            int buildingId = bonus.Building.id;
+            if (!AffectingBonuses.ContainsKey(buildingId))
+            {
+                AffectingBonuses[buildingId] = new List<LocalBonus>
+                {
+                    bonus
+                };
+            }
+            else
+            {
+                AffectingBonuses[buildingId].Add(bonus);
+            }
+        }
+
+        public void RemoveAffectingBonus(LocalBonus bonus)
+        {
+            int buildingId = bonus.Building.id;
+            if (AffectingBonuses.ContainsKey(buildingId))
+            {
+                AffectingBonuses[buildingId].Remove(bonus);
+                if (AffectingBonuses[buildingId].Count == 0)
+                {
+                    AffectingBonuses.Remove(buildingId);
+                }
+            }
+        }
+
+        public bool IsAffectingByAnyBonus()
+        {
+            return AffectingBonuses.Count > 0;
+        }
+        #endregion
+
+        /*
+        #region Utilities
+        /// <summary>
+        /// Método para verificar todos los bonuses locales y registrar los que afectan esta construcción.
+        /// </summary>
+        public void CheckAndRegisterBonuses()
+        {
+            foreach (var bonus in BonusManager.GetLocalBonuses())
+            {
+                if (bonus.AffectsConstruction(this) && bonus is IProviderInfo provider && provider.ProviderObject != null)
+                {
+                    AddAffectingBonus(bonus);
+                }
+            }
+        }
+        #endregion
+        */
 
         #region Destroy
         //public abstract void OnDestroy();

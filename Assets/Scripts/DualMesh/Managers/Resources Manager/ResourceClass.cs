@@ -46,7 +46,7 @@ namespace ResourceSystem
         /// Recalcula producers y producersDetailed usando la lista de consumers activos.
         /// Llama a BonusManager.ApplyBonusesDetailed para obtener el breakdown.
         /// </summary>
-        public void UpdateFromConsumers(Dictionary<int, ResourceManager.Consumer> consumers)
+        public void UpdateFromConsumers(Dictionary<int, ResourceManager.ResourceBuilding> consumers)
         {
             producers.Clear();
             producersDetailed.Clear();

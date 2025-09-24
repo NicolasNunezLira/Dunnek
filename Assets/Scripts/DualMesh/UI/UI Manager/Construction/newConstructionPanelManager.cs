@@ -174,6 +174,8 @@ public class UIController : Singleton<UIController>
 
     public void UpdateSelectedVisual(string selectedID)
     {
+        currentConstruction = selectedID;
+        
         foreach (var kvp in constructionButtons)
             kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
     }

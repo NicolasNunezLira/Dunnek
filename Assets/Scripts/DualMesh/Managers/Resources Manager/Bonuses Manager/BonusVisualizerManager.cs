@@ -4,17 +4,27 @@ using Utils;
 
 public class BonusVisualizerManager : Singleton<BonusVisualizerManager>
 {
-    private readonly List<BonusMarker> activeMarkers = new();
+    private readonly List<(GameObject obj, int originalLayer)> highlightedObjects = new();
     private readonly List<BonusRadiusVisualizer> activeRadii = new();
 
-    public void RegisterMarker(BonusMarker marker) => activeMarkers.Add(marker);
+    public void RegisterHighlightedObject(GameObject obj)
+    {
+        bool alreadyRegistered = highlightedObjects.Exists(x => x.obj == obj);
+        if (!alreadyRegistered)
+            highlightedObjects.Add((obj, obj.layer));
+    }
+    
     public void RegisterRadius(BonusRadiusVisualizer radius) => activeRadii.Add(radius);
 
     public void ClearVisuals()
     {
-        foreach (var m in activeMarkers) m?.HideMarker();
+        foreach (var (obj, originalLayer) in highlightedObjects)
+        {
+            if (obj != null)
+                RecursivelyFunctions.SetLayerRecursively(obj, originalLayer);
+        }
         foreach (var r in activeRadii) r?.HideRadius();
-        activeMarkers.Clear();
+        highlightedObjects.Clear();
         activeRadii.Clear();
     }
 }
