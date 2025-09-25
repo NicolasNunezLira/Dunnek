@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BonusSystem;
 using ResourceSystem;
 using UnityEngine;
@@ -26,17 +27,13 @@ public class ClickeableObject : MonoBehaviour
 
         if (link == null) return;
 
-        if (link.IsConsumer && link.ConsumerId.HasValue)
+        if (link.Building.IsAffectingByAnyBonus())
         {
-            var consumer = ResourceManager.AllBuildings[link.ConsumerId.Value];
-
-            foreach (var local in BonusManager.GetLocalBonuses())
+            foreach (var (_, bonusesList) in link.Building.AffectingBonuses)
             {
-                if (local.AffectsBuilding(consumer.instance) &&
-                    local is IProviderInfo provider && provider.ProviderBuilding.Obj != null
-                    && !isClicked)
+                foreach (var bonus in bonusesList)
                 {
-                    GameObject obj = provider.ProviderBuilding.Obj;
+                    GameObject obj = bonus.Building.Obj;
 
                     BonusVisualizerManager.Instance.RegisterHighlightedObject(obj);
 
@@ -44,6 +41,26 @@ public class ClickeableObject : MonoBehaviour
                 }
             }
         }
+        /*
+            if (link.IsConsumer && link.ConsumerId.HasValue)
+            {
+                var consumer = ResourceManager.AllBuildings[link.ConsumerId.Value];
+
+                foreach (var local in BonusManager.GetLocalBonuses())
+                {
+                    if (local.AffectsBuilding(consumer.instance) &&
+                        local is IProviderInfo provider && provider.ProviderBuilding.Obj != null
+                        && !isClicked)
+                    {
+                        GameObject obj = provider.ProviderBuilding.Obj;
+
+                        BonusVisualizerManager.Instance.RegisterHighlightedObject(obj);
+
+                        RecursivelyFunctions.SetLayerRecursively(obj, 12);
+                    }
+                }
+            }
+            */
 
 
         if (link.IsBonusProvider && link.LocalBonuses.Count > 0)

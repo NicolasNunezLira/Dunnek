@@ -203,13 +203,14 @@ namespace Building
                     {
                         link = obj.GetComponent<ResourcesLink>();
                         if (link != null) link.Init(
+                            instance,
                             codeName,
                             currentConstructionID);
                     }
                     break;
                 case ConstructionCategory.BonusProvider:
                     link = obj.GetComponent<ResourcesLink>();
-                    if (link != null) link.Init(codeName);
+                    if (link != null) link.Init(instance, codeName);
 
                     var config = configs[codeName];
                     if (config.bonusList != null)

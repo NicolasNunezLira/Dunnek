@@ -3,12 +3,11 @@ using ResourceSystem;
 using ConstructionSystem;
 using System.Collections.Generic;
 using System.Text;
-using System;
 using BonusSystem;
-using Building;
 
 public class ResourcesLink : MonoBehaviour
 {
+    public ConstructionInstance Building { get; private set; }
     public int? ConsumerId { get; private set; }
     public bool IsConsumer { get; private set; }
     public bool IsBonusProvider { get; private set; }
@@ -21,10 +20,13 @@ public class ResourcesLink : MonoBehaviour
 
     private string codeName;
 
-    public void Init(string codeName, int? consumerId = null)
+    #region - Initializer
+
+    public void Init(ConstructionInstance instance, string codeName, int? consumerId = null)
     {
         this.codeName = codeName;
         ConsumerId = consumerId;
+        Building = instance;
 
         var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
         rates = config.rate;
@@ -65,6 +67,7 @@ public class ResourcesLink : MonoBehaviour
             }
         }
     }
+    #endregion
 
     /*
     public void RefreshAffectingProviders()
@@ -92,6 +95,7 @@ public class ResourcesLink : MonoBehaviour
     }
     */
 
+    #region - Information for tooltip
     public string GetInfoString()
     {
         StringBuilder sb = new StringBuilder();
@@ -139,7 +143,7 @@ public class ResourcesLink : MonoBehaviour
 
         return sb.Length > 0 ? sb.ToString() : null;
     }
-    
+
     public string GetInfoStringWithBonuses()
     {
         if (ConsumerId == null)
@@ -180,6 +184,7 @@ public class ResourcesLink : MonoBehaviour
 
         return sb.ToString();
     }
+    #endregion
 }
 
     /*
