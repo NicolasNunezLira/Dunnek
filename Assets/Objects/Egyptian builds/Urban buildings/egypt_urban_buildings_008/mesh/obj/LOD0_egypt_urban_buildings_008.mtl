@@ -1,0 +1,37 @@
+# Blender MTL File: 'Enterables_egypt_urban_buildings_01.blend'
+# Material Count: 3
+
+newmtl fabric
+Ns 39.558406
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.500000 D:\\CG\\Praca\\Enterables\\Dots_Textures\\fabric\\fabric_n.png
+
+newmtl mud
+Ns 708.599275
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.500000 D:\\CG\\Praca\\Enterables\\Dots_Textures\\mud\\mud_n.png
+map_Ns D:\\CG\\Praca\\Enterables\\Dots_Textures\\mud\\mud_r.png
+
+newmtl sandstone
+Ns 708.599275
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\CG\\Praca\\Enterables\\Dots_Textures\\sandstone\\sandstone_n.png
+map_Ns D:\\CG\\Praca\\Enterables\\Dots_Textures\\sandstone\\sandstone_r.png
