@@ -18,13 +18,14 @@ public class TooltipManager : Singleton<TooltipManager>
     private RectTransform tooltipUI;
     private ScrollRect scrollRect;
     private TextMeshProUGUI tooltipTitle, tooltipInfo;
-    private Button toggleButton;   
+    private Button toggleButton;
     private Transform target;
     private Camera mainCamera;
 
     private int currentConsumerId = -1;
-    private bool isForceToStop, justOpened = false;   
+    private bool isForceToStop, justOpened = false;
 
+    #region - Awake
     protected override void Awake()
     {
         base.Awake();
@@ -43,7 +44,6 @@ public class TooltipManager : Singleton<TooltipManager>
                 tooltipTitle = texts[0];
                 tooltipInfo = texts[1];
             }
-            // Busca el botón dentro del prefab
             toggleButton = tooltipInstance.GetComponentInChildren<Button>(true);
             if (toggleButton != null)
                 toggleButton.onClick.AddListener(ToggleProduction);
@@ -55,7 +55,9 @@ public class TooltipManager : Singleton<TooltipManager>
             Debug.LogError("TooltipManager: No hay prefab asignado.");
         }
     }
+    #endregion
 
+    #region - Update
     private void Update()
     {
         if (target != null && tooltipUI != null)
@@ -95,7 +97,9 @@ public class TooltipManager : Singleton<TooltipManager>
             }
         }
     }
+    #endregion
 
+    #region - Show tooltip
     public void ShowTooltip(Transform worldTarget, string title, string info, int? consumerId = null)
     {
         target = worldTarget;
@@ -125,10 +129,12 @@ public class TooltipManager : Singleton<TooltipManager>
         }
 
         justOpened = true;
-        
+
         LayoutRebuilder.ForceRebuildLayoutImmediate(tooltipUI);
     }
+    #endregion
 
+    #region - Hide Tooltip
     public void HideTooltip()
     {
         target = null;
@@ -138,9 +144,12 @@ public class TooltipManager : Singleton<TooltipManager>
 
         currentConsumerId = -1;
     }
+    #endregion
 
+    #region - Toggle Production
     private void ToggleProduction()
     {
+        Debug.Log("Toggle production activado");
         if (currentConsumerId < 0) return;
 
         var consumers = ResourceManager.GetAllConsumers();
@@ -149,10 +158,12 @@ public class TooltipManager : Singleton<TooltipManager>
         var consumer = consumers[currentConsumerId];
         bool newState = !consumer.isForceToStop;
 
-        ResourceManager.SetConsumerActive(currentConsumerId, newState);
+        ResourceManager.SetBuildingActive(currentConsumerId, newState);
         UpdateButtonText();
     }
+    #endregion
 
+    #region - Update Button Text
     private void UpdateButtonText()
     {
         if (toggleButton == null) return;
@@ -165,4 +176,5 @@ public class TooltipManager : Singleton<TooltipManager>
         if (textComp != null)
             textComp.text = consumer.isForceToStop ? "Activar producción" : "Forzar detención";
     }
+    #endregion
 }

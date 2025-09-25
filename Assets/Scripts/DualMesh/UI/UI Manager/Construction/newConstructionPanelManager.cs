@@ -37,7 +37,7 @@ public class UIController : Singleton<UIController>
     private Dictionary<string, Button> tabButtons = new();
 
     public string currentCategory { get; private set; } = "Housing";
-    public string currentConstruction { get; private set; }
+    public string currentBuilding { get; private set; }
     public string currentAction { get; private set; }
 
     private Color selectedColor = Color.green;
@@ -91,6 +91,7 @@ public class UIController : Singleton<UIController>
         ShowCategory(currentCategory);
         DualMesh.Instance.SetMode(DualMesh.PlayingMode.Build);
         UpdateMainButtonVisuals(DualMesh.Instance.inMode);
+        TooltipManager.Instance.HideTooltip();
     }
 
     public void UpdateMainButtonVisuals(DualMesh.PlayingMode mode)
@@ -164,7 +165,7 @@ public class UIController : Singleton<UIController>
         var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
         Debug.Log($"Construcción seleccionada: {config.codeName} ({config.category})");
 
-        currentConstruction = codeName;
+        currentBuilding = codeName;
         currentCategory = config.category.ToString();
         
         DualMesh.Instance.SetBuildType(codeName);
@@ -174,7 +175,7 @@ public class UIController : Singleton<UIController>
 
     public void UpdateSelectedVisual(string selectedID)
     {
-        currentConstruction = selectedID;
+        currentBuilding = selectedID;
         
         foreach (var kvp in constructionButtons)
             kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
@@ -221,6 +222,8 @@ public class UIController : Singleton<UIController>
 
     void OnActionOptionClicked(string id)
     {
+        currentAction = id;
+
         if (!actionButtons.ContainsKey(id)) return;
 
         switch (id)
@@ -244,6 +247,8 @@ public class UIController : Singleton<UIController>
 
     public void UpdateActionsButtonVisual(string selectedID)
     {
+        currentAction = selectedID;
+        
         foreach (var kvp in actionButtons)
             kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
     }

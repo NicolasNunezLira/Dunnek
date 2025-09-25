@@ -70,7 +70,7 @@
         "recycleWorkCost": -10,
         "duration": 1000,
         "prefabs": [
-            { "part": "building", "path": "Prefabs/Cantera" }
+            { "part": "building", "path": "Prefabs/LOD0_egypt_urban_buildings_004" }
         ]
     },
     {
@@ -102,7 +102,7 @@
         "recycleWorkCost": 20,
         "duration": 1000,
         "prefabs": [
-            { "part": "building", "path": "Prefabs/Dunek TorreArena" }
+            { "part": "building", "path": "Prefabs/LOD0_egypt_monuments_001" }
         ]
     }
   ]

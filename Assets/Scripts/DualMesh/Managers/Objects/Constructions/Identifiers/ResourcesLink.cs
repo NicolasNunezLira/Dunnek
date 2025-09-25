@@ -144,6 +144,7 @@ public class ResourcesLink : MonoBehaviour
         return sb.Length > 0 ? sb.ToString() : null;
     }
 
+
     public string GetInfoStringWithBonuses()
     {
         if (ConsumerId == null)
@@ -176,15 +177,17 @@ public class ResourcesLink : MonoBehaviour
             if (detail.LocalMultiplier != 1f)
                 sb.AppendLine($"    Local x{detail.LocalMultiplier:0.00}");// (Radius {detail.Radius})");
 
-            /*
-            foreach (var applied in detail.AppliedBonuses)
-                sb.AppendLine($"    - {applied.ProviderName} ({applied.OriginType}) x{applied.Multiplier:0.00}");
-            */
+            
+            //foreach (var applied in detail.AppliedBonuses)
+            //    sb.AppendLine($"    - {applied.ProviderName} ({applied.OriginType}) x{applied.Multiplier:0.00}");
+            
         }
 
         return sb.ToString();
     }
+
     #endregion
+
 }
 
     /*

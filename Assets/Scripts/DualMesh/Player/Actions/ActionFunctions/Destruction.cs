@@ -123,6 +123,7 @@ namespace Building
 
             toDestroy = null;
             idToDestroy = -1;
+            UIController.Instance.UpdateActionsButtonVisual("");
             return true;
         }
 

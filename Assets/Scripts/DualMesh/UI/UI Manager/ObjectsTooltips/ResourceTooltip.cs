@@ -20,7 +20,7 @@ public class ResourceTooltip : MonoBehaviour
     private void ToggleProduction()
     {
         isActive = !isActive;
-        ResourceSystem.ResourceManager.SetConsumerActive(consumerID, isActive);
+        ResourceSystem.ResourceManager.SetBuildingActive(consumerID, isActive);
         UpdateButtonText();
     }
 

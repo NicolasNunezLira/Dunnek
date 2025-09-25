@@ -10,9 +10,9 @@ public class ResourceUI : MonoBehaviour
     void Update()
     {
         var work = ResourceManager.GetAllResources()[Resource.Work];
-        workersText.text = $"Work: {work.Amount} ({work.Rate})";
+        workersText.text = $"Work: {work.Amount:0.00} ({work.Rate:0.00})";
 
         var sand = ResourceManager.GetAllResources()[Resource.Sand];
-        sandText.text = $"Sand: {sand.Amount} ({sand.Rate})";
+        sandText.text = $"Sand: {sand.Amount:0.00} ({sand.Rate:0.00})";
     }
 }   

@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using BonusSystem;
-using ResourceSystem;
 using UnityEngine;
 using Utils;
+using UnityEngine.EventSystems;
 
 public class ClickeableObject : MonoBehaviour
 {
@@ -27,7 +25,7 @@ public class ClickeableObject : MonoBehaviour
 
         if (link == null) return;
 
-        if (link.Building.IsAffectingByAnyBonus())
+        if (link.Building.IsAffectingByAnyBonus() && !isClicked)
         {
             foreach (var (_, bonusesList) in link.Building.AffectingBonuses)
             {
@@ -41,31 +39,10 @@ public class ClickeableObject : MonoBehaviour
                 }
             }
         }
-        /*
-            if (link.IsConsumer && link.ConsumerId.HasValue)
-            {
-                var consumer = ResourceManager.AllBuildings[link.ConsumerId.Value];
-
-                foreach (var local in BonusManager.GetLocalBonuses())
-                {
-                    if (local.AffectsBuilding(consumer.instance) &&
-                        local is IProviderInfo provider && provider.ProviderBuilding.Obj != null
-                        && !isClicked)
-                    {
-                        GameObject obj = provider.ProviderBuilding.Obj;
-
-                        BonusVisualizerManager.Instance.RegisterHighlightedObject(obj);
-
-                        RecursivelyFunctions.SetLayerRecursively(obj, 12);
-                    }
-                }
-            }
-            */
-
 
         if (link.IsBonusProvider && link.LocalBonuses.Count > 0)
         {
-            radiusVisualizer = GetComponent<BonusRadiusVisualizer>();
+            radiusVisualizer = GetComponentInChildren<BonusRadiusVisualizer>();
             if (radiusVisualizer != null)
             {
                 foreach (var l in link.LocalBonuses)
@@ -84,6 +61,11 @@ public class ClickeableObject : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && isInitialized)
         {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit))
