@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using ConstructionSystem;
 using System.Linq;
 using Utils;
+using ResourceSystem;
+using System;
 public class UIController : Singleton<UIController>
 {
     [Header("Main Buttons")]
@@ -91,6 +93,7 @@ public class UIController : Singleton<UIController>
         ShowCategory(currentCategory);
         DualMesh.Instance.SetMode(DualMesh.PlayingMode.Build);
         UpdateMainButtonVisuals(DualMesh.Instance.inMode);
+        BonusVisualizerManager.Instance.ClearVisuals();
         TooltipManager.Instance.HideTooltip();
     }
 
@@ -136,6 +139,20 @@ public class UIController : Singleton<UIController>
 
         // listener
         btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName));
+
+        foreach (Transform child in btnRef.costPanel)
+            Destroy(child.gameObject);
+
+        foreach ((Resource resType, float amount) in config.cost)
+        {
+            GameObject slotGO = Instantiate(btnRef.resourceSlotPrefab, btnRef.costPanel);
+            var slotImage = slotGO.GetComponentInChildren<UnityEngine.UI.Image>();
+            var slotText = slotGO.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+
+            slotText.text = Math.Abs(amount).ToString();
+
+            slotImage.sprite = ResourceIconLibrary.Instance.GetIcon(resType);
+        }
 
         constructionButtons[config.codeName] = btnRef;
     }

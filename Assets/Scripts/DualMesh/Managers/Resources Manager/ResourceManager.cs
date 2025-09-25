@@ -362,6 +362,13 @@ namespace ResourceSystem
             {
                 Bonuses.Add(bonus);
             }
+
+            public void RemoveLocalBonus(LocalBonus bonus)
+            {
+                if (Bonuses.Contains(bonus))
+                    Bonuses.Remove(bonus);
+            }
+
         }
         #endregion
     }

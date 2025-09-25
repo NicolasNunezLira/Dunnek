@@ -33,6 +33,8 @@ public class ClickeableObject : MonoBehaviour
                 {
                     GameObject obj = bonus.Building.Obj;
 
+                    if (obj == null) continue;
+
                     BonusVisualizerManager.Instance.RegisterHighlightedObject(obj);
 
                     RecursivelyFunctions.SetLayerRecursively(obj, 12);

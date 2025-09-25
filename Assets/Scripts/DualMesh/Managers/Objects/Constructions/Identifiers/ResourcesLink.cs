@@ -7,135 +7,100 @@ using BonusSystem;
 
 public class ResourcesLink : MonoBehaviour
 {
+    #region - Properties
     public ConstructionInstance Building { get; private set; }
     public int? ConsumerId { get; private set; }
     public bool IsConsumer { get; private set; }
     public bool IsBonusProvider { get; private set; }
 
-    public Dictionary<Resource, float> rates { get; private set; }
-    public List<ConstructionConfig.BonusEntry> bonus { get; private set; }
+    public Dictionary<Resource, float> Rates { get; private set; }
+    public List<ConstructionConfig.BonusEntry> AllBonuses { get; private set; }
     public List<ConstructionConfig.BonusEntry> GlobalBonuses { get; private set; }
     public List<ConstructionConfig.BonusEntry> LocalBonuses { get; private set; }
-    public List<ConstructionInstance> AffectingProviders { get; private set; }
+    #endregion
 
     private string codeName;
 
     #region - Initializer
-
     public void Init(ConstructionInstance instance, string codeName, int? consumerId = null)
     {
         this.codeName = codeName;
-        ConsumerId = consumerId;
         Building = instance;
+        ConsumerId = consumerId;
 
         var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
-        rates = config.rate;
-        bonus = config.bonusList;
+        Rates = config.rate;
+        AllBonuses = config.bonusList;
 
-        // Determinar si es consumidor
-        IsConsumer = false;
-        if (rates != null)
-        {
-            foreach (float value in rates.Values)
-            {
-                if (value < 0)
-                {
-                    IsConsumer = true;
-                    break;
-                }
-            }
-        }
+        // Consumidor si alguna tasa es negativa
+        IsConsumer = Rates != null && HasConsumption(Rates);
 
-        // Determinar si es proveedor de bonus
-        IsBonusProvider = bonus != null && bonus.Count > 0;
-
+        // Proveedor de bonus si tiene lista
+        IsBonusProvider = AllBonuses != null && AllBonuses.Count > 0;
         if (IsBonusProvider)
         {
             GlobalBonuses = new List<ConstructionConfig.BonusEntry>();
             LocalBonuses = new List<ConstructionConfig.BonusEntry>();
 
-            foreach (var b in bonus)
+            foreach (var b in AllBonuses)
             {
                 if (b.bonusType == "Global")
-                {
                     GlobalBonuses.Add(b);
-                }
                 else if (b.bonusType == "Local")
-                {
                     LocalBonuses.Add(b);
-                }
             }
         }
+    }
+
+    private bool HasConsumption(Dictionary<Resource, float> rates)
+    {
+        foreach (float value in rates.Values)
+        {
+            if (value < 0f) return true;
+        }
+        return false;
     }
     #endregion
 
-    /*
-    public void RefreshAffectingProviders()
-    {
-        AffectingProviders.Clear();
-
-        if (ConsumerId == null) return;
-
-        var consumers = ResourceManager.GetAllConsumers();
-        if (!consumers.ContainsKey(ConsumerId.Value)) return;
-
-        var consumer = consumers[ConsumerId.Value];
-
-        foreach (var local in BonusManager.GetLocalBonuses())
-        {
-            if (local.AffectsConsumer(consumer))
-            {
-                var providerId = (local as IProviderInfo)?.ProviderId;
-                if (providerId != null && DualMesh.Instance.builder.constructions.TryGetValue(providerId.Value, out var providerInstance))
-                {
-                    AffectingProviders.Add(providerInstance);
-                }
-            }
-        }
-    }
-    */
-
-    #region - Information for tooltip
+    #region - Tooltip Info
     public string GetInfoString()
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
-        if (rates != null && rates.Count > 0)
+        // Producción/consumo base
+        if (Rates != null && Rates.Count > 0)
         {
-            sb.AppendLine("Production rates:");
-            foreach (var kvp in rates)
+            sb.AppendLine("<b>Base rates:</b>");
+            foreach (var (resource, value) in Rates)
             {
-                Resource resource = kvp.Key;
-                float value = kvp.Value;
-
                 if (Mathf.Approximately(value, 0f)) continue;
-
                 string sign = value > 0 ? "+" : "-";
                 sb.AppendLine($"• {sign}{Mathf.Abs(value)} {resource}");
             }
+            sb.AppendLine();
         }
 
-        // Mostrar bonus
+        // Proveedor de bonus
         if (IsBonusProvider)
         {
             if (GlobalBonuses.Count > 0)
             {
-                sb.AppendLine("Global bonuses:");
+                sb.AppendLine("<b>Global bonuses:</b>");
                 foreach (var g in GlobalBonuses)
                 {
-                    foreach (var effects in g.effects)
-                        sb.AppendLine($"• {effects.resource} {effects.pct * 100}%");
+                    foreach (var e in g.effects)
+                        sb.AppendLine($"• {e.resource} {e.pct * 100:0.#}%");
                 }
                 sb.AppendLine();
             }
 
             if (LocalBonuses.Count > 0)
             {
-                sb.AppendLine("Local bonuses:");
+                sb.AppendLine("<b>Local bonuses:</b>");
                 foreach (var l in LocalBonuses)
                 {
-                    foreach (var effects in l.effects)
-                        sb.AppendLine($"• {effects.resource} {effects.pct * 100}% (radius {l.radius})");
+                    foreach (var e in l.effects)
+                        sb.AppendLine($"• {e.resource} {e.pct * 100:0.#}% (radius {l.radius})");
                 }
                 sb.AppendLine();
             }
@@ -144,89 +109,98 @@ public class ResourcesLink : MonoBehaviour
         return sb.Length > 0 ? sb.ToString() : null;
     }
 
-
     public string GetInfoStringWithBonuses()
     {
+        // Si no es consumidor → mostrar solo info de provider
         if (ConsumerId == null)
-            return GetInfoString(); // si no es consumidor, mostramos lo mismo que antes
+        {
+            var sbProvider = new StringBuilder();
 
+            if (IsBonusProvider)
+            {
+                if (GlobalBonuses.Count > 0)
+                {
+                    sbProvider.AppendLine("<b>Global:</b>");
+                    foreach (var g in GlobalBonuses)
+                    {
+                        foreach (var e in g.effects)
+                        {
+                            string sign = e.pct >= 0 ? "+" : "-";
+                            sbProvider.AppendLine($"- {sign}{Mathf.Abs(e.pct * 100):0.#}% {FormatEffect(e)}");
+                        }
+                    }
+                    sbProvider.AppendLine();
+                }
+
+                if (LocalBonuses.Count > 0)
+                {
+                    sbProvider.AppendLine("<b>Local:</b>");
+                    foreach (var l in LocalBonuses)
+                    {
+                        sbProvider.AppendLine($"(Radius {l.radius})");
+                        foreach (var e in l.effects)
+                        {
+                            string sign = e.pct >= 0 ? "+" : "-";
+                            sbProvider.AppendLine($"- {sign}{Mathf.Abs(e.pct * 100):0.#}% {FormatEffect(e)}");
+                        }
+                    }
+                    sbProvider.AppendLine();
+                }
+            }
+
+            return sbProvider.ToString();
+        }
+
+        // Si es consumidor → mostrar tasas finales y bonuses aplicados
         var sb = new StringBuilder();
-
-        // Obtenemos el consumer desde ResourceManager
         var consumers = ResourceManager.GetAllConsumers();
-        if (!consumers.ContainsKey(ConsumerId.Value))
+
+        if (!consumers.TryGetValue(ConsumerId.Value, out var consumer))
             return GetInfoString();
 
-        var consumer = consumers[ConsumerId.Value];
-
-        sb.AppendLine("<b>Production rates:</b>");
+        sb.AppendLine("<b>Effective rates:</b>");
 
         foreach (var (resource, baseRate) in consumer.rates)
         {
             if (Mathf.Approximately(baseRate, 0f)) continue;
 
-            // usamos el cálculo detallado
             var detail = BonusManager.ApplyBonusesDetailed(baseRate, resource, consumer);
 
             string sign = detail.FinalValue > 0 ? "+" : "-";
             sb.AppendLine($"• {resource}: {sign}{Mathf.Abs(detail.FinalValue):0.00}");
 
-            // extra: mostrar desglose
-            if (detail.GlobalMultiplier != 1f)
-                sb.AppendLine($"    Global x{detail.GlobalMultiplier:0.00}");
-            if (detail.LocalMultiplier != 1f)
-                sb.AppendLine($"    Local x{detail.LocalMultiplier:0.00}");// (Radius {detail.Radius})");
+            // Desglose por bonus aplicado → porcentaje en vez de multiplicador
+            foreach (var applied in detail.AppliedBonuses)
+            {
+                float pct = (applied.Multiplier - 1f) * 100f;
+                if (Mathf.Approximately(pct, 0f)) continue;
 
-            
-            //foreach (var applied in detail.AppliedBonuses)
-            //    sb.AppendLine($"    - {applied.ProviderName} ({applied.OriginType}) x{applied.Multiplier:0.00}");
-            
+                string pctSign = pct >= 0 ? "+" : "-";
+                //sb.AppendLine($"    - {applied.ProviderName} ({applied.OriginType}) {pctSign}{Mathf.Abs(pct):0.#}%");
+                sb.AppendLine($"    - {pctSign}{Mathf.Abs(pct):0.#}%");
+            }
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Convierte un efecto a string legible (ej: "producción trabajo" o "consumo arena")
+    /// </summary>
+    private string FormatEffect(ConstructionConfig.BonusEffect e)
+    {
+        // Heurística: si pct es positivo y recurso es producido, llamarlo producción,
+        // si es negativo y recurso es consumido, llamarlo consumo.
+        // Ajusta según tu lógica de negocio.
+        return (e.pct >= 0 ? "producción" : "consumo") + $" {e.resource}";
     }
 
     #endregion
 
+    #region - On destroy
+    private void OnDestroy()
+    {
+        if (IsBonusProvider) BonusManager.RemoveBonusesByProvider(gameObject);
+    }
+    #endregion
 }
-
-    /*
-    public int ConsumerId { get; private set; }
-    public bool IsConsumer { get; private set; }
-    public Dictionary<Resource, float> rates { get; private set; }
-
-    public void Init(int consumerId, string codeName)
-    {
-        ConsumerId = consumerId;
-        rates = ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
-        IsConsumer = false;
-        foreach (float value in rates.Values)
-        {
-            if (value < 0)
-            {
-                IsConsumer = true;
-                break;
-            }
-        }
-    }
-
-    public string GetInfoString()
-    {
-        if (rates == null || rates.Count == 0) return null;
-
-        StringBuilder sb = new StringBuilder();
-
-        foreach (var kvp in rates)
-        {
-            Resource resource = kvp.Key;
-            float value = kvp.Value;
-
-            if (Mathf.Approximately(value, 0f)) continue;
-
-            string sign = value > 0 ? "+" : "-";
-            sb.AppendLine($"{sign}{Mathf.Abs(value)} {resource}");
-        }
-
-        return sb.ToString();
-    }
-    */

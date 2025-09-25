@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using System.Text.RegularExpressions;
 using ConstructionSystem;
 using ResourceSystem;
+using BonusSystem;
 
 namespace Building
 {
@@ -76,6 +77,12 @@ namespace Building
 
             ResourceManager.RemoveConsumer(idToDestroy, recycle: true);
 
+            ResourcesLink link = data.Obj.GetComponent<ResourcesLink>();
+            if (link != null && link.IsBonusProvider)
+            {
+                BonusSystem.BonusManager.RemoveBonusesByProvider(toDestroy);
+            }
+
             // Liberar celdas ocupadas
             foreach (int2 coord in data.Support)
             {
@@ -103,14 +110,6 @@ namespace Building
                 duneModel.terrainShadow[cx, cz] = duneModel.terrain[cx, cz]; // restaura altura original
                 duneModel.ActivateCell(cx, cz);
                 duneModel.UpdateShadow(cx, cz, duneModel.dx, duneModel.dz);
-            }
-
-            ResourcesLink link = toDestroy.GetComponent<ResourcesLink>();
-
-            if (link != null && link.IsBonusProvider)
-            {
-                // Remover todos los bonuses locales que esta construcción proveía
-                BonusSystem.BonusManager.RemoveLocalBonusesByProvider(toDestroy);
             }
 
 

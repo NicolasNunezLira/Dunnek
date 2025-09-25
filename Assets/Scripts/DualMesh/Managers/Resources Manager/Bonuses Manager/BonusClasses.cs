@@ -33,9 +33,16 @@ namespace BonusSystem
             Building = building;
         }
 
-        public abstract float Apply(
-            float baseValue, ConstructionInstance consumer
-        );
+        /// <summary>
+        /// Aplica el bonus solo si corresponde al signo (positivo/negativo) y al Target.
+        /// </summary>
+        public abstract float Apply(float baseValue, ConstructionInstance consumer);
+
+        protected bool ShouldAffect(float baseValue)
+        {
+            return (Target == BonusTarget.Production && baseValue > 0f) ||
+                   (Target == BonusTarget.Consumption && baseValue < 0f);
+        }
     }
     #endregion
 
@@ -50,6 +57,7 @@ namespace BonusSystem
 
         public override float Apply(float baseValue, ConstructionInstance consumer)
         {
+            if (!ShouldAffect(baseValue)) return baseValue;
             return baseValue * Multiplier;
         }
     }
@@ -79,81 +87,59 @@ namespace BonusSystem
             ProviderBuilding = building;
         }
 
-        /*
-        public void AddConsumerIfInRange(ResourceManager.Consumer consumer)
-        {
-            Vector2 pos = new Vector2(consumer.instance.Position.x, consumer.instance.Position.z);
-            if (IsWithinRadius(sourcePos, pos, Radius) && !affectedBuildings.Contains(consumer))
-            {
-                affectedBuildings.Add(consumer);
-            }
-        }
-        */
         public void AddBuildingIfInRange(ConstructionInstance building)
         {
             Vector2 pos = new Vector2(building.Position.x, building.Position.z);
             if (IsWithinRadius(sourcePos, pos, Radius) && !affectedBuildings.Contains(building))
             {
-                affectedBuildings.Add(building);
-                building.AddAffectingBonus(this);
+                if (DoesBonusAffect(building))
+                {
+                    affectedBuildings.Add(building);
+                    building.AddAffectingBonus(this);
+                }
             }
         }
 
-        /*
-        public void RemoveConsumer(ResourceManager.Consumer consumer)
+        private bool DoesBonusAffect(ConstructionInstance building)
         {
-            affectedBuildings.Remove(consumer);
+            bool res = true;
+
+            foreach ((Resource resource, float rate) in building.Config.rate)
+            {
+                if (Target == BonusTarget.Production && resource == this.Resource && rate <= 0)
+                {
+                    res = false; break;
+                }
+                
+                if (Target == BonusTarget.Consumption && resource == this.Resource && rate >= 0)
+                {
+                    res = false; break;
+                }
+            }
+
+            return res;
         }
-        */
+
         public void RemoveBuilding(ConstructionInstance building)
         {
             affectedBuildings.Remove(building);
         }
 
-        /*
-        public bool AffectsConsumer(ResourceManager.Consumer consumer)
-        {
-            Vector2 pos = new Vector2(consumer.instance.Position.x, consumer.instance.Position.z);
-            return IsWithinRadius(sourcePos, pos, Radius);
-        }
-        */
         public bool AffectsBuilding(ConstructionInstance building)
         {
             Vector2 pos = new Vector2(building.Position.x, building.Position.z);
             return IsWithinRadius(sourcePos, pos, Radius);
         }
 
-        /*
-        public override float Apply(float baseValue, ResourceManager.Consumer consumer)
-        {
-            if (AffectsConsumer(consumer))
-                return baseValue * Multiplier;
-
-            return baseValue;
-        }
-        */
         public override float Apply(float baseValue, ConstructionInstance building)
         {
+            if (!ShouldAffect(baseValue)) return baseValue;
             if (AffectsBuilding(building))
                 return baseValue * Multiplier;
 
             return baseValue;
         }
 
-        /*
-        public void RecalculateAffectedBuildings(IEnumerable<ResourceManager.Consumer> allConsumers)
-        {
-            affectedBuildings.Clear();
-            foreach (var consumer in allConsumers)
-            {
-                Vector2 pos = new Vector2(consumer.instance.Position.x, consumer.instance.Position.z);
-                if (IsWithinRadius(sourcePos, pos, Radius))
-                {
-                    affectedBuildings.Add(consumer);
-                }
-            }
-        }
-        */
         public void RecalculateAffectedBuildings()
         {
             affectedBuildings.Clear();

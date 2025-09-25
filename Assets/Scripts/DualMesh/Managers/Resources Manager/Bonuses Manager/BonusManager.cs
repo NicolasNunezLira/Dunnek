@@ -20,7 +20,6 @@ namespace BonusSystem
             {
                 localBonuses.Add(local);
 
-                // Al añadir un bonus local, registrar consumidores ya existentes
                 foreach (var building in ResourceManager.AllBuildings.Values)
                 {
                     local.AddBuildingIfInRange(building.instance);
@@ -49,37 +48,31 @@ namespace BonusSystem
         #endregion
 
         #region - Application
-        /// <summary>
-        /// Versión simplificada: aplica todos los bonus aditivamente.
-        /// </summary>
         public static float ApplyBonuses(
             float baseValue,
             Resource resource,
             ResourceManager.ResourceBuilding building
         )
         {
-            float totalPct = 0f;
+            float result = baseValue;
 
             // Globales
             foreach (var global in globalBonuses)
             {
-                if (global.Resource == resource)
-                    totalPct += global.Multiplier - 1f; // convertir multiplicador en delta porcentual
+                if (global.Resource != resource) continue;
+                result = global.Apply(result, building.instance);
             }
 
             // Locales
             foreach (var local in localBonuses)
             {
-                if (local.Resource == resource && local.AffectsBuilding(building.instance))
-                    totalPct += local.Multiplier - 1f;
+                if (local.Resource != resource) continue;
+                result = local.Apply(result, building.instance);
             }
 
-            return baseValue * (1f + totalPct);
+            return result;
         }
 
-        /// <summary>
-        /// Versión detallada que devuelve desglose de bonus aplicados.
-        /// </summary>
         public static BonusApplicationResult ApplyBonusesDetailed(
             float baseValue,
             Resource resource,
@@ -89,26 +82,31 @@ namespace BonusSystem
             var result = new BonusApplicationResult();
             result.FinalValue = baseValue;
 
-            float totalPct = 0f;
+            float runningValue = baseValue;
 
             // Globales
             foreach (var g in globalBonuses)
             {
                 if (g.Resource != resource) continue;
+                if (!((g.Target == BonusTarget.Production && baseValue > 0) ||
+                      (g.Target == BonusTarget.Consumption && baseValue < 0)))
+                    continue;
 
-                float delta = g.Multiplier - 1f;
-                totalPct += delta;
+                float before = runningValue;
+                runningValue = g.Apply(runningValue, building.instance);
+                float applied = runningValue - before;
 
-                var info = new BonusAppliedInfo
+                result.GlobalMultiplier *= g.Multiplier;
+                result.AppliedBonuses.Add(new BonusAppliedInfo
                 {
                     OriginType = BonusOriginType.Global,
+                    Target = g.Target,
                     ProviderId = (g as IProviderInfo)?.ProviderId,
                     ProviderName = (g as IProviderInfo)?.ProviderName,
                     Multiplier = g.Multiplier,
-                    AppliedAmount = baseValue * delta,
-                    Description = $"Global: +{delta * 100f:0.#}%"
-                };
-                result.AppliedBonuses.Add(info);
+                    AppliedAmount = applied,
+                    Description = $"Global {g.Target}: {(g.Multiplier - 1f) * 100f:+0.#;-0.#}%"
+                });
             }
 
             // Locales
@@ -116,50 +114,31 @@ namespace BonusSystem
             {
                 if (l.Resource != resource) continue;
                 if (!l.AffectsBuilding(building.instance)) continue;
+                if (!((l.Target == BonusTarget.Production && baseValue > 0) ||
+                      (l.Target == BonusTarget.Consumption && baseValue < 0)))
+                    continue;
 
-                float delta = l.Multiplier - 1f;
-                totalPct += delta;
+                float before = runningValue;
+                runningValue = l.Apply(runningValue, building.instance);
+                float applied = runningValue - before;
 
-                var info = new BonusAppliedInfo
+                result.LocalMultiplier *= l.Multiplier;
+                result.AppliedBonuses.Add(new BonusAppliedInfo
                 {
                     OriginType = BonusOriginType.Local,
+                    Target = l.Target,
                     ProviderId = (l as IProviderInfo)?.ProviderId,
                     ProviderName = (l as IProviderInfo)?.ProviderName,
                     Multiplier = l.Multiplier,
                     Radius = (int?)l.Radius,
-                    AppliedAmount = baseValue * delta,
-                    Description = $"Local: +{delta * 100f:0.#}%" //(radius {l.Radius})"
-                };
+                    AppliedAmount = applied,
+                    Description = $"Local {l.Target}: {(l.Multiplier - 1f) * 100f:+0.#;-0.#}%"
+                });
                 result.Radius = (int?)l.Radius;
-                result.AppliedBonuses.Add(info);
             }
 
-            // Valor final = base * (1 + suma de porcentajes)
-            result.FinalValue = baseValue * (1f + totalPct);
-
-            // Guardar acumulados para referencia
-            result.GlobalMultiplier = 1f + SumGlobalPct(resource);
-            result.LocalMultiplier = 1f + SumLocalPct(resource, building);
-
+            result.FinalValue = runningValue;
             return result;
-        }
-
-        private static float SumGlobalPct(Resource resource)
-        {
-            float pct = 0f;
-            foreach (var g in globalBonuses)
-                if (g.Resource == resource)
-                    pct += g.Multiplier - 1f;
-            return pct;
-        }
-
-        private static float SumLocalPct(Resource resource, ResourceManager.ResourceBuilding building)
-        {
-            float pct = 0f;
-            foreach (var l in localBonuses)
-                if (l.Resource == resource && l.AffectsBuilding(building.instance))
-                    pct += l.Multiplier - 1f;
-            return pct;
         }
         #endregion
 
@@ -182,8 +161,29 @@ namespace BonusSystem
 
         public static void RemoveLocalBonusesByProvider(GameObject providerObj)
         {
-            localBonuses.RemoveAll(lb => lb.Building.Obj == providerObj);
+            var toRemove = localBonuses.FindAll(lb => lb.Building.Obj == providerObj);
+
+            foreach (var local in toRemove)
+            {
+                foreach (var building in ResourceManager.AllBuildings.Values)
+                {
+                    if (local.AffectsBuilding(building.instance))
+                    {
+                        building.RemoveLocalBonus(local);
+                    }
+                }
+
+                localBonuses.Remove(local);
+            }
         }
+
+        public static void RemoveBonusesByProvider(GameObject providerObj)
+        {
+            localBonuses.RemoveAll(lb => lb.Building.Obj == providerObj);
+
+            globalBonuses.RemoveAll(gb => gb.Building.Obj == providerObj);
+        }
+
         #endregion
 
         #region - Debug/Tooltip

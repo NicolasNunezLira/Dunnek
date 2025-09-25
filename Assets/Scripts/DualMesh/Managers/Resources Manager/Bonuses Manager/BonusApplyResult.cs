@@ -1,7 +1,4 @@
-// BonusSystem/BonusApplyResult.cs
 using System.Collections.Generic;
-using UnityEngine;
-using ResourceSystem;
 
 namespace BonusSystem
 {
@@ -10,19 +7,20 @@ namespace BonusSystem
     public class BonusAppliedInfo
     {
         public BonusOriginType OriginType;
-        public int? ProviderId;          // id de la construcción que creó el bonus (si lo conocemos)
-        public string ProviderName;      // opcional: código o nombre
-        public int? Radius;              // Radio: solo para local
-        public float Multiplier;         // p. ej. 1.1f para +10%
-        public float AppliedAmount;      // qué cantidad aporta (informativo)
-        public string Description;       // texto legible del bonus (ej. "+10% Work")
+        public BonusTarget Target;
+        public int? ProviderId;
+        public string ProviderName;
+        public int? Radius;
+        public float Multiplier;
+        public float AppliedAmount;
+        public string Description;
     }
 
     public class BonusApplicationResult
     {
-        public float FinalValue;               // base * globalMult * localMult
-        public float GlobalMultiplier = 1f;    // producto de globales aplicadas
-        public float LocalMultiplier = 1f;     // producto de locales aplicadas
+        public float FinalValue;
+        public float GlobalMultiplier = 1f;
+        public float LocalMultiplier = 1f;
         public int? Radius;
         public List<BonusAppliedInfo> AppliedBonuses = new List<BonusAppliedInfo>();
     }

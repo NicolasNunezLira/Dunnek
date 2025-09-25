@@ -94,8 +94,8 @@
                 "target": "Consumption",
                 "radius": 10,
                 "effects": [
-                    { "resource": "Sand", "pct": 0.25 },
-                    { "resource": "Work", "pct": 0.05 }
+                    { "resource": "Sand", "pct": -0.25 },
+                    { "resource": "Work", "pct": -0.05 }
                 ]
             }
         ],
