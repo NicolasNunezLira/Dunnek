@@ -6,7 +6,23 @@ using UnityEngine;
 namespace ResourceSystem
 {
     [System.Serializable]
-    public enum Resource { Work, Sand }
+    public enum Resource
+    {
+        Work,
+        Food,
+        Morlaks,
+        Wisdom,
+        Power,
+        Energy,
+        Sand,
+        Water,
+        Clay,
+        Stone,
+        Glass,
+        Limestone,
+        Copper,
+        Gold
+    }
 
     #region - ResourceClass
     [System.Serializable]
@@ -14,6 +30,7 @@ namespace ResourceSystem
     {
         public Resource Name { get; private set; }
         public float Amount { get; private set; }
+        public bool IsUnlocked { get; private set; }
 
         // consumerId -> finalRate (ya con bonuses)
         private readonly Dictionary<int, float> producers = new();
@@ -21,11 +38,15 @@ namespace ResourceSystem
 
         public float Rate => producers.Values.Sum();
 
-        public ResourceClass(Resource name, float initialAmount = 0f)
+        public ResourceClass(Resource name, float initialAmount = 0f, bool unlocked = false)
         {
             Name = name;
             Amount = initialAmount;
+            IsUnlocked = unlocked;
         }
+
+        public void Unlock() => IsUnlocked = true;
+        public void Lock() => IsUnlocked = false;
 
         #region - ProducerInfo
         public class ProducerInfo

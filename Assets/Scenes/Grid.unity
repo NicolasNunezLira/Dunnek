@@ -152,16 +152,16 @@ MonoBehaviour:
   width: 128
   height: 128
   tileSize: 1
-  depositeHeight: 0.1
-  erosionHeight: 0.1
+  depositeHeight: 0.45
+  erosionHeight: 0.45
   slope: 0.5
-  grainsPerStep: 8192
+  grainsPerStep: 150
   scale1: 0.05
-  amplitude1: 10
+  amplitude1: 20
   scale2: 0.05
-  amplitude2: 2
+  amplitude2: 8
   scale3: 0.15
-  amplitude3: 1
+  amplitude3: 3
 --- !u!4 &370844737
 Transform:
   m_ObjectHideFlags: 0
@@ -445,20 +445,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 904479486}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5dc00ae09e8d1514991c4db2773efcbd, type: 3}
+  m_Script: {fileID: 11500000, guid: b8c911a13a934c34dbaa3f5bf6ecc1d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panSpeed: 20
-  panBorderThickness: 10
-  useScreenEdges: 0
-  panLimit: {x: 50, y: 50}
-  zoomSpeed: 10
-  minZoom: 10
-  maxZoom: 50
-  allowRotation: 1
-  rotationSpeed: 100
-  allowMousePan: 1
-  mousePanSpeed: 0.5
+  moveSpeed: 20
+  zoomSpeed: 400
+  rotationSpeed: 5
+  minZoom: -100
+  maxZoom: 100
+  minDistanceFromGround: 1
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
+  isControllable: 1
 --- !u!1 &917177142
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,16 +534,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   resolution: 255
-  size: 5
-  scale1: 0.05
-  amplitude1: 10
+  size: 1
+  scale1: 0.005
+  amplitude1: 20
   scale2: 0.05
-  amplitude2: 2
+  amplitude2: 8
   scale3: 0.15
-  amplitude3: 1
+  amplitude3: 3
   heightVariation: 0.5
   slope: 1
-  windDirection: {x: 1, y: 0}
+  windDirection: {x: 2, y: 2}
   grainsPerStep: 2000
   mesh: {fileID: 0}
 --- !u!23 &1954305375
@@ -570,7 +569,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a2ff748566e60694da1bf3c896a2bbf3, type: 2}
+  - {fileID: 2100000, guid: fa542ab47cc7bb3418c35926f8cab963, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -707,10 +706,10 @@ MonoBehaviour:
   width: 100
   height: 100
   tileSize: 1
-  depositeHeight: 0.1
-  erosionHeight: 0.1
+  depositeHeight: 0.2
+  erosionHeight: 0.2
   grainsPerStep: 50
-  windDirection: {x: 1, y: 0}
+  windDirection: {x: 2, y: 2}
   scale1: 0.05
   amplitude1: 10
   scale2: 0.05

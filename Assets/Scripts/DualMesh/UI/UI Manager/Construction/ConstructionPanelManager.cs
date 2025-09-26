@@ -1,212 +1,326 @@
-/*
-sausing System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using static DualMesh;
-
-public class UIController : MonoBehaviour
+using System.Collections.Generic;
+using ConstructionSystem;
+using System.Linq;
+using Utils;
+using ResourceSystem;
+using System;
+public class UIController : Singleton<UIController>
 {
     [Header("Main Buttons")]
-    [SerializeField]
-    [Tooltip("Recycle Button")]
-    public Button recycleButton;
-    [SerializeField]
-    [Tooltip("Build Button")]
-    public Button buildButton;
-    [SerializeField]
-    [Tooltip("Action Button")]
-    public Button actionButton;
+    [SerializeField] public Button buildButton; // único botón principal
 
-    [Header("Options subpanels")]
-    [SerializeField]
-    [Tooltip("Builds options panel")]
-    public GameObject buildOptionsPanel;
-    [SerializeField]
-    [Tooltip("Action options panel")]
-    public GameObject actionOptionsPanel;
+    [Header("Options Panels")]
+    [SerializeField] public GameObject buildOptionsPanel;
+
+    [Header("Build Category Panels")]
+    [SerializeField] public GameObject housingPanel;
+    [SerializeField] public GameObject wallPanel;
+    [SerializeField] public GameObject consumerPanel;
+    [SerializeField] public GameObject bonusPanel;
+    [SerializeField] public GameObject actionsPanel; // nueva pestaña para acciones
+
+    [Header("Category Tabs")]
+    [SerializeField] public Button housingTabButton;
+    [SerializeField] public Button wallTabButton;
+    [SerializeField] public Button consumerTabButton;
+    [SerializeField] public Button bonusTabButton;
+    [SerializeField] public Button actionsTabButton;
+
+    [Header("Prefabs")]
+    [SerializeField] public GameObject constructionButtonPrefab;
+
+    [Header("Scriptable object for icons")]
+    [SerializeField] private ResourceIconLibrary resourceIcons;
 
     private Outline buildOutline;
-    private Outline recycleOutline;
-    private Outline actionOutline;
 
-    private Button selectedBuildButton;
-    private Button selectedActionButton;
+    private Dictionary<string, UIButtonReference> constructionButtons = new();
+    private Dictionary<string, UIButtonReference> actionButtons = new();
+    private Dictionary<string, GameObject> categoryPanels = new();
+    private Dictionary<string, Button> tabButtons = new();
 
-    void Start()
+    public string currentCategory { get; private set; } = "Housing";
+    public string currentBuilding { get; private set; }
+    public string currentAction { get; private set; }
+
+    private Color selectedColor = Color.green;
+    private Color defaultColor = new Color(0, 0, 0, 0);
+
+    protected override void Awake()
     {
+        base.Awake();
+
+        if (resourceIcons != null) ResourceIconLibrary.Instance = resourceIcons;
+        //}
+
+        //void Start()
+        //{
+        // Listener principal
         buildButton.onClick.AddListener(OnBuildClicked);
-        recycleButton.onClick.AddListener(OnDestroyClicked);
-        actionButton.onClick.AddListener(OnActionClicked);
 
+        // Guardar outline
         buildOutline = buildButton.GetComponent<Outline>();
-        recycleOutline = recycleButton.GetComponent<Outline>();
-        actionOutline = actionButton.GetComponent<Outline>();
 
-        buildOptionsPanel.SetActive(false);
-        actionOptionsPanel.SetActive(false);
 
-        StartCoroutine(WaitAndInitialize());
 
+
+        // Mapear categorías
+        categoryPanels["Housing"] = housingPanel;
+        categoryPanels["Wall"] = wallPanel;
+        categoryPanels["Consumer"] = consumerPanel;
+        categoryPanels["BonusProvider"] = bonusPanel;
+        categoryPanels["Actions"] = actionsPanel;
+
+        // Tabs
+        housingTabButton.onClick.AddListener(() => ShowCategory("Housing"));
+        wallTabButton.onClick.AddListener(() => ShowCategory("Wall"));
+        consumerTabButton.onClick.AddListener(() => ShowCategory("Consumer"));
+        bonusTabButton.onClick.AddListener(() => ShowCategory("BonusProvider"));
+        actionsTabButton.onClick.AddListener(() => ShowCategory("Actions"));
+
+        // Mapear botones de tabs
+        tabButtons["Housing"] = housingTabButton;
+        tabButtons["Wall"] = wallTabButton;
+        tabButtons["Consumer"] = consumerTabButton;
+        tabButtons["BonusProvider"] = bonusTabButton;
+        tabButtons["Actions"] = actionsTabButton;
+
+        // Inicializar botones
+        GenerateConstructionButtons();
         InitializeActionButtons();
-        InitializeBuildButtons();
+        
+        // Ocultar panel inicial
+        housingPanel.SetActive(false);
+        wallPanel.SetActive(false);
+        consumerPanel.SetActive(false);
+        bonusPanel.SetActive(false);
+        actionsPanel.SetActive(false);
+        buildOptionsPanel.SetActive(false);
     }
 
+    #region --- Main Button ---
     void OnBuildClicked()
     {
-        DualMesh.Instance.SetMode(PlayingMode.Build);
+        ShowCategory(currentCategory);
+        DualMesh.Instance.SetMode(DualMesh.PlayingMode.Build);
+        UpdateMainButtonVisuals(DualMesh.Instance.inMode);
+        BonusVisualizerManager.Instance.ClearVisuals();
+        TooltipManager.Instance.HideTooltip();
     }
 
-    void OnDestroyClicked()
+    public void UpdateMainButtonVisuals(DualMesh.PlayingMode mode)
     {
-        DualMesh.Instance.SetMode(PlayingMode.Recycle);
+
+        buildOutline.effectColor = (mode == DualMesh.PlayingMode.Build) ? selectedColor : defaultColor;
+        buildOptionsPanel.SetActive(mode == DualMesh.PlayingMode.Build);
     }
+    #endregion
 
-    void OnActionClicked()
+    #region --- Constructions ---
+    void GenerateConstructionButtons()
     {
-        DualMesh.Instance.SetMode(PlayingMode.Action);
-    }
-
-    IEnumerator WaitAndInitialize()
-    {
-        yield return new WaitUntil(() => DualMesh.Instance != null);
-        UpdateButtonVisuals(DualMesh.Instance.inMode);
-    }
-
-    public void UpdateButtonVisuals(PlayingMode mode)
-    {
-        Color selectedColor = Color.green;
-        Color defaultColor = new Color(0, 0, 0, 0);
-
-        buildOutline.effectColor = (mode == PlayingMode.Build) ? selectedColor : defaultColor;
-        recycleOutline.effectColor = (mode == PlayingMode.Recycle) ? selectedColor : defaultColor;
-        actionOutline.effectColor = (mode == PlayingMode.Action) ? selectedColor : defaultColor;
-
-
-        buildOptionsPanel.SetActive(mode == PlayingMode.Build);
-        actionOptionsPanel.SetActive(mode == PlayingMode.Action);
-    }
-
-    public void UpdateBuildsButtonVisual(BuildMode mode)
-    {
-        Color selectedColor = Color.green;
-        Color defaultColor = new Color(0, 0, 0, 0);
-
-        Button[] buildButtons = buildOptionsPanel.GetComponentsInChildren<Button>();
-
-        foreach (Button btn in buildButtons)
+        foreach (var kvp in ConstructionConfig.Instance.ConstructionConfigs)
         {
-            Outline outline = btn.GetComponent<Outline>();
-            if (outline == null) continue;
+            var config = kvp.Value;
 
-            // Match button name to BuildMode
-            bool isSelected = false;
-            switch (mode)
-            {
-                case BuildMode.PlaceHouse:
-                    isSelected = btn.name == "HouseButton";
-                    break;
-                case BuildMode.PlaceWallBetweenPoints:
-                    isSelected = btn.name == "WallButton";
-                    break;
-                case BuildMode.PlaceCantera:
-                    isSelected = btn.name == "CanteraButton";
-                    break;
-            }
+            if (!IsUnlocked(config.codeName))
+                continue;
 
-            outline.effectColor = isSelected ? selectedColor : defaultColor;
-
-            if (isSelected) selectedBuildButton = btn;
+            CreateConstructionButton(config);
         }
     }
 
-    public void UpdateActionsButtonVisual(ActionMode mode)
+    void CreateConstructionButton(ConstructionConfig.ConfigData config)
     {
-        Color selectedColor = Color.green;
-        Color defaultColor = new Color(0, 0, 0, 0);
+        string category = config.category.ToString();
+        if (!categoryPanels.ContainsKey(category))
+            return;
 
-        Button[] actionButtons = actionOptionsPanel.GetComponentsInChildren<Button>();
+        Transform parentPanel = categoryPanels[category].transform;
+        GameObject btnGO = Instantiate(constructionButtonPrefab, parentPanel);
 
-        foreach (Button btn in actionButtons)
+        UIButtonReference btnRef = btnGO.GetComponent<UIButtonReference>();
+        btnRef.buttonID = config.codeName;
+
+        // si tiene sprite, mostrarlo
+        if (config.icon != null && btnRef.iconImage != null)
+            btnRef.iconImage.sprite = config.icon;
+
+        btnRef.label.text = config.displayName;
+
+        // listener
+        btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName));
+
+        foreach (Transform child in btnRef.costPanel)
+            Destroy(child.gameObject);
+
+        foreach ((Resource resType, float amount) in config.cost)
         {
-            Outline outline = btn.GetComponent<Outline>();
-            if (outline == null) continue;
+            GameObject slotGO = Instantiate(btnRef.resourceSlotPrefab, btnRef.costPanel);
+            slotGO.name = "slot" + resType.ToString();
+            var slotImage = slotGO.GetComponentInChildren<UnityEngine.UI.Image>();
+            var slotText = slotGO.GetComponentInChildren<TMPro.TextMeshProUGUI>();
 
-            bool isSelected = false;
-            switch (mode)
-            {
-                case ActionMode.Dig:
-                    isSelected = btn.name == "DigButton";
-                    break;
-                case ActionMode.AddSand:
-                    isSelected = btn.name == "AddButton";
-                    break;
-                case ActionMode.Flat:
-                    isSelected = btn.name == "FlattenButton";
-                    break;
-            }
+            slotText.text = Math.Abs(amount).ToString();
 
-            outline.effectColor = isSelected ? selectedColor : defaultColor;
+            slotImage.sprite = ResourceIconLibrary.Instance.GetIcon(resType);
 
-            if (isSelected) selectedActionButton = btn;
+            LayoutRebuilder.ForceRebuildLayoutImmediate(slotGO.GetComponent<RectTransform>());
+        }
+       
+        LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.costPanel.GetComponent<RectTransform>());
+
+        constructionButtons[config.codeName] = btnRef;
+    }
+
+    public void ShowCategory(string category)
+    {
+        currentCategory = category;
+        Debug.Log($"Current Category {currentCategory}");
+
+        foreach (var kvp in categoryPanels)
+        {
+            tabButtons[kvp.Key].GetComponent<Outline>().effectColor = (currentCategory == kvp.Key) ? selectedColor : defaultColor;
+            kvp.Value.SetActive(kvp.Key == category);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(kvp.Value.GetComponent<RectTransform>());          
         }
     }
 
-
-    void InitializeBuildButtons()
+    bool IsUnlocked(string codeName)
     {
-        Button[] buildButtons = buildOptionsPanel.GetComponentsInChildren<Button>();
-
-        foreach (Button btn in buildButtons)
-        {
-            string name = btn.gameObject.name;
-            btn.onClick.AddListener(() => OnBuildOptionClicked(name));
-        }
+        return ConstructionUnlockerManager.UnlockedConstructions.Contains(codeName);
     }
 
+    void OnConstructionClicked(string codeName)
+    {
+        if (!constructionButtons.ContainsKey(codeName)) return;
+
+        var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
+        Debug.Log($"Construcción seleccionada: {config.codeName} ({config.category})");
+
+        currentBuilding = codeName;
+        currentCategory = config.category.ToString();
+        
+        DualMesh.Instance.SetBuildType(codeName);
+
+        UpdateSelectedVisual(codeName);
+    }
+
+    public void UpdateSelectedVisual(string selectedID)
+    {
+        currentBuilding = selectedID;
+        
+        foreach (var kvp in constructionButtons)
+            kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
+    }
+
+    public void OnConstructionUnlocked(string codeName)
+    {
+        if (constructionButtons.ContainsKey(codeName))
+            return;
+
+        if (ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(codeName, out var config))
+            CreateConstructionButton(config);
+    }
+    #endregion
+
+    #region --- Actions ---
     void InitializeActionButtons()
     {
-        Button[] actionButtons = actionOptionsPanel.GetComponentsInChildren<Button>();
-
-        foreach (Button btn in actionButtons)
+        foreach (var (_, config) in ActionConfig.Instance.actionsConfig)
         {
-            string name = btn.gameObject.name;
-            btn.onClick.AddListener(() => OnActionOptionClicked(name));
+            CreateActionButton(config);
         }
     }
 
-    void OnBuildOptionClicked(string buttonName)
+    void CreateActionButton(ActionConfig.ConfigData config)
     {
-        switch (buttonName)
-        {
-            case "HouseButton":
-                DualMesh.Instance.SetBuildType(BuildMode.PlaceHouse);
-                UpdateBuildsButtonVisual(BuildMode.PlaceHouse);
-                break;
-            case "WallButton":
-                DualMesh.Instance.SetBuildType(BuildMode.PlaceWallBetweenPoints);
-                UpdateBuildsButtonVisual(BuildMode.PlaceWallBetweenPoints);
-                break;
-            case "CanteraButton":
-                DualMesh.Instance.SetBuildType(BuildMode.PlaceCantera);
-                UpdateBuildsButtonVisual(BuildMode.PlaceCantera);
-                break;
-        }
+        Transform parentPanel = categoryPanels["Actions"].transform;
+        GameObject btnGO = Instantiate(constructionButtonPrefab, parentPanel);
+
+        UIButtonReference btnRef = btnGO.GetComponent<UIButtonReference>();
+        btnRef.buttonID = config.type;
+
+        // si tiene sprite, mostrarlo
+        if (config.icon != null && btnRef.iconImage != null)
+            btnRef.iconImage.sprite = config.icon;
+
+        btnRef.label.text = config.type;
+
+        // listener
+        btnRef.button.onClick.AddListener(() => OnActionOptionClicked(config.type));
+
+        actionButtons[config.type] = btnRef;
     }
 
-    void OnActionOptionClicked(string buttonName)
+    void OnActionOptionClicked(string id)
     {
-        switch (buttonName)
+        currentAction = id;
+
+        if (!actionButtons.ContainsKey(id)) return;
+
+        switch (id)
         {
-            case "DigButton":
-                DualMesh.Instance.SetActionType(ActionMode.Dig);
+            case "Dig":
+                DualMesh.Instance.SetActionType(DualMesh.ActionMode.Dig);
                 break;
-            case "AddButton":
-                DualMesh.Instance.SetActionType(ActionMode.AddSand);
+            case "AddSand":
+                DualMesh.Instance.SetActionType(DualMesh.ActionMode.AddSand);
                 break;
-            case "FlattenButton":
-                DualMesh.Instance.SetActionType(ActionMode.Flat);
+            case "Flat":
+                DualMesh.Instance.SetActionType(DualMesh.ActionMode.Flat);
+                break;
+            case "Recycle":
+                DualMesh.Instance.SetActionType(DualMesh.ActionMode.Recycle);
                 break;
         }
+
+        UpdateActionsButtonVisual(id);
     }
+
+    public void UpdateActionsButtonVisual(string selectedID)
+    {
+        currentAction = selectedID;
+        
+        foreach (var kvp in actionButtons)
+            kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
+    }
+    #endregion
 }
+
+
+/*
+Canvas
+ └── UIController (GameObject con script UIController)
+     ├── MainButtonsPanel
+     │    └── BuildButton (único botón principal, con Outline)
+     │
+     └── BuildOptionsPanel (panel principal de pestañas, desactivado al inicio)
+          ├── TabButtonsPanel (fila horizontal de pestañas)
+          │    ├── HousingTabButton
+          │    ├── WallTabButton
+          │    ├── ConsumerTabButton
+          │    ├── BonusTabButton
+          │    └── ActionsTabButton
+          │
+          ├── HousingPanel   (GridLayoutGroup o VerticalLayoutGroup)
+          │    └── (botones generados dinámicamente, ej: HouseSand)
+          │
+          ├── WallPanel      (GridLayoutGroup)
+          │    └── (botones generados dinámicamente, ej: WallSand)
+          │
+          ├── ConsumerPanel  (GridLayoutGroup)
+          │    └── (botones generados dinámicamente, ej: Cantera)
+          │
+          ├── BonusPanel     (GridLayoutGroup)
+          │    └── (botones generados dinámicamente, ej: InitialTemple)
+          │
+          └── ActionsPanel   (GridLayoutGroup)
+               ├── DigButton        (UIButtonReference, id = "dig")
+               ├── AddButton        (UIButtonReference, id = "add")
+               ├── FlattenButton    (UIButtonReference, id = "flat")
+               └── RecycleButton    (UIButtonReference, id = "recycle")
+
 */

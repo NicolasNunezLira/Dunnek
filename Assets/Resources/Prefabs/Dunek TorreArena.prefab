@@ -152,9 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61ca27361aa1353418a1fd977ba62053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalMaterial: {fileID: 0}
-  overlayMaterial: {fileID: 2100000, guid: ef70fbfa797207b4aad4b6d1c0512f5a, type: 2}
-  widthFactor: 0.01
 --- !u!1 &8529738117729268318
 GameObject:
   m_ObjectHideFlags: 0
@@ -304,15 +301,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 76e2ff8191dcd17418cdea01c722457a, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.4
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 76e2ff8191dcd17418cdea01c722457a, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.4
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 76e2ff8191dcd17418cdea01c722457a, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.4
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 76e2ff8191dcd17418cdea01c722457a, type: 3}
       propertyPath: m_LocalPosition.x

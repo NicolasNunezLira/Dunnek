@@ -2,11 +2,12 @@
     "configs": [
     {
         "codeName": "houseSand",
+        "displayName": "Casa 1",
         "constructionCategory": "Housing",
         "iconPath": "Icons/houseSandIcon",
         "costList": [
-            { "type": "Work", "value": -1 },
-            { "type": "Sand", "value": -10 }
+            { "type": "Work", "value": 5 },
+            { "type": "Sand", "value": 5 }
         ],
         "rateList": [
             { "type": "Work", "value": 1 },
@@ -20,11 +21,12 @@
     },
     {
         "codeName": "houseClay",
+        "displayName": "Casa 2",
         "constructionCategory": "Housing",
         "iconPath": "Icons/houseSandIcon",
         "costList": [
-            { "type": "Work", "value": -1 },
-            { "type": "Sand", "value": -10 }
+            { "type": "Work", "value": 10 },
+            { "type": "Clay", "value": 5 }
         ],
         "rateList": [
             { "type": "Work", "value": 1 },
@@ -33,16 +35,17 @@
         "recycleWorkCost": 0,
         "duration": 1000,
         "prefabs": [
-            { "part": "building", "path": "Prefabs/lowpoly_egyptian_house_001" }
+            { "part": "building", "path": "Prefabs/Dunek CasaGrande2" }
         ]
     },
     {
         "codeName": "wallSand",
+        "displayName": "Muralla básica",
         "constructionCategory": "Wall",
         "iconPath": "Icons/wallSandIcon",
         "costList": [
-            { "type": "Work", "value": -1 },
-            { "type": "Sand", "value": -5 }
+            { "type": "Work", "value": 1 },
+            { "type": "Sand", "value": 5 }
         ],
         "rateList": [
             { "type": "Work", "value": 0 },
@@ -57,11 +60,14 @@
     },
     {
         "codeName": "Cantera",
+        "displayName": "Cantera",
         "constructionCategory": "Consumer",
         "iconPath": "Icons/canteraIcon",
         "costList": [
-            { "type": "Work", "value": 0 },
-            { "type": "Sand", "value": 0 }
+            { "type": "Work", "value": 20 },
+            { "type": "Sand", "value": 10 },
+            { "type": "Clay", "value": 10 }
+
         ],
         "rateList": [
             { "type": "Work", "value": -3 },
@@ -70,16 +76,17 @@
         "recycleWorkCost": -10,
         "duration": 1000,
         "prefabs": [
-            { "part": "building", "path": "Prefabs/LOD0_egypt_urban_buildings_004" }
+            { "part": "building", "path": "Prefabs/Dunek Pozo" }
         ]
     },
     {
         "codeName": "initialTemple",
+        "displayName": "Templo",
         "constructionCategory": "BonusProvider",
         "iconPath": "Icons/initialTempleIcon",
         "costList": [
-            { "type": "Work", "value": -10},
-            { "type": "Sand", "value": -10}
+            { "type": "Work", "value": 10},
+            { "type": "Sand", "value": 10}
         ],
         "bonusList": [
             {
@@ -102,7 +109,7 @@
         "recycleWorkCost": 20,
         "duration": 1000,
         "prefabs": [
-            { "part": "building", "path": "Prefabs/LOD0_egypt_monuments_001" }
+            { "part": "building", "path": "Prefabs/Dunek TorreArena" }
         ]
     }
   ]

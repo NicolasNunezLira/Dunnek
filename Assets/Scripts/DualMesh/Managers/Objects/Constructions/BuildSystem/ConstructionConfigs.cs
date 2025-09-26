@@ -87,6 +87,7 @@ namespace ConstructionSystem
         public class ConfigData
         {
             public string codeName;
+            public string displayName;
             public string constructionCategory;
             public string iconPath;
 

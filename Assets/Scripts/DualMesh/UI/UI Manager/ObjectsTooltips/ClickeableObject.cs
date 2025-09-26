@@ -19,7 +19,9 @@ public class ClickeableObject : MonoBehaviour
         //string info = (link != null) ? link.GetInfoString() : null;
         string info = (link != null) ? link.GetInfoStringWithBonuses() : null;
 
-        TooltipManager.Instance.ShowTooltip(transform, tooltipInfo, info, id);
+        string title = (link != null) ? link.Building.Config.displayName : tooltipInfo;       
+
+        TooltipManager.Instance.ShowTooltip(transform, title, info, id);
 
         BonusVisualizerManager.Instance.ClearVisuals();
 

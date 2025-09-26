@@ -17,7 +17,7 @@ public class ResourceIconLibrary : ScriptableObject
     public List<ResourceIcon> icons;
     private Dictionary<Resource, Sprite> iconDict;
 
-    void Onable()
+    void OnEnable()
     {
         Instance = this;
         iconDict = new Dictionary<Resource, Sprite>();
