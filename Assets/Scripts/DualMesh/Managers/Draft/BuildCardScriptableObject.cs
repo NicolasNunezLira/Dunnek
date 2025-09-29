@@ -1,16 +1,16 @@
-using ConstructionSystem;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DraftSystem
 {
-    [CreateAssetMenu(fileName = "NewBuildCard", menuName = "Draft/BuildCard")]
-    public class BuildCard : ScriptableObject
+    [CreateAssetMenu(fileName = "NewCard", menuName = "Draft/Card")]
+    public class Card : ScriptableObject
     {
         public string cardName;
         public Sprite icon;
-        public string constructionType;
         public Rarity rarity;
         [TextArea] public string description;
         public int cost;
+        [SerializeReference] public List<ICardEffect> effects;
     }
 }

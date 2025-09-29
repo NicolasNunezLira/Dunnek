@@ -2,7 +2,6 @@ using Utils;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using ConstructionSystem;
 
 namespace DraftSystem
 {
@@ -10,10 +9,10 @@ namespace DraftSystem
     {
         #region Variables
         public DraftState currentState = DraftState.Idle;
-        public List<BuildCard> unlockedCards = new();
+        public List<Card> unlockedCards = new();
 
-        public List<BuildCard> allCards;
-        public int cartToDraft = 3;
+        public List<Card> allCards;
+        public int cardsToDraft = 3;
 
         [Header("Rariry configuration")]
         public AnimationCurve rarityDistribution;
@@ -25,7 +24,6 @@ namespace DraftSystem
             base.Awake();
 
             ConstructionUnlockerManager.Awake();
-
         }
         #endregion
 
@@ -34,16 +32,16 @@ namespace DraftSystem
         {
             if (currentState != DraftState.Idle) return;
 
-            List<BuildCardInstance> draftOptions = GetRandomCardInstances(cartToDraft);
+            List<CardInstance> draftOptions = GetRandomCardInstances(cardsToDraft);
             ShowDraftUI(draftOptions);
 
             currentState = DraftState.Drafting;
         }
 
-        List<BuildCardInstance> GetRandomCardInstances(int count)
+        List<CardInstance> GetRandomCardInstances(int count)
         {
-            List<BuildCardInstance> result = new();
-            HashSet<BuildCard> used = new();
+            List<CardInstance> result = new();
+            HashSet<Card> used = new();
 
             var filteredPool = allCards
                 .Where(c => !unlockedCards.Contains(c))
@@ -66,7 +64,7 @@ namespace DraftSystem
                 {
                     var selected = possible[Random.Range(0, possible.Count)];
                     used.Add(selected);
-                    result.Add(new BuildCardInstance(selected, result.Count));
+                    result.Add(new CardInstance(selected, result.Count));
                 }
 
                 tries++;
@@ -85,23 +83,24 @@ namespace DraftSystem
             return Rarity.Legendary;
         }
 
-        void ShowDraftUI(List<BuildCardInstance> draftOptions)
+        void ShowDraftUI(List<CardInstance> draftOptions)
         {
-            List<BuildCard> cardsToShow = draftOptions.Select(instance => instance.cardData).ToList();
+            List<CardInstance> cardsToShow = draftOptions.ToList();
             DraftUI.Instance.ShowDraft(cardsToShow);
         }
         #endregion
 
         #region On Draft
-        public void OnDraftChosen(BuildCard card)
+        public void OnDraftChosen(Card card)
         {
             unlockedCards.Add(card);
-            UnlockConstruction(card.constructionType);
-        }
 
-        public void UnlockConstruction(string type)
-        {
-            ConstructionUnlockerManager.UnlockConstruction(type);
+            foreach (var effect in card.effects)
+            {
+                effect.Apply();
+            }
+
+            currentState = DraftState.Idle;
         }
         #endregion
     }

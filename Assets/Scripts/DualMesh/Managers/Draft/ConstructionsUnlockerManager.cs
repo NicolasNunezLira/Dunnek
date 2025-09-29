@@ -12,8 +12,8 @@ public static class ConstructionUnlockerManager
     public static void Awake()
     {
         unlockedConstructions.Add("houseSand");
-        unlockedConstructions.Add("houseClay");
-        unlockedConstructions.Add("Cantera");
+        //unlockedConstructions.Add("houseClay");
+        //unlockedConstructions.Add("Cantera");
         unlockedConstructions.Add("initialTemple");
         unlockedConstructions.Add("wallSand");
     }
@@ -33,9 +33,17 @@ public static class ConstructionUnlockerManager
     // Desbloquea una construcción por su codeName
     static public void UnlockConstruction(string codeName)
     {
+        if (!ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(codeName, out var config))
+        {
+            Debug.LogWarning($"Construcción {codeName} no encontrada.");
+            return;
+        }
+        
         if (!unlockedConstructions.Contains(codeName))
         {
             unlockedConstructions.Add(codeName);
+            UIController.Instance.CreateConstructionButton(config);
+            
             Debug.Log($"Construction {codeName} unlocked");
         }
         else

@@ -111,7 +111,6 @@ public class ResourcesLink : MonoBehaviour
 
     public string GetInfoStringWithBonuses()
     {
-        // Si no es consumidor → mostrar solo info de provider
         if (ConsumerId == null)
         {
             var sbProvider = new StringBuilder();

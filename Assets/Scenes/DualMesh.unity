@@ -761,7 +761,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 604e204555a5c394eb9e947c594a4f29, type: 2}
   - {fileID: 11400000, guid: 72840ce74bd93e845a77640990041077, type: 2}
   - {fileID: 11400000, guid: f9e7fd48005151d498ce0a6c84312b1f, type: 2}
-  cartToDraft: 3
+  cardsToDraft: 3
   rarityDistribution:
     serializedVersion: 2
     m_Curve:
@@ -1491,6 +1491,7 @@ GameObject:
   - component: {fileID: 379718207}
   - component: {fileID: 379718206}
   - component: {fileID: 379718205}
+  - component: {fileID: 379718208}
   m_Layer: 5
   m_Name: Wall Panel
   m_TagString: Untagged
@@ -1579,6 +1580,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 379718203}
   m_CullTransparentMesh: 1
+--- !u!225 &379718208
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 379718203}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &391501819
 GameObject:
   m_ObjectHideFlags: 0
@@ -3356,6 +3369,7 @@ GameObject:
   - component: {fileID: 764849846}
   - component: {fileID: 764849848}
   - component: {fileID: 764849847}
+  - component: {fileID: 764849849}
   m_Layer: 5
   m_Name: BuildOptionsPanel
   m_TagString: Untagged
@@ -3422,6 +3436,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764849845}
   m_CullTransparentMesh: 1
+--- !u!225 &764849849
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764849845}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &765289228
 GameObject:
   m_ObjectHideFlags: 0
@@ -3691,6 +3717,7 @@ GameObject:
   - component: {fileID: 858604885}
   - component: {fileID: 858604884}
   - component: {fileID: 858604883}
+  - component: {fileID: 858604886}
   m_Layer: 5
   m_Name: Consumers Panel
   m_TagString: Untagged
@@ -3779,6 +3806,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 858604881}
   m_CullTransparentMesh: 1
+--- !u!225 &858604886
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858604881}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &896335850
 GameObject:
   m_ObjectHideFlags: 0
@@ -4459,27 +4498,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a78da3f00f3328541b4526c0b0b5ec5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineThickness: 1.25
-  lineIntensity: 0.5
-  fillAmount: 0.2
-  lineColor0: {r: 1, g: 0, b: 0, a: 1}
-  lineColor1: {r: 0, g: 1, b: 0, a: 1}
-  lineColor2: {r: 0, g: 0, b: 1, a: 1}
-  additiveRendering: 0
-  backfaceCulling: 1
-  fillColor: {r: 0, g: 0, b: 1, a: 1}
-  useFillColor: 0
-  cornerOutlines: 0
-  addLinesBetweenColors: 0
-  scaleWithScreenSize: 1
-  alphaCutoff: 0.5
-  flipY: 0
-  sourceCamera: {fileID: 0}
-  autoEnableOutlines: 0
-  outlineCamera: {fileID: 0}
-  outlineShaderMaterial: {fileID: 0}
-  renderTexture: {fileID: 0}
-  extraRenderTexture: {fileID: 0}
 --- !u!1 &1000085851
 GameObject:
   m_ObjectHideFlags: 0
@@ -4707,8 +4725,8 @@ MonoBehaviour:
     m_Bottom: 50
   m_ChildAlignment: 4
   m_Spacing: 50
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
@@ -5150,6 +5168,7 @@ GameObject:
   - component: {fileID: 1131575858}
   - component: {fileID: 1131575857}
   - component: {fileID: 1131575856}
+  - component: {fileID: 1131575859}
   m_Layer: 5
   m_Name: Actions Panel
   m_TagString: Untagged
@@ -5238,6 +5257,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131575854}
   m_CullTransparentMesh: 1
+--- !u!225 &1131575859
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131575854}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1160234425
 GameObject:
   m_ObjectHideFlags: 0
@@ -5344,6 +5375,7 @@ GameObject:
   - component: {fileID: 1188143567}
   - component: {fileID: 1188143566}
   - component: {fileID: 1188143565}
+  - component: {fileID: 1188143568}
   m_Layer: 5
   m_Name: Housing Panel
   m_TagString: Untagged
@@ -5432,6 +5464,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1188143563}
   m_CullTransparentMesh: 1
+--- !u!225 &1188143568
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1188143563}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1202145078
 GameObject:
   m_ObjectHideFlags: 0
@@ -7255,6 +7299,7 @@ GameObject:
   - component: {fileID: 1726210405}
   - component: {fileID: 1726210404}
   - component: {fileID: 1726210403}
+  - component: {fileID: 1726210406}
   m_Layer: 5
   m_Name: Bonus Provider Panel
   m_TagString: Untagged
@@ -7343,6 +7388,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1726210401}
   m_CullTransparentMesh: 1
+--- !u!225 &1726210406
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1726210401}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1727804353
 GameObject:
   m_ObjectHideFlags: 0

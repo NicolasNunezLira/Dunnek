@@ -20,7 +20,7 @@ namespace ResourceSystem
         {
             RegisterResource(Resource.Work, 1000f, true);
             RegisterResource(Resource.Food, 100f, true);
-            RegisterResource(Resource.Morlaks, 100f, true);
+            RegisterResource(Resource.Morlaks, 500f, true);
             RegisterResource(Resource.Wisdom, 0f, true);
             RegisterResource(Resource.Power, 0f, true);
             RegisterResource(Resource.Energy, 0f, true);

@@ -8,18 +8,18 @@ namespace DraftSystem
     public class DraftUI : Singleton<DraftUI>
     {
         [SerializeField] private Transform cardContainer;
-        [SerializeField] private BuildCardUI cardPrefab;
+        [SerializeField] private CardUI cardPrefab;
         [SerializeField] private Button confirmButton;
 
-        private List<BuildCardUI> instantiatedCards = new();
-        private BuildCard selectedCard;
+        private List<CardUI> instantiatedCards = new();
+        private CardInstance selectedCard;
 
         protected override void Awake()
         {
             base.Awake();
 
-            cardContainer?.gameObject.SetActive(false);
-            cardPrefab?.gameObject.SetActive(false);
+            if (cardContainer != null) cardContainer.gameObject.SetActive(false);
+            if (cardPrefab != null) cardPrefab.gameObject.SetActive(false);
 
             if (confirmButton != null)
             {
@@ -28,26 +28,25 @@ namespace DraftSystem
             }
         }
 
-        public void ShowDraft(List<BuildCard> draftOptions)
+        public void ShowDraft(List<CardInstance> draftOptions)
         {
             ClearPreviousCards();
 
             cardContainer.gameObject.SetActive(true);
             confirmButton.gameObject.SetActive(true);
 
-            foreach (var cardData in draftOptions)
+            foreach (var instance in draftOptions)
             {
                 var cardUI = Instantiate(cardPrefab, cardContainer);
-                cardUI.Setup(cardData);
+                cardUI.Setup(instance);
                 cardUI.gameObject.SetActive(true);
-                //cardUI.GetComponent<Button>().onClick.AddListener(() => OnCardSelected(cardUI));
                 instantiatedCards.Add(cardUI);
             }
         }
 
-        public void OnCardSelected(BuildCardUI selected)
+        public void OnCardSelected(CardUI selected)
         {
-            selectedCard = selected.GetData();
+            selectedCard = selected.GetInstance();
 
             foreach (var cardUI in instantiatedCards)
             {
@@ -60,14 +59,12 @@ namespace DraftSystem
         {
             if (selectedCard != null)
             {
-                ConstructionUnlockerManager.UnlockConstruction(selectedCard.constructionType);
+                DraftManager.Instance.OnDraftChosen(selectedCard.cardData);
 
                 ClearPreviousCards();
-                //gameObject.SetActive(false);
                 cardContainer.gameObject.SetActive(false);
                 confirmButton.gameObject.SetActive(false);
 
-                DraftManager.Instance.currentState = DraftState.Idle;
                 DualMesh.Instance.SetMode(DualMesh.PlayingMode.Simulation);
             }
         }
@@ -76,12 +73,11 @@ namespace DraftSystem
         {
             foreach (var card in instantiatedCards)
             {
-                Object.Destroy(card.gameObject); // card.GameObject
+                Object.Destroy(card.gameObject);
             }
 
             instantiatedCards.Clear();
             selectedCard = null;
-            //confirmButton.onClick.RemoveAllListeners();
         }
     }
 }

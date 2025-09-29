@@ -14,7 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardName: Carta 3
   icon: {fileID: 0}
-  constructionType: 4
   rarity: 2
   description: Desbloquea Cantera
   cost: 500
+  effects:
+  - rid: 6032320582811123794
+  references:
+    version: 2
+    RefIds:
+    - rid: 6032320582811123794
+      type: {class: UnlockConstructionEffect, ns: DraftSystem, asm: Assembly-CSharp}
+      data:
+        constructionType: Cantera

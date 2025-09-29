@@ -73,6 +73,32 @@ namespace BonusSystem
             return result;
         }
 
+        public static float ApplyCostBonuses(
+            float baseCost,
+            Resource resource,
+            ResourceManager.ResourceBuilding building
+        )
+        {
+            float result = baseCost;
+ 
+            foreach (var global in globalBonuses)
+            {
+                if (global.Resource != resource) continue;
+                if (global.Target != BonusTarget.Cost) continue;
+                result = global.Apply(result, building.instance);
+            }
+
+            foreach (var local in localBonuses)
+            {
+                if (local.Resource != resource) continue;
+                if (local.Target != BonusTarget.Cost) continue;
+                if (!local.AffectsBuilding(building.instance)) continue;
+                result = local.Apply(result, building.instance);
+            }
+
+            return result;
+        }
+
         public static BonusApplicationResult ApplyBonusesDetailed(
             float baseValue,
             Resource resource,

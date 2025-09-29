@@ -303,7 +303,7 @@ namespace Building
             foreach (var (codeName, amount) in amounts)
             {
                 if (string.IsNullOrEmpty(codeName)) continue;
-                
+
                 var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
 
                 foreach ((Resource resource, float cost) in config.cost)
@@ -328,6 +328,7 @@ namespace Building
 
             return hasEnough;
         }
+
         #endregion
 
         #region - Verificate resources for actions
@@ -344,7 +345,7 @@ namespace Building
                 }
                 necessaryResources[resource] += cost;
             }
-            
+
             bool hasEnough = true;
             foreach ((Resource resource, float cost) in necessaryResources)
             {
@@ -390,6 +391,7 @@ namespace Building
                 ResourceManager.UpdateResources();
             }
         }
+
 
         #endregion
     }    

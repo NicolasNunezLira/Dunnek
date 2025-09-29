@@ -2,14 +2,14 @@ using UnityEngine;
 
 namespace DraftSystem
 {
-    public class BuildCardInstance
+    public class CardInstance
     {
-        public BuildCard cardData { get; private set; }
+        public Card cardData { get; private set; }
 
         public bool wasChosen = false;
         public int indexInDraft;
 
-        public BuildCardInstance(BuildCard card, int index)
+        public CardInstance(Card card, int index)
         {
             cardData = card;
             indexInDraft = index;
@@ -20,6 +20,14 @@ namespace DraftSystem
         public string Description => cardData.description;
         public int Cost => cardData.cost;
         public Rarity Rarity => cardData.rarity;
-        public string Type => cardData.constructionType;
+
+        public void ApplyEffects()
+        {
+            foreach (var effect in cardData.effects)
+            {
+                effect.Apply();
+            }
+            wasChosen = true;
+        }
     }
 }

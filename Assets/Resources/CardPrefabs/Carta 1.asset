@@ -14,7 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardName: Carta 1
   icon: {fileID: 0}
-  constructionType: 0
   rarity: 0
-  description: Desbloquea Casa
+  description: Desbloquea Casa de arcilla
   cost: 1
+  effects:
+  - rid: 6032320582811123792
+  references:
+    version: 2
+    RefIds:
+    - rid: 6032320582811123792
+      type: {class: UnlockConstructionEffect, ns: DraftSystem, asm: Assembly-CSharp}
+      data:
+        constructionType: houseClay

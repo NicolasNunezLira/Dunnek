@@ -53,51 +53,33 @@ public class UIController : Singleton<UIController>
         base.Awake();
 
         if (resourceIcons != null) ResourceIconLibrary.Instance = resourceIcons;
-        //}
 
-        //void Start()
-        //{
-        // Listener principal
         buildButton.onClick.AddListener(OnBuildClicked);
 
-        // Guardar outline
         buildOutline = buildButton.GetComponent<Outline>();
 
-
-
-
-        // Mapear categorías
         categoryPanels["Housing"] = housingPanel;
         categoryPanels["Wall"] = wallPanel;
         categoryPanels["Consumer"] = consumerPanel;
         categoryPanels["BonusProvider"] = bonusPanel;
         categoryPanels["Actions"] = actionsPanel;
 
-        // Tabs
         housingTabButton.onClick.AddListener(() => ShowCategory("Housing"));
         wallTabButton.onClick.AddListener(() => ShowCategory("Wall"));
         consumerTabButton.onClick.AddListener(() => ShowCategory("Consumer"));
         bonusTabButton.onClick.AddListener(() => ShowCategory("BonusProvider"));
         actionsTabButton.onClick.AddListener(() => ShowCategory("Actions"));
 
-        // Mapear botones de tabs
         tabButtons["Housing"] = housingTabButton;
         tabButtons["Wall"] = wallTabButton;
         tabButtons["Consumer"] = consumerTabButton;
         tabButtons["BonusProvider"] = bonusTabButton;
         tabButtons["Actions"] = actionsTabButton;
 
-        // Inicializar botones
         GenerateConstructionButtons();
         InitializeActionButtons();
         
-        // Ocultar panel inicial
-        housingPanel.SetActive(false);
-        wallPanel.SetActive(false);
-        consumerPanel.SetActive(false);
-        bonusPanel.SetActive(false);
-        actionsPanel.SetActive(false);
-        buildOptionsPanel.SetActive(false);
+        HideAllPanels();
     }
 
     #region --- Main Button ---
@@ -114,7 +96,7 @@ public class UIController : Singleton<UIController>
     {
 
         buildOutline.effectColor = (mode == DualMesh.PlayingMode.Build) ? selectedColor : defaultColor;
-        buildOptionsPanel.SetActive(mode == DualMesh.PlayingMode.Build);
+        SetPanelVisible(buildOptionsPanel, mode == DualMesh.PlayingMode.Build);
     }
     #endregion
 
@@ -132,25 +114,22 @@ public class UIController : Singleton<UIController>
         }
     }
 
-    void CreateConstructionButton(ConstructionConfig.ConfigData config)
+    public void CreateConstructionButton(ConstructionConfig.ConfigData config)
     {
         string category = config.category.ToString();
-        if (!categoryPanels.ContainsKey(category))
+        if (!categoryPanels.TryGetValue(category, out GameObject currentPanel))
             return;
 
-        Transform parentPanel = categoryPanels[category].transform;
+        Transform parentPanel = currentPanel.transform;
         GameObject btnGO = Instantiate(constructionButtonPrefab, parentPanel);
 
         UIButtonReference btnRef = btnGO.GetComponent<UIButtonReference>();
         btnRef.buttonID = config.codeName;
 
-        // si tiene sprite, mostrarlo
         if (config.icon != null && btnRef.iconImage != null)
             btnRef.iconImage.sprite = config.icon;
 
         btnRef.label.text = config.displayName;
-
-        // listener
         btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName));
 
         foreach (Transform child in btnRef.costPanel)
@@ -160,31 +139,34 @@ public class UIController : Singleton<UIController>
         {
             GameObject slotGO = Instantiate(btnRef.resourceSlotPrefab, btnRef.costPanel);
             slotGO.name = "slot" + resType.ToString();
+
             var slotImage = slotGO.GetComponentInChildren<UnityEngine.UI.Image>();
             var slotText = slotGO.GetComponentInChildren<TMPro.TextMeshProUGUI>();
 
             slotText.text = Math.Abs(amount).ToString();
-
             slotImage.sprite = ResourceIconLibrary.Instance.GetIcon(resType);
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(slotGO.GetComponent<RectTransform>());
         }
-       
+
+        Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.costPanel.GetComponent<RectTransform>());
+        LayoutRebuilder.ForceRebuildLayoutImmediate(currentPanel.GetComponent<RectTransform>());
 
         constructionButtons[config.codeName] = btnRef;
+
+        StartCoroutine(RebuildNextFrame(currentPanel));
     }
 
     public void ShowCategory(string category)
     {
         currentCategory = category;
-        Debug.Log($"Current Category {currentCategory}");
+        //Debug.Log($"Current Category {currentCategory}");
 
         foreach (var kvp in categoryPanels)
         {
             tabButtons[kvp.Key].GetComponent<Outline>().effectColor = (currentCategory == kvp.Key) ? selectedColor : defaultColor;
-            kvp.Value.SetActive(kvp.Key == category);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(kvp.Value.GetComponent<RectTransform>());          
+            SetPanelVisible(kvp.Value, kvp.Key == category);
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(kvp.Value.GetComponent<RectTransform>());
         }
     }
 
@@ -202,7 +184,7 @@ public class UIController : Singleton<UIController>
 
         currentBuilding = codeName;
         currentCategory = config.category.ToString();
-        
+
         DualMesh.Instance.SetBuildType(codeName);
 
         UpdateSelectedVisual(codeName);
@@ -211,7 +193,7 @@ public class UIController : Singleton<UIController>
     public void UpdateSelectedVisual(string selectedID)
     {
         currentBuilding = selectedID;
-        
+
         foreach (var kvp in constructionButtons)
             kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
     }
@@ -243,16 +225,16 @@ public class UIController : Singleton<UIController>
         UIButtonReference btnRef = btnGO.GetComponent<UIButtonReference>();
         btnRef.buttonID = config.type;
 
-        // si tiene sprite, mostrarlo
         if (config.icon != null && btnRef.iconImage != null)
             btnRef.iconImage.sprite = config.icon;
 
         btnRef.label.text = config.type;
 
-        // listener
         btnRef.button.onClick.AddListener(() => OnActionOptionClicked(config.type));
 
         actionButtons[config.type] = btnRef;
+
+        StartCoroutine(RebuildNextFrame(parentPanel.gameObject));
     }
 
     void OnActionOptionClicked(string id)
@@ -283,9 +265,37 @@ public class UIController : Singleton<UIController>
     public void UpdateActionsButtonVisual(string selectedID)
     {
         currentAction = selectedID;
-        
+
         foreach (var kvp in actionButtons)
             kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
+    }
+    #endregion
+
+    #region - Helper
+    private System.Collections.IEnumerator RebuildNextFrame(GameObject panel)
+    {
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(panel.GetComponent<RectTransform>());
+    }
+
+    void SetPanelVisible(GameObject panel, bool visible)
+    {
+        var cg = panel.GetComponent<CanvasGroup>();
+        if (cg == null) cg = panel.AddComponent<CanvasGroup>();
+
+        cg.alpha = visible ? 1 : 0;
+        cg.interactable = visible;
+        cg.blocksRaycasts = visible;
+    }
+
+    public void HideAllPanels()
+    {
+        SetPanelVisible(buildOptionsPanel, false);
+        foreach (GameObject panel in categoryPanels.Values)
+        {
+            SetPanelVisible(panel, false);
+        }
     }
     #endregion
 }

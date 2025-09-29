@@ -14,7 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardName: Carta 2
   icon: {fileID: 0}
-  constructionType: 2
   rarity: 1
-  description: Desbloquea Muros
+  description: "+10% producci\xF3n de arena"
   cost: 100
+  effects:
+  - rid: 6032320582811123793
+  references:
+    version: 2
+    RefIds:
+    - rid: 6032320582811123793
+      type: {class: GrantGlobalBonusEffect, ns: DraftSystem, asm: Assembly-CSharp}
+      data:
+        resource: 6
+        multiplier: 1.1
+        target: 0
