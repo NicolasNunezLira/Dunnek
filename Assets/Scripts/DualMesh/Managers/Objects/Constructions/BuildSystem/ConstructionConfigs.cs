@@ -2,9 +2,11 @@ using UnityEngine;
 using System.Collections.Generic;
 using Utils;
 using ResourceSystem;
+using BonusSystem;
 
 namespace ConstructionSystem
 {
+    #region - Category enum
     public enum ConstructionCategory
     {
         Housing,
@@ -12,7 +14,9 @@ namespace ConstructionSystem
         Consumer,
         BonusProvider
     }
+    #endregion
 
+    #region - Config Singleton
     public class ConstructionConfig : Singleton<ConstructionConfig>
     {
         public Dictionary<string, ConfigData> ConstructionConfigs { get; private set; } = new();
@@ -81,8 +85,9 @@ namespace ConstructionSystem
                 }
             }
         }
+        #endregion
 
-
+        #region - Config Data
         [System.Serializable]
         public class ConfigData
         {
@@ -100,6 +105,8 @@ namespace ConstructionSystem
             public List<BonusEntry> bonusList;
 
             // Diccionarios procesados
+            [System.NonSerialized] public ResourceCost baseCost;
+            [System.NonSerialized] public Dictionary<Resource, float> costModifiers = new();
             [System.NonSerialized] public ResourceCost cost;
             [System.NonSerialized] public ResourceCost rate;
             [System.NonSerialized] public Dictionary<string, GameObject> loadedPrefabs;
@@ -108,11 +115,10 @@ namespace ConstructionSystem
 
             public void InitializeResources()
             {
-                // Costos y tasas
+                baseCost = new ResourceCost(costList);
                 cost = new ResourceCost(costList);
                 rate = new ResourceCost(rateList);
 
-                // Categoría
                 if (System.Enum.TryParse(constructionCategory, out ConstructionCategory parsed))
                 {
                     category = parsed;
@@ -122,7 +128,6 @@ namespace ConstructionSystem
                     Debug.LogWarning($"Category not found: {constructionCategory}");
                 }
 
-                // Prefabs
                 loadedPrefabs = new Dictionary<string, GameObject>();
                 foreach (PrefabData prefab in prefabs)
                 {
@@ -137,7 +142,6 @@ namespace ConstructionSystem
                     }
                 }
 
-                // Icono
                 if (!string.IsNullOrEmpty(iconPath))
                 {
                     icon = Resources.Load<Sprite>(iconPath);
@@ -162,9 +166,41 @@ namespace ConstructionSystem
                 }
                 return text;
             }
+
+            /// <summary>
+            /// Recalcula el costo aplicando los modificadores acumulados en costModifiers.
+            /// </summary>
+            public void RecalculateCost()
+            {
+                cost = new ResourceCost(costList);
+
+                foreach (var kvp in costModifiers)
+                {
+                    if (cost.ContainsKey(kvp.Key))
+                    {
+                        float multiplier = 1f + kvp.Value;
+                        cost[kvp.Key] = baseCost[kvp.Key] * multiplier;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Suma o resta un modificador a un recurso específico.
+            /// </summary>
+            public void UpdateCostModifier(Resource resource, float deltaPct)
+            {
+                if (!costModifiers.ContainsKey(resource))
+                    costModifiers[resource] = 0;
+
+                costModifiers[resource] += deltaPct;
+                RecalculateCost();
+
+                UIController.Instance.UpdateBuildCost();
+            }
         }
+        #endregion
 
-
+        #region - Load Config
         [System.Serializable]
         public class ConfigDataList
         {
@@ -190,7 +226,23 @@ namespace ConstructionSystem
             }
         }
 
+        public void RecalculateAllCosts()
+        {
+            foreach (var config in ConstructionConfigs.Values)
+            {
+                config.RecalculateCost();
+            }
+        }
+
+        public void UpdateCostModifier(Resource resource, float modifier)
+        {
+            foreach (var config in ConstructionConfigs.Values)
+            {
+                config.UpdateCostModifier(resource, modifier);
+            }
+        }
     }
+    #endregion
 }
 
 #region - Json example

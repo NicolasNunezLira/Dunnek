@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using DraftSystem; // Asegúrate de que esto esté apuntando al namespace correcto
+using DraftSystem;
+using ResourceSystem;
 
 public class CardUI : MonoBehaviour
 {
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI cardName;
     [SerializeField] private TextMeshProUGUI description;
-    [SerializeField] private TextMeshProUGUI cost;
     [SerializeField] private Button selectButton;
 
     private CardInstance cardInstance;
@@ -29,7 +29,6 @@ public class CardUI : MonoBehaviour
         if (icon != null) icon.sprite = data.icon;
         if (cardName != null) cardName.text = data.cardName;
         if (description != null) description.text = data.description;
-        if (cost != null) cost.text = data.cost.ToString();
     }
 
     private void OnSelectCard()

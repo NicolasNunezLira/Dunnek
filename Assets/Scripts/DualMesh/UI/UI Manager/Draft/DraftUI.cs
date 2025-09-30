@@ -2,14 +2,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
+using ResourceSystem;
+using TMPro;
 
 namespace DraftSystem
 {
     public class DraftUI : Singleton<DraftUI>
     {
+        [Header("Bonus button:")]
+        [SerializeField] private Button bonusButton;
+        [SerializeField] private ResourceDraftCost bonusCost;
+
+        [Header("Unlock Button:")]
+        [SerializeField] private Button unlockButton;
+        [SerializeField] private ResourceDraftCost unlockCost;
+
+        [Header("Cards panel:")]
         [SerializeField] private Transform cardContainer;
         [SerializeField] private CardUI cardPrefab;
         [SerializeField] private Button confirmButton;
+        [SerializeField] private Button closeButton;
+
+        private Color originalBonusColor;
+        private Color originalUnlockColor;
+        private Coroutine flashRoutine;
+        private float flashDuration = 2f;
+
 
         private List<CardUI> instantiatedCards = new();
         private CardInstance selectedCard;
@@ -26,6 +44,36 @@ namespace DraftSystem
                 confirmButton.onClick.AddListener(ConfirmSelection);
                 confirmButton.gameObject.SetActive(false);
             }
+
+            if (closeButton != null)
+            {
+                closeButton.onClick.AddListener(CloseSelection);
+                closeButton.gameObject.SetActive(false);
+            }
+
+            if (unlockButton != null)
+            {
+                unlockButton.onClick.AddListener(() => SetDraftMode(DraftMode.UnlockOnly, unlockCost));
+                var resourceSlot = unlockButton.transform.Find("ResourceSlotTemplate");
+
+                var sprite = resourceSlot.GetComponentInChildren<UnityEngine.UI.Image>();
+                sprite.sprite = ResourceSystem.ResoureIconManager.Instance.GetIcon(unlockCost.resource);
+
+                var text = resourceSlot.GetComponentInChildren<TextMeshProUGUI>();
+                text.text = unlockCost.cost.ToString();
+            }
+
+            if (bonusButton != null)
+            {
+                bonusButton.onClick.AddListener(() => SetDraftMode(DraftMode.BonusOnly, bonusCost));
+                var resourceSlot = bonusButton.transform.Find("ResourceSlotTemplate");
+
+                var sprite = resourceSlot.GetComponentInChildren<UnityEngine.UI.Image>();
+                sprite.sprite = ResourceSystem.ResoureIconManager.Instance.GetIcon(bonusCost.resource);
+
+                var text = resourceSlot.GetComponentInChildren<TextMeshProUGUI>();
+                text.text = bonusCost.cost.ToString();
+            }
         }
 
         public void ShowDraft(List<CardInstance> draftOptions)
@@ -34,11 +82,14 @@ namespace DraftSystem
 
             cardContainer.gameObject.SetActive(true);
             confirmButton.gameObject.SetActive(true);
+            closeButton.gameObject.SetActive(true);
 
             foreach (var instance in draftOptions)
             {
                 var cardUI = Instantiate(cardPrefab, cardContainer);
                 cardUI.Setup(instance);
+                var outline = cardUI.GetComponent<Outline>();
+                if (outline) outline.enabled = false;
                 cardUI.gameObject.SetActive(true);
                 instantiatedCards.Add(cardUI);
             }
@@ -64,9 +115,21 @@ namespace DraftSystem
                 ClearPreviousCards();
                 cardContainer.gameObject.SetActive(false);
                 confirmButton.gameObject.SetActive(false);
+                closeButton.gameObject.SetActive(false);
 
                 DualMesh.Instance.SetMode(DualMesh.PlayingMode.Simulation);
             }
+        }
+
+        private void CloseSelection()
+        {
+            cardContainer.gameObject.SetActive(false);
+            confirmButton.gameObject.SetActive(false);
+            closeButton.gameObject.SetActive(false);
+
+            DualMesh.Instance.SetMode(DualMesh.PlayingMode.Simulation);
+
+            DraftManager.Instance.currentState = DraftState.Idle;
         }
 
         private void ClearPreviousCards()
@@ -79,5 +142,22 @@ namespace DraftSystem
             instantiatedCards.Clear();
             selectedCard = null;
         }
+
+        private void SetDraftMode(DraftMode mode, ResourceDraftCost draftCost)
+        {
+            if (ResourceManager.TryConsumeResource(draftCost.resource, draftCost.cost))
+            {
+                DraftManager.Instance.SetMode(mode);
+                DualMesh.Instance.SetMode(DualMesh.PlayingMode.Draft);
+                return;
+            }
+        }
+    }
+
+    [System.Serializable]
+    public struct ResourceDraftCost
+    {
+        public Resource resource;
+        public float cost;
     }
 }

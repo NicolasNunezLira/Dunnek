@@ -16,6 +16,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   rarity: 1
   description: "+10% producci\xF3n de arena"
+  resource: 3
   cost: 100
   effects:
   - rid: 6032320582811123793

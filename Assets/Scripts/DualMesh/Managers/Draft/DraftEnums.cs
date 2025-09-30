@@ -2,6 +2,13 @@ using UnityEngine;
 
 namespace DraftSystem
 {
+    public enum DraftMode
+    {
+        UnlockOnly,
+        BonusOnly,
+        Mixed
+    }
+    
     public enum Rarity
     {
         Common,

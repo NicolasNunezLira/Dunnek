@@ -6,6 +6,7 @@ using System.Linq;
 using Utils;
 using ResourceSystem;
 using System;
+
 public class UIController : Singleton<UIController>
 {
     [Header("Main Buttons")]
@@ -31,9 +32,6 @@ public class UIController : Singleton<UIController>
     [Header("Prefabs")]
     [SerializeField] public GameObject constructionButtonPrefab;
 
-    [Header("Scriptable object for icons")]
-    [SerializeField] private ResourceIconLibrary resourceIcons;
-
     private Outline buildOutline;
 
     private Dictionary<string, UIButtonReference> constructionButtons = new();
@@ -51,8 +49,6 @@ public class UIController : Singleton<UIController>
     protected override void Awake()
     {
         base.Awake();
-
-        if (resourceIcons != null) ResourceIconLibrary.Instance = resourceIcons;
 
         buildButton.onClick.AddListener(OnBuildClicked);
 
@@ -78,7 +74,7 @@ public class UIController : Singleton<UIController>
 
         GenerateConstructionButtons();
         InitializeActionButtons();
-        
+
         HideAllPanels();
     }
 
@@ -94,7 +90,6 @@ public class UIController : Singleton<UIController>
 
     public void UpdateMainButtonVisuals(DualMesh.PlayingMode mode)
     {
-
         buildOutline.effectColor = (mode == DualMesh.PlayingMode.Build) ? selectedColor : defaultColor;
         SetPanelVisible(buildOptionsPanel, mode == DualMesh.PlayingMode.Build);
     }
@@ -132,24 +127,7 @@ public class UIController : Singleton<UIController>
         btnRef.label.text = config.displayName;
         btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName));
 
-        foreach (Transform child in btnRef.costPanel)
-            Destroy(child.gameObject);
-
-        foreach ((Resource resType, float amount) in config.cost)
-        {
-            GameObject slotGO = Instantiate(btnRef.resourceSlotPrefab, btnRef.costPanel);
-            slotGO.name = "slot" + resType.ToString();
-
-            var slotImage = slotGO.GetComponentInChildren<UnityEngine.UI.Image>();
-            var slotText = slotGO.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-
-            slotText.text = Math.Abs(amount).ToString();
-            slotImage.sprite = ResourceIconLibrary.Instance.GetIcon(resType);
-        }
-
-        Canvas.ForceUpdateCanvases();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.costPanel.GetComponent<RectTransform>());
-        LayoutRebuilder.ForceRebuildLayoutImmediate(currentPanel.GetComponent<RectTransform>());
+        RefreshButtonCosts(btnRef, config);
 
         constructionButtons[config.codeName] = btnRef;
 
@@ -165,7 +143,7 @@ public class UIController : Singleton<UIController>
         {
             tabButtons[kvp.Key].GetComponent<Outline>().effectColor = (currentCategory == kvp.Key) ? selectedColor : defaultColor;
             SetPanelVisible(kvp.Value, kvp.Key == category);
-            Canvas.ForceUpdateCanvases();
+            //Canvas.ForceUpdateCanvases();
             LayoutRebuilder.ForceRebuildLayoutImmediate(kvp.Value.GetComponent<RectTransform>());
         }
     }
@@ -271,7 +249,55 @@ public class UIController : Singleton<UIController>
     }
     #endregion
 
+    #region - External Updates
+    public void UpdateBuildCost()
+    {
+        foreach (var kvp in constructionButtons)
+        {
+            string codeName = kvp.Key;
+            UIButtonReference btnRef = kvp.Value;
+
+            if (ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(codeName, out var config))
+            {
+                RefreshButtonCosts(btnRef, config);
+                LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.GetComponent<RectTransform>());
+            }
+        }
+
+        foreach (var panel in categoryPanels.Values)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panel.GetComponent<RectTransform>());
+        }
+    }
+    #endregion
+
     #region - Helper
+    private void RefreshButtonCosts(UIButtonReference btnRef, ConstructionConfig.ConfigData config)
+    {
+        foreach (Transform child in btnRef.costPanel)
+        {
+            Destroy(child.gameObject);
+        }
+
+        foreach ((Resource resource, float amount) in config.cost)
+        {
+            GameObject slotGO = Instantiate(btnRef.resourceSlotPrefab, btnRef.costPanel);
+            slotGO.name = "slot" + resource.ToString();
+
+            var slotImage = slotGO.GetComponentInChildren<UnityEngine.UI.Image>();
+            var slotText = slotGO.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+
+            slotText.text = Math.Abs(amount).ToString();
+            slotImage.sprite = ResourceSystem.ResoureIconManager.Instance.GetIcon(resource);
+            //LayoutRebuilder.ForceRebuildLayoutImmediate(slotGO.GetComponent<RectTransform>());
+        }
+
+        //Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.costPanel.GetComponent<RectTransform>());
+
+        StartCoroutine(RebuildNextFrame(btnRef.costPanel.gameObject));
+    }
+
     private System.Collections.IEnumerator RebuildNextFrame(GameObject panel)
     {
         yield return null;

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ResourceSystem;
 
 namespace DraftSystem
 {
@@ -10,7 +11,8 @@ namespace DraftSystem
         public Sprite icon;
         public Rarity rarity;
         [TextArea] public string description;
-        public int cost;
+        public Resource resource;
+        public float cost;
         [SerializeReference] public List<ICardEffect> effects;
     }
 }

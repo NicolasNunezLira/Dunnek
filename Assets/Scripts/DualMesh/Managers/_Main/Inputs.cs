@@ -12,11 +12,13 @@ public partial class DualMesh : MonoBehaviour
             SetMode(newMode);
         }
 
+        /*
         if (Input.GetKeyDown(KeyCode.V))
         {
             PlayingMode newMode = (inMode == PlayingMode.Action) ? PlayingMode.Simulation : PlayingMode.Action;
             SetMode(newMode);
         }
+        */
 
         if (Input.GetKeyDown(KeyCode.Escape) && inMode != PlayingMode.Simulation)
         {

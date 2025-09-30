@@ -10,19 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01c14892304d42e41af02e367393312c, type: 3}
-  m_Name: Carta 1
+  m_Name: Carta 4
   m_EditorClassIdentifier: 
-  cardName: Carta 1
+  cardName: Carta 4
   icon: {fileID: 0}
-  rarity: 0
-  description: Desbloquea Casa de arcilla
-  cost: 1
+  rarity: 1
+  description: "Disminuye el costo de arena de construcci\xF3n en un 5%"
+  resource: 3
+  cost: 50
   effects:
-  - rid: 6032320582811123792
+  - rid: 6550862383987556425
   references:
     version: 2
     RefIds:
-    - rid: 6032320582811123792
-      type: {class: UnlockConstructionEffect, ns: DraftSystem, asm: Assembly-CSharp}
+    - rid: 6550862383987556425
+      type: {class: GrantGlobalBonusEffect, ns: DraftSystem, asm: Assembly-CSharp}
       data:
-        constructionType: houseClay
+        resource: 6
+        multiplier: -0.1
+        target: 2

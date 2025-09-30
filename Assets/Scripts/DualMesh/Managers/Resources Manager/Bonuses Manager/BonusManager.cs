@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ConstructionSystem;
 using ResourceSystem;
 using UnityEngine;
 
@@ -28,7 +29,11 @@ namespace BonusSystem
                 }
             }
 
-            if (bonus.Target == BonusTarget.Cost) costBonuses.Add(bonus);
+            if (bonus.Target == BonusTarget.Cost)
+            {
+                costBonuses.Add(bonus);
+                ConstructionConfig.Instance.UpdateCostModifier(bonus.Resource, bonus.Multiplier);
+            }
         }
 
         public static void RemoveBonus(Bonus bonus)
@@ -43,6 +48,7 @@ namespace BonusSystem
             }
 
             costBonuses.Remove(bonus);
+            ConstructionConfig.Instance.UpdateCostModifier(bonus.Resource, -bonus.Multiplier);
         }
 
         public static void ClearAllBonuses()
@@ -144,19 +150,6 @@ namespace BonusSystem
             }
 
             result.FinalValue = runningValue;
-            return result;
-        }
-
-        public static float ApplyCostBonuses(float baseCost, Resource resource)
-        {
-            float result = baseCost;
-
-            foreach (var costBonus in costBonuses)
-            {
-                if (costBonus.Resource != resource) continue;
-                result = costBonus.Apply(result);
-            }
-
             return result;
         }
         #endregion

@@ -12,9 +12,6 @@ public class ResourceUI : MonoBehaviour
     [Header("Contenedor")]
     [SerializeField] private Transform resourcePanelParent;
 
-    [Header("Scriptable object for icons")]
-    [SerializeField] private ResourceIconLibrary resourceIcons;
-
     private class ResourceSlot
     {
         public GameObject slotGO;
@@ -61,7 +58,7 @@ public class ResourceUI : MonoBehaviour
 
         // Icon
         var slotImage = slotGO.transform.Find("Image").GetComponent<Image>();
-        var sprite = ResourceIconLibrary.Instance.GetIcon(res.Name);
+        var sprite = ResourceSystem.ResoureIconManager.Instance.GetIcon(res.Name);
         if (sprite != null) slotImage.sprite = sprite;
 
         // Texts
