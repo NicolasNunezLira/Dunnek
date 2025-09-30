@@ -14,7 +14,7 @@ namespace BonusSystem
     #region - Abstract Bonus
     public abstract class Bonus
     {
-        public ConstructionInstance Building { get; protected set; }
+        public ConstructionInstance? Building { get; protected set; }
         public BonusType Type { get; protected set; }
         public BonusTarget Target { get; protected set; }
         public Resource Resource { get; protected set; }
@@ -24,7 +24,7 @@ namespace BonusSystem
             Resource resource,
             float multiplier,
             BonusTarget target,
-            ConstructionInstance building
+            ConstructionInstance? building = null
         )
         {
             Resource = resource;
@@ -36,12 +36,13 @@ namespace BonusSystem
         /// <summary>
         /// Aplica el bonus solo si corresponde al signo (positivo/negativo) y al Target.
         /// </summary>
-        public abstract float Apply(float baseValue, ConstructionInstance consumer);
+        public abstract float Apply(float baseValue, ConstructionInstance? consumer = null);
 
         protected bool ShouldAffect(float baseValue)
         {
             return (Target == BonusTarget.Production && baseValue > 0f) ||
-                   (Target == BonusTarget.Consumption && baseValue < 0f);
+                   (Target == BonusTarget.Consumption && baseValue < 0f) ||
+                   (Target == BonusTarget.Cost);
         }
     }
     #endregion
@@ -55,7 +56,7 @@ namespace BonusSystem
             Type = BonusType.Global;
         }
 
-        public override float Apply(float baseValue, ConstructionInstance consumer)
+        public override float Apply(float baseValue, ConstructionInstance? consumer = null)
         {
             if (!ShouldAffect(baseValue)) return baseValue;
             return baseValue * Multiplier;

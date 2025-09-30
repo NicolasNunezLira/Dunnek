@@ -8,6 +8,7 @@ namespace BonusSystem
     {
         private static readonly List<GlobalBonus> globalBonuses = new();
         private static readonly List<LocalBonus> localBonuses = new();
+        private static readonly List<Bonus> costBonuses = new();
 
         #region Management
         public static void AddBonus(Bonus bonus)
@@ -26,6 +27,8 @@ namespace BonusSystem
                     building.AddLocalBonus(local);
                 }
             }
+
+            if (bonus.Target == BonusTarget.Cost) costBonuses.Add(bonus);
         }
 
         public static void RemoveBonus(Bonus bonus)
@@ -38,12 +41,15 @@ namespace BonusSystem
             {
                 localBonuses.Remove(local);
             }
+
+            costBonuses.Remove(bonus);
         }
 
         public static void ClearAllBonuses()
         {
             globalBonuses.Clear();
             localBonuses.Clear();
+            costBonuses.Clear();
         }
         #endregion
 
@@ -67,32 +73,6 @@ namespace BonusSystem
             foreach (var local in localBonuses)
             {
                 if (local.Resource != resource) continue;
-                result = local.Apply(result, building.instance);
-            }
-
-            return result;
-        }
-
-        public static float ApplyCostBonuses(
-            float baseCost,
-            Resource resource,
-            ResourceManager.ResourceBuilding building
-        )
-        {
-            float result = baseCost;
- 
-            foreach (var global in globalBonuses)
-            {
-                if (global.Resource != resource) continue;
-                if (global.Target != BonusTarget.Cost) continue;
-                result = global.Apply(result, building.instance);
-            }
-
-            foreach (var local in localBonuses)
-            {
-                if (local.Resource != resource) continue;
-                if (local.Target != BonusTarget.Cost) continue;
-                if (!local.AffectsBuilding(building.instance)) continue;
                 result = local.Apply(result, building.instance);
             }
 
@@ -166,6 +146,19 @@ namespace BonusSystem
             result.FinalValue = runningValue;
             return result;
         }
+
+        public static float ApplyCostBonuses(float baseCost, Resource resource)
+        {
+            float result = baseCost;
+
+            foreach (var costBonus in costBonuses)
+            {
+                if (costBonus.Resource != resource) continue;
+                result = costBonus.Apply(result);
+            }
+
+            return result;
+        }
         #endregion
 
         #region - Consumers
@@ -215,6 +208,7 @@ namespace BonusSystem
         #region - Debug/Tooltip
         public static IEnumerable<GlobalBonus> GetGlobalBonuses() => globalBonuses;
         public static IEnumerable<LocalBonus> GetLocalBonuses() => localBonuses;
+        public static IEnumerable<Bonus> GetCostBonuses() => costBonuses;
         #endregion
     }
 }
