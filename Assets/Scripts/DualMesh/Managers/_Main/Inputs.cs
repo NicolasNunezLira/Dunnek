@@ -6,29 +6,9 @@ public partial class DualMesh : MonoBehaviour
     #region Handle Input
     public void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            PlayingMode newMode = (inMode == PlayingMode.Build) ? PlayingMode.Simulation : PlayingMode.Build;
-            SetMode(newMode);
-        }
-
-        /*
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            PlayingMode newMode = (inMode == PlayingMode.Action) ? PlayingMode.Simulation : PlayingMode.Action;
-            SetMode(newMode);
-        }
-        */
-
         if (Input.GetKeyDown(KeyCode.Escape) && inMode != PlayingMode.Simulation)
         {
             SetMode(PlayingMode.Simulation);
-        }
-
-        if (Input.GetKeyDown(KeyCode.B) && inMode != PlayingMode.Draft)
-        {
-            PlayingMode newMode = (inMode == PlayingMode.Draft) ? PlayingMode.Simulation : PlayingMode.Draft;
-            SetMode(newMode);
         }
         #endregion
     }

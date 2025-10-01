@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using Utils;
@@ -9,6 +10,7 @@ namespace DraftSystem
 {
     public class DraftUI : Singleton<DraftUI>
     {
+        #region - Variables
         [Header("Bonus button:")]
         [SerializeField] private Button bonusButton;
         [SerializeField] private ResourceDraftCost bonusCost;
@@ -23,15 +25,16 @@ namespace DraftSystem
         [SerializeField] private Button confirmButton;
         [SerializeField] private Button closeButton;
 
-        private Color originalBonusColor;
-        private Color originalUnlockColor;
-        private Coroutine flashRoutine;
-        private float flashDuration = 2f;
+        private Dictionary<Button, Color> originalColors = new();
+        private Dictionary<Button, Coroutine> flashRoutines = new();
+        private float flashDuration = 1f;
 
 
         private List<CardUI> instantiatedCards = new();
         private CardInstance selectedCard;
+        #endregion
 
+        #region - Awake
         protected override void Awake()
         {
             base.Awake();
@@ -54,6 +57,7 @@ namespace DraftSystem
             if (unlockButton != null)
             {
                 unlockButton.onClick.AddListener(() => SetDraftMode(DraftMode.UnlockOnly, unlockCost));
+                originalColors[unlockButton] = unlockButton.GetComponent<UnityEngine.UI.Image>().color;
                 var resourceSlot = unlockButton.transform.Find("ResourceSlotTemplate");
 
                 var sprite = resourceSlot.GetComponentInChildren<UnityEngine.UI.Image>();
@@ -66,6 +70,8 @@ namespace DraftSystem
             if (bonusButton != null)
             {
                 bonusButton.onClick.AddListener(() => SetDraftMode(DraftMode.BonusOnly, bonusCost));
+                originalColors[bonusButton] = bonusButton.GetComponent<UnityEngine.UI.Image>().color;
+
                 var resourceSlot = bonusButton.transform.Find("ResourceSlotTemplate");
 
                 var sprite = resourceSlot.GetComponentInChildren<UnityEngine.UI.Image>();
@@ -75,7 +81,9 @@ namespace DraftSystem
                 text.text = bonusCost.cost.ToString();
             }
         }
+        #endregion
 
+        #region - Show Draft and selection
         public void ShowDraft(List<CardInstance> draftOptions)
         {
             ClearPreviousCards();
@@ -151,7 +159,48 @@ namespace DraftSystem
                 DualMesh.Instance.SetMode(DualMesh.PlayingMode.Draft);
                 return;
             }
+            else
+            {
+                switch (mode)
+                {
+                    case DraftMode.BonusOnly:
+                        FlashRed(bonusButton);
+                        break;
+                    case DraftMode.UnlockOnly:
+                        FlashRed(unlockButton);
+                        break;
+                }
+            }
         }
+        #endregion
+
+        #region - Flash red routine
+        public void FlashRed(Button button)
+        {
+            if (flashRoutines.TryGetValue(button, out Coroutine running))
+                StopCoroutine(running);
+
+            flashRoutines[button] = StartCoroutine(FlashRoutine(button));
+        }
+
+
+        private IEnumerator FlashRoutine(Button button)
+        {
+            Image buttonImage = button.GetComponent<Image>();
+            buttonImage.color = Color.red;
+
+            float t = 0f;
+            while (t < flashDuration)
+            {
+                t += Time.deltaTime;
+                buttonImage.color = Color.Lerp(Color.red, originalColors[button], t / flashDuration);
+                yield return null;
+            }
+
+            buttonImage.color = originalColors[button];
+            flashRoutines.Remove(button);
+        }
+        #endregion
     }
 
     [System.Serializable]

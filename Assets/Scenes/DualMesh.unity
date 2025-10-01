@@ -261,10 +261,10 @@ MonoBehaviour:
     m_Bottom: 0
   m_ChildAlignment: 4
   m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -313,6 +313,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 88472284}
+  - component: {fileID: 88472286}
+  - component: {fileID: 88472285}
   m_Layer: 5
   m_Name: Draft
   m_TagString: Untagged
@@ -342,6 +344,75 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &88472285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 88472283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57a08d67f81afbf4e9dc1d19b5109c15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentState: 0
+  unlockedCards: []
+  allCards:
+  - {fileID: 11400000, guid: 604e204555a5c394eb9e947c594a4f29, type: 2}
+  - {fileID: 11400000, guid: 72840ce74bd93e845a77640990041077, type: 2}
+  - {fileID: 11400000, guid: f9e7fd48005151d498ce0a6c84312b1f, type: 2}
+  - {fileID: 11400000, guid: 8b4f35759e5fa1f47a8250d24de7220e, type: 2}
+  cardsToDraft: 3
+  rarityDistribution:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  currentMode: 2
+--- !u!114 &88472286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 88472283}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5401b69d718ae664e832d7a218e05bf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bonusButton: {fileID: 627214841}
+  bonusCost:
+    resource: 2
+    cost: 500
+  unlockButton: {fileID: 4977460}
+  unlockCost:
+    resource: 2
+    cost: 250
+  cardContainer: {fileID: 1031985927}
+  cardPrefab: {fileID: -8859950876481902238, guid: 7db91912e2a833b45b3502b3c69b540f, type: 3}
+  confirmButton: {fileID: 1107995508}
+  closeButton: {fileID: 798335289}
 --- !u!1 &110220990
 GameObject:
   m_ObjectHideFlags: 0
@@ -2867,8 +2938,8 @@ MonoBehaviour:
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -3735,7 +3806,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764849845}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -5623,7 +5694,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 30}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1092129380
 MonoBehaviour:
@@ -6559,7 +6630,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1969004533253122393, guid: c53ac55e828bcc44b84a9e44f793efde, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -45.5
+      value: -43.41
       objectReference: {fileID: 0}
     - target: {fileID: 1969004533253122393, guid: c53ac55e828bcc44b84a9e44f793efde, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -6749,8 +6820,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1295478666}
-  - component: {fileID: 1295478668}
-  - component: {fileID: 1295478667}
   m_Layer: 5
   m_Name: DraftPanel
   m_TagString: Untagged
@@ -6780,75 +6849,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1000, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1295478667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1295478665}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57a08d67f81afbf4e9dc1d19b5109c15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentState: 0
-  unlockedCards: []
-  allCards:
-  - {fileID: 11400000, guid: 604e204555a5c394eb9e947c594a4f29, type: 2}
-  - {fileID: 11400000, guid: 72840ce74bd93e845a77640990041077, type: 2}
-  - {fileID: 11400000, guid: f9e7fd48005151d498ce0a6c84312b1f, type: 2}
-  - {fileID: 11400000, guid: 8b4f35759e5fa1f47a8250d24de7220e, type: 2}
-  cardsToDraft: 3
-  rarityDistribution:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  currentMode: 2
---- !u!114 &1295478668
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1295478665}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5401b69d718ae664e832d7a218e05bf2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bonusButton: {fileID: 627214841}
-  bonusCost:
-    resource: 2
-    cost: 500
-  unlockButton: {fileID: 4977460}
-  unlockCost:
-    resource: 2
-    cost: 250
-  cardContainer: {fileID: 1031985927}
-  cardPrefab: {fileID: -8859950876481902238, guid: 7db91912e2a833b45b3502b3c69b540f, type: 3}
-  confirmButton: {fileID: 1107995508}
-  closeButton: {fileID: 798335289}
 --- !u!1 &1311119502
 GameObject:
   m_ObjectHideFlags: 0
@@ -7155,7 +7155,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1969004533253122393, guid: c53ac55e828bcc44b84a9e44f793efde, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -45
+      value: -43.41
       objectReference: {fileID: 0}
     - target: {fileID: 1969004533253122393, guid: c53ac55e828bcc44b84a9e44f793efde, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -7522,7 +7522,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 150, y: 30}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1434876514
 MonoBehaviour:

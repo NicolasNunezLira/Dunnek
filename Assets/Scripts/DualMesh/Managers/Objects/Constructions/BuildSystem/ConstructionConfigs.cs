@@ -194,8 +194,6 @@ namespace ConstructionSystem
 
                 costModifiers[resource] += deltaPct;
                 RecalculateCost();
-
-                UIController.Instance.UpdateBuildCost();
             }
         }
         #endregion
@@ -240,6 +238,8 @@ namespace ConstructionSystem
             {
                 config.UpdateCostModifier(resource, modifier);
             }
+            
+            UIController.Instance.UpdateBuildCost();
         }
     }
     #endregion

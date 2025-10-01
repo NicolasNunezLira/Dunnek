@@ -6,6 +6,7 @@ using System.Linq;
 using Utils;
 using ResourceSystem;
 using System;
+using Mono.Cecil.Cil;
 
 public class UIController : Singleton<UIController>
 {
@@ -127,7 +128,7 @@ public class UIController : Singleton<UIController>
         btnRef.label.text = config.displayName;
         btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName));
 
-        RefreshButtonCosts(btnRef, config);
+        RefreshBuildButtonCosts(btnRef, config);
 
         constructionButtons[config.codeName] = btnRef;
 
@@ -143,7 +144,6 @@ public class UIController : Singleton<UIController>
         {
             tabButtons[kvp.Key].GetComponent<Outline>().effectColor = (currentCategory == kvp.Key) ? selectedColor : defaultColor;
             SetPanelVisible(kvp.Value, kvp.Key == category);
-            //Canvas.ForceUpdateCanvases();
             LayoutRebuilder.ForceRebuildLayoutImmediate(kvp.Value.GetComponent<RectTransform>());
         }
     }
@@ -210,6 +210,8 @@ public class UIController : Singleton<UIController>
 
         btnRef.button.onClick.AddListener(() => OnActionOptionClicked(config.type));
 
+        RefreshActionButtonCosts(btnRef, config);
+
         actionButtons[config.type] = btnRef;
 
         StartCoroutine(RebuildNextFrame(parentPanel.gameObject));
@@ -221,6 +223,13 @@ public class UIController : Singleton<UIController>
 
         if (!actionButtons.ContainsKey(id)) return;
 
+        SetActionType(id);
+
+        UpdateActionsButtonVisual(id);
+    }
+
+    void SetActionType(string id)
+    {
         switch (id)
         {
             case "Dig":
@@ -236,8 +245,27 @@ public class UIController : Singleton<UIController>
                 DualMesh.Instance.SetActionType(DualMesh.ActionMode.Recycle);
                 break;
         }
+    }
 
-        UpdateActionsButtonVisual(id);
+    bool MapAction(string id, out DualMesh.ActionMode? parsed)
+    {
+        switch (id)
+        {
+            case "Dig":
+                parsed = DualMesh.ActionMode.Dig;
+                return true;
+            case "AddSand":
+                parsed = DualMesh.ActionMode.AddSand;
+                return true;
+            case "Flat":
+                parsed = DualMesh.ActionMode.Flat;
+                return true;
+            case "Recycle":
+                parsed = DualMesh.ActionMode.Dig;
+                return true;
+        }
+        parsed = null;
+        return false;
     }
 
     public void UpdateActionsButtonVisual(string selectedID)
@@ -259,20 +287,73 @@ public class UIController : Singleton<UIController>
 
             if (ConstructionConfig.Instance.ConstructionConfigs.TryGetValue(codeName, out var config))
             {
-                RefreshButtonCosts(btnRef, config);
+                RefreshBuildButtonCosts(btnRef, config);
                 LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.GetComponent<RectTransform>());
             }
         }
 
+        RebuilLayoutPanels();
+    }
+
+    public void UpdateActionCost()
+    {
+        foreach (var kvp in actionButtons)
+        {
+            string codeName = kvp.Key;
+            UIButtonReference btnRef = kvp.Value;
+
+            if (!MapAction(codeName, out var parsed)) continue;
+
+            if (ActionConfig.Instance.actionsConfig.TryGetValue(parsed.Value, out var config))
+            {
+                RefreshActionButtonCosts(btnRef, config);
+                LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.GetComponent<RectTransform>());
+            }
+        }
+
+        RebuilLayoutPanels();
+    }
+
+    public void UpdataAllCost()
+    {
+        UpdateActionCost();
+        UpdateBuildCost();
+    }
+    #endregion
+
+    #region - Helper
+    void RebuilLayoutPanels()
+    {
         foreach (var panel in categoryPanels.Values)
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(panel.GetComponent<RectTransform>());
         }
     }
-    #endregion
+    private void RefreshBuildButtonCosts(UIButtonReference btnRef, ConstructionConfig.ConfigData config)
+    {
+        foreach (Transform child in btnRef.costPanel)
+        {
+            Destroy(child.gameObject);
+        }
 
-    #region - Helper
-    private void RefreshButtonCosts(UIButtonReference btnRef, ConstructionConfig.ConfigData config)
+        foreach ((Resource resource, float amount) in config.cost)
+        {
+            GameObject slotGO = Instantiate(btnRef.resourceSlotPrefab, btnRef.costPanel);
+            slotGO.name = "slot" + resource.ToString();
+
+            var slotImage = slotGO.GetComponentInChildren<UnityEngine.UI.Image>();
+            var slotText = slotGO.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+
+            slotText.text = Math.Abs(amount).ToString();
+            slotImage.sprite = ResourceSystem.ResoureIconManager.Instance.GetIcon(resource);
+        }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.costPanel.GetComponent<RectTransform>());
+
+        StartCoroutine(RebuildNextFrame(btnRef.costPanel.gameObject));
+    }
+
+    private void RefreshActionButtonCosts(UIButtonReference btnRef, ActionConfig.ConfigData config)
     {
         foreach (Transform child in btnRef.costPanel)
         {
