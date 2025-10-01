@@ -40,7 +40,7 @@ public class CardEditor : Editor
     {
         serializedObject.Update();
 
-        // Resto de propiedades de la card
+        // Resto de propiedades de la Card (excepto script y efectos)
         DrawPropertiesExcluding(serializedObject, "m_Script", "effects");
 
         EditorGUILayout.Space();
@@ -59,7 +59,7 @@ public class CardEditor : Editor
 
         EditorGUILayout.Space();
 
-        // Dibujar elementos
+        // Dibujar elementos de effects
         for (int i = 0; i < effectsProp.arraySize; i++)
         {
             SerializedProperty element = effectsProp.GetArrayElementAtIndex(i);
@@ -83,13 +83,23 @@ public class CardEditor : Editor
 
             if (instance != null)
             {
-                // Dibujar SOLO los hijos (los campos del efecto concreto)
+                // Dibujar SOLO los hijos (campos del efecto concreto)
                 SerializedProperty iterator = element.Copy();
                 SerializedProperty endProperty = iterator.GetEndProperty();
                 bool enterChildren = true;
+
                 while (iterator.NextVisible(enterChildren) && !SerializedProperty.EqualContents(iterator, endProperty))
                 {
-                    EditorGUILayout.PropertyField(iterator, true);
+                    if (iterator.propertyType == SerializedPropertyType.Generic)
+                    {
+                        // Asegura que listas como affectedBuildTypes se muestren correctamente
+                        EditorGUILayout.PropertyField(iterator, true);
+                    }
+                    else
+                    {
+                        EditorGUILayout.PropertyField(iterator, true);
+                    }
+
                     enterChildren = false;
                 }
             }

@@ -47,6 +47,7 @@ namespace ConstructionSystem
             public string bonusType;            // "Global" o "Local"
             public string target;               // "Production" o "Consumption"
             public float radius;                // solo si es local
+            public List<string> affectedBuildType;
             public List<BonusEffect> effects;
         }
 
@@ -232,11 +233,12 @@ namespace ConstructionSystem
             }
         }
 
-        public void UpdateCostModifier(Resource resource, float modifier)
+        public void UpdateCostModifier(Resource resource, float modifier, List<string> affectedBuildType)
         {
             foreach (var config in ConstructionConfigs.Values)
             {
-                config.UpdateCostModifier(resource, modifier);
+                if (affectedBuildType.Contains("All") || affectedBuildType.Contains(config.codeName))
+                    config.UpdateCostModifier(resource, modifier);
             }
             
             UIController.Instance.UpdateBuildCost();

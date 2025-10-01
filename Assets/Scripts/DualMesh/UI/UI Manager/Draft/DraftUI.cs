@@ -153,11 +153,40 @@ namespace DraftSystem
 
         private void SetDraftMode(DraftMode mode, ResourceDraftCost draftCost)
         {
-            if (ResourceManager.TryConsumeResource(draftCost.resource, draftCost.cost))
+            if (DraftManager.Instance.currentState != DraftState.Idle) return;
+
+            bool openPanel = true;
+
+            switch (mode)
             {
-                DraftManager.Instance.SetMode(mode);
-                DualMesh.Instance.SetMode(DualMesh.PlayingMode.Draft);
-                return;
+                case DraftMode.UnlockOnly:
+                    openPanel = DraftManager.Instance.unlockQuantityCards() != 0;
+                    break;
+                case DraftMode.BonusOnly:
+                    openPanel = DraftManager.Instance.bonusQuantityCards() != 0;
+                    break;
+            }
+
+            if (openPanel)
+            {
+                if (ResourceManager.TryConsumeResource(draftCost.resource, draftCost.cost))
+                {
+                    DraftManager.Instance.SetMode(mode);
+                    DualMesh.Instance.SetMode(DualMesh.PlayingMode.Draft);
+                    return;
+                }
+                else
+                {
+                    switch (mode)
+                    {
+                        case DraftMode.BonusOnly:
+                            FlashRed(bonusButton);
+                            break;
+                        case DraftMode.UnlockOnly:
+                            FlashRed(unlockButton);
+                            break;
+                    }
+                }
             }
             else
             {

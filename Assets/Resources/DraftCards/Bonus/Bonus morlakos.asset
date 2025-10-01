@@ -10,22 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01c14892304d42e41af02e367393312c, type: 3}
-  m_Name: Carta 2
+  m_Name: Bonus morlakos
   m_EditorClassIdentifier: 
-  cardName: Carta 2
+  cardName: Con platita baila el mono
   icon: {fileID: 0}
-  rarity: 1
-  description: "+10% producci\xF3n de arena"
-  resource: 3
-  cost: 100
+  rarity: 0
+  description: +5 morlaks
   effects:
-  - rid: 6032320582811123793
+  - rid: 8435493926792069190
   references:
     version: 2
     RefIds:
-    - rid: 6032320582811123793
-      type: {class: GrantGlobalBonusEffect, ns: DraftSystem, asm: Assembly-CSharp}
+    - rid: 8435493926792069190
+      type: {class: GrantResourceBonusEffect, ns: DraftSystem, asm: Assembly-CSharp}
       data:
-        resource: 6
-        multiplier: 1.1
-        target: 0
+        resource: 2
+        amount: 5

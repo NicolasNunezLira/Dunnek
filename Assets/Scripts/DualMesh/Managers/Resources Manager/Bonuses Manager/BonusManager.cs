@@ -10,6 +10,7 @@ namespace BonusSystem
         private static readonly List<GlobalBonus> globalBonuses = new();
         private static readonly List<LocalBonus> localBonuses = new();
         private static readonly List<Bonus> costBonuses = new();
+        private static readonly List<ResourceBonus> resourceBonuses = new();
 
         #region Management
         public static void AddBonus(Bonus bonus)
@@ -28,11 +29,16 @@ namespace BonusSystem
                     building.AddLocalBonus(local);
                 }
             }
+            else if (bonus is ResourceBonus resourceBonus)
+            {
+                resourceBonuses.Add(resourceBonus);
+                resourceBonus.ApplyResource();
+            }
 
             if (bonus.Target == BonusTarget.Cost)
             {
                 costBonuses.Add(bonus);
-                ConstructionConfig.Instance.UpdateCostModifier(bonus.Resource, bonus.Multiplier);
+                ConstructionConfig.Instance.UpdateCostModifier(bonus.Resource, bonus.Multiplier, bonus.AffectedBuildType);
             }
         }
 
@@ -48,7 +54,7 @@ namespace BonusSystem
             }
 
             costBonuses.Remove(bonus);
-            ConstructionConfig.Instance.UpdateCostModifier(bonus.Resource, -bonus.Multiplier);
+            ConstructionConfig.Instance.UpdateCostModifier(bonus.Resource, -bonus.Multiplier, bonus.AffectedBuildType);
         }
 
         public static void ClearAllBonuses()
@@ -82,6 +88,8 @@ namespace BonusSystem
                 result = local.Apply(result, building.instance);
             }
 
+
+
             return result;
         }
 
@@ -100,6 +108,7 @@ namespace BonusSystem
             foreach (var g in globalBonuses)
             {
                 if (g.Resource != resource) continue;
+                if (!(g.AffectedBuildType.Contains(building.instance.Config.codeName) || g.AffectedBuildType.Contains("all"))) continue;
                 if (!((g.Target == BonusTarget.Production && baseValue > 0) ||
                       (g.Target == BonusTarget.Consumption && baseValue < 0)))
                     continue;
@@ -125,6 +134,7 @@ namespace BonusSystem
             foreach (var l in localBonuses)
             {
                 if (l.Resource != resource) continue;
+                if (!(l.AffectedBuildType.Contains(building.instance.Config.codeName) || l.AffectedBuildType.Contains("all"))) continue;
                 if (!l.AffectsBuilding(building.instance)) continue;
                 if (!((l.Target == BonusTarget.Production && baseValue > 0) ||
                       (l.Target == BonusTarget.Consumption && baseValue < 0)))
@@ -202,6 +212,7 @@ namespace BonusSystem
         public static IEnumerable<GlobalBonus> GetGlobalBonuses() => globalBonuses;
         public static IEnumerable<LocalBonus> GetLocalBonuses() => localBonuses;
         public static IEnumerable<Bonus> GetCostBonuses() => costBonuses;
+        public static IEnumerable<ResourceBonus> GetResourceBonus() => resourceBonuses;
         #endregion
     }
 }

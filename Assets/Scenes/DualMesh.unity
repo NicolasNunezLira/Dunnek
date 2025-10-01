@@ -359,10 +359,13 @@ MonoBehaviour:
   currentState: 0
   unlockedCards: []
   allCards:
+  - {fileID: 11400000, guid: f9e7fd48005151d498ce0a6c84312b1f, type: 2}
+  - {fileID: 11400000, guid: 46b033a8770b14d44aa40cc4710e4238, type: 2}
   - {fileID: 11400000, guid: 604e204555a5c394eb9e947c594a4f29, type: 2}
   - {fileID: 11400000, guid: 72840ce74bd93e845a77640990041077, type: 2}
-  - {fileID: 11400000, guid: f9e7fd48005151d498ce0a6c84312b1f, type: 2}
+  - {fileID: 11400000, guid: 72840ce74bd93e845a77640990041077, type: 2}
   - {fileID: 11400000, guid: 8b4f35759e5fa1f47a8250d24de7220e, type: 2}
+  - {fileID: 11400000, guid: f865bf5fed67072478fcbc66901eb0ae, type: 2}
   cardsToDraft: 3
   rarityDistribution:
     serializedVersion: 2
@@ -3880,7 +3883,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &798335288
 RectTransform:
   m_ObjectHideFlags: 0

@@ -58,13 +58,13 @@ namespace DraftSystem
                 .Where(c =>
                 {
                     bool isUnlock = c.effects.All(e => e is UnlockConstructionEffect);
-                    bool isBonus  = c.effects.All(e => e is GrantGlobalBonusEffect);
+                    bool isBonus = c.effects.All(e => e is GrantGlobalBonusEffect || e is GrantResourceBonusEffect);
 
                     return currentMode switch
                     {
                         DraftMode.UnlockOnly => isUnlock,
-                        DraftMode.BonusOnly  => isBonus,
-                        DraftMode.Mixed      => true,
+                        DraftMode.BonusOnly => isBonus,
+                        DraftMode.Mixed => true,
                         _ => true
                     };
                 })
@@ -89,7 +89,6 @@ namespace DraftSystem
                     used.Add(selected);
 
                     CardInstance instance = new CardInstance(selected, result.Count);
-                    ApplyDraftModeCost(instance);
 
                     result.Add(instance);
                 }
@@ -150,6 +149,24 @@ namespace DraftSystem
             }
 
             currentState = DraftState.Idle;
+        }
+        #endregion
+
+        #region - External cards query
+        public int unlockQuantityCards()
+        {
+            return allCards
+                .Where(c => !unlockedCards.Contains(c))
+                .Where(c => c.effects.Any(e => e is UnlockConstructionEffect))
+                .ToList().Count();
+        }
+
+        public int bonusQuantityCards()
+        {
+            return allCards
+                .Where(c => !unlockedCards.Contains(c))
+                .Where(c => c.effects.Any(e => e is GrantGlobalBonusEffect || e is GrantResourceBonusEffect))
+                .ToList().Count();
         }
         #endregion
     }

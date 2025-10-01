@@ -11,9 +11,8 @@ public static class ConstructionUnlockerManager
     // Inicialización con construcciones desbloqueadas por defecto
     public static void Awake()
     {
-        unlockedConstructions.Add("houseSand");
-        //unlockedConstructions.Add("houseClay");
-        //unlockedConstructions.Add("Cantera");
+        unlockedConstructions.Add("Casa");
+        unlockedConstructions.Add("Plaza Central");
         unlockedConstructions.Add("initialTemple");
         unlockedConstructions.Add("wallSand");
     }

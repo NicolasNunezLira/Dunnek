@@ -7,14 +7,15 @@ using ConstructionSystem;
 namespace BonusSystem
 {
     #region - Enums
-    public enum BonusType { Local, Global }
-    public enum BonusTarget { Production, Consumption, Cost }
+    public enum BonusType { Local, Global, Resource }
+    public enum BonusTarget { Production, Consumption, Cost, Resource }
     #endregion
 
     #region - Abstract Bonus
     public abstract class Bonus
     {
         public ConstructionInstance Building { get; protected set; }
+        public List<string> AffectedBuildType { get; private set; }
         public BonusType Type { get; protected set; }
         public BonusTarget Target { get; protected set; }
         public Resource Resource { get; protected set; }
@@ -24,12 +25,14 @@ namespace BonusSystem
             Resource resource,
             float multiplier,
             BonusTarget target,
+            List<string> affectedBuildType,
             ConstructionInstance building = null
         )
         {
             Resource = resource;
             Multiplier = multiplier;
             Target = target;
+            AffectedBuildType = affectedBuildType;
             Building = building;
         }
 
@@ -38,6 +41,11 @@ namespace BonusSystem
         /// </summary>
         public abstract float Apply(float baseValue, ConstructionInstance consumer = null);
 
+        /// <summary>
+        /// Para bonuses de tipo Resource. Por defecto no hace nada.
+        /// </summary>
+        public virtual void ApplyResource() { }
+        
         protected bool ShouldAffect(float baseValue)
         {
             return (Target == BonusTarget.Production && baseValue > 0f) ||
@@ -50,15 +58,20 @@ namespace BonusSystem
     #region - Global Bonus
     public class GlobalBonus : Bonus
     {
-        public GlobalBonus(Resource resource, float multiplier, BonusTarget target, ConstructionInstance building)
-            : base(resource, multiplier, target, building)
+        public GlobalBonus(
+            Resource resource,
+            float multiplier,
+            BonusTarget target,
+            List<string> affectedBuildTypes,
+            ConstructionInstance building)
+            : base(resource, multiplier, target, affectedBuildTypes, building)
         {
             Type = BonusType.Global;
         }
 
         public override float Apply(float baseValue, ConstructionInstance consumer = null)
         {
-            if (!ShouldAffect(baseValue)) return baseValue;
+            if (!(ShouldAffect(baseValue) && AffectedBuildType.Contains(consumer.Config.codeName))) return baseValue;
             return baseValue * Multiplier;
         }
     }
@@ -76,8 +89,15 @@ namespace BonusSystem
 
         private readonly List<ConstructionInstance> affectedBuildings = new();
 
-        public LocalBonus(Resource resource, float multiplier, BonusTarget target, ConstructionInstance building, Vector2Int source, int radius)
-            : base(resource, multiplier, target, building)
+        public LocalBonus(
+            Resource resource,
+            float multiplier,
+            BonusTarget target,
+            List<string> affectedBuildType,
+            ConstructionInstance building,
+            Vector2Int source,
+            int radius)
+            : base(resource, multiplier, target, affectedBuildType, building)
         {
             Type = BonusType.Local;
             sourcePos = source;
@@ -134,7 +154,7 @@ namespace BonusSystem
 
         public override float Apply(float baseValue, ConstructionInstance building)
         {
-            if (!ShouldAffect(baseValue)) return baseValue;
+            if (!(ShouldAffect(baseValue) && AffectedBuildType.Contains(building.Config.codeName))) return baseValue;
             if (AffectsBuilding(building))
                 return baseValue * Multiplier;
 
@@ -160,6 +180,35 @@ namespace BonusSystem
         private bool IsWithinRadius(Vector2 source, Vector2 target, float radius)
         {
             return (source - target).sqrMagnitude <= radius * radius;
+        }
+    }
+    #endregion
+
+    #region - Resource amount Bonus
+    public class ResourceBonus : Bonus
+    {
+        private float amount;
+        private bool appliedOnce = false;
+
+        public ResourceBonus(Resource resource, float amount)
+            : base(resource, amount, BonusTarget.Resource, null, null)
+        {
+            Type = BonusType.Resource;
+            this.amount = amount;
+        }
+
+        // No usado en este tipo de bonus
+        public override float Apply(float baseValue, ConstructionInstance consumer = null)
+        {
+            return baseValue;
+        }
+
+        public override void ApplyResource()
+        {
+            if (appliedOnce) return;
+
+            ResourceManager.AddResource(Resource, amount);
+            appliedOnce = true;
         }
     }
     #endregion

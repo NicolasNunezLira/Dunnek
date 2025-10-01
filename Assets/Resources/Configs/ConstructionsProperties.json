@@ -1,8 +1,24 @@
 {
     "configs": [
+        {
+        "codeName": "Plaza Central",
+        "displayName": "Plaza Central",
+        "constructionCategory": "Consumer",
+        "iconPath": "Icons/houseSandIcon",
+        "rateList": [
+            { "type": "Work", "value": 5 },
+            { "type": "Food", "value": 10 },
+            { "type": "Water", "value": 10 }
+        ],
+        "recycleWorkCost": 0,
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/LOD2_egypt_pyramids_001" }
+        ]
+    },
     {
-        "codeName": "houseSand",
-        "displayName": "Casa 1",
+        "codeName": "Casa",
+        "displayName": "Casa",
         "constructionCategory": "Housing",
         "iconPath": "Icons/houseSandIcon",
         "costList": [
@@ -11,7 +27,9 @@
         ],
         "rateList": [
             { "type": "Work", "value": 1 },
-            { "type": "Sand", "value": 0 }
+            { "type": "Food", "value": -1 },
+            { "type": "Morlaks", "value": 1 },
+            { "type": "Water", "value": -1 }
         ],
         "recycleWorkCost": 0,
         "duration": 1000,
@@ -20,8 +38,8 @@
         ]
     },
     {
-        "codeName": "houseClay",
-        "displayName": "Casa 2",
+        "codeName": "Casa arcilla",
+        "displayName": "Casa arcilla",
         "constructionCategory": "Housing",
         "iconPath": "Icons/houseSandIcon",
         "costList": [
@@ -29,8 +47,75 @@
             { "type": "Clay", "value": 5 }
         ],
         "rateList": [
+            { "type": "Work", "value": 2 },
+            { "type": "Food", "value": -1 },
+            { "type": "Morlaks", "value": 1 },
+            { "type": "Water", "value": -1 }
+        ],
+        "recycleWorkCost": 0,
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/Dunek CasaGrande2" }
+        ]
+    },
+    {
+        "codeName": "Casa piedra",
+        "displayName": "Casa piedra",
+        "constructionCategory": "Housing",
+        "iconPath": "Icons/houseSandIcon",
+        "costList": [
+            { "type": "Work", "value": 10 },
+            { "type": "Stone", "value": 5 }
+        ],
+        "rateList": [
             { "type": "Work", "value": 1 },
-            { "type": "Sand", "value": 0 }
+            { "type": "Food", "value": -1 },
+            { "type": "Morlaks", "value": 2 },
+            { "type": "Water", "value": -1 }
+        ],
+        "recycleWorkCost": 0,
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/Dunek CasaGrande2" }
+        ]
+    },
+    {
+        "codeName": "Casa piedra verde",
+        "displayName": "Casa piedra verde",
+        "constructionCategory": "Housing",
+        "iconPath": "Icons/houseSandIcon",
+        "costList": [
+            { "type": "Work", "value": 10 },
+            { "type": "Stone", "value": 5 },
+            { "type": "Glass", "value": 5 }
+        ],
+        "rateList": [
+            { "type": "Work", "value": 2 },
+            { "type": "Food", "value": -1 },
+            { "type": "Morlaks", "value": 2 },
+            { "type": "Water", "value": -2 }
+        ],
+        "recycleWorkCost": 0,
+        "duration": 1000,
+        "prefabs": [
+            { "part": "building", "path": "Prefabs/Dunek CasaGrande2" }
+        ]
+    },
+    {
+        "codeName": "Casa caliza",
+        "displayName": "Casa caliza",
+        "constructionCategory": "Housing",
+        "iconPath": "Icons/houseSandIcon",
+        "costList": [
+            { "type": "Work", "value": 20 },
+            { "type": "Limestone", "value": 5 }
+        ],
+        "rateList": [
+            { "type": "Work", "value": 3 },
+            { "type": "Food", "value": -2 },
+            { "type": "Morlaks", "value": 3 },
+            { "type": "Energy", "value": -1 },
+            { "type": "Water", "value": -2 }
         ],
         "recycleWorkCost": 0,
         "duration": 1000,
@@ -92,6 +177,7 @@
             {
                 "bonusType": "Global",
                 "target": "Production",
+                "affectedBuildType" : ["all"],
                 "effects": [
                     { "resource": "Work", "pct": 0.1 }
                 ]

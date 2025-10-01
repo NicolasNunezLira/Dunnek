@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using BonusSystem;
+using ResourceSystem;
+
 namespace DraftSystem
 {
     public interface ICardEffect
@@ -22,10 +26,24 @@ namespace DraftSystem
         public ResourceSystem.Resource resource;
         public float multiplier;
         public BonusSystem.BonusTarget target;
+        public List<string> affectedBuildTypes;
 
         public void Apply()
         {
-            var bonus = new BonusSystem.GlobalBonus(resource, multiplier, target, null);
+            var bonus = new BonusSystem.GlobalBonus(resource, multiplier, target, affectedBuildTypes, null);
+            BonusSystem.BonusManager.AddBonus(bonus);
+        }
+    }
+
+    [System.Serializable]
+    public class GrantResourceBonusEffect : ICardEffect
+    {
+        public Resource resource;
+        public float amount;
+
+        public void Apply()
+        {
+            var bonus = new ResourceBonus(resource, amount);
             BonusSystem.BonusManager.AddBonus(bonus);
         }
     }

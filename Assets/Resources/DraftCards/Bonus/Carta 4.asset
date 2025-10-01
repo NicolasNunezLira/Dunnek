@@ -12,12 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01c14892304d42e41af02e367393312c, type: 3}
   m_Name: Carta 4
   m_EditorClassIdentifier: 
-  cardName: Carta 4
+  cardName: Casas chubi
   icon: {fileID: 0}
   rarity: 1
-  description: "Disminuye el costo de arena de construcci\xF3n en un 5%"
-  resource: 3
-  cost: 50
+  description: "Disminuye el costo de arena de construcci\xF3n de casa en un 10%"
   effects:
   - rid: 6550862383987556425
   references:
@@ -29,3 +27,5 @@ MonoBehaviour:
         resource: 6
         multiplier: -0.1
         target: 2
+        affectedBuildTypes:
+        - Casa

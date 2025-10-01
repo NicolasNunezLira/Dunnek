@@ -6,7 +6,6 @@ using System.Linq;
 using Utils;
 using ResourceSystem;
 using System;
-using Mono.Cecil.Cil;
 
 public class UIController : Singleton<UIController>
 {
@@ -132,7 +131,7 @@ public class UIController : Singleton<UIController>
 
         constructionButtons[config.codeName] = btnRef;
 
-        StartCoroutine(RebuildNextFrame(currentPanel));
+        RebuilLayoutPanels();
     }
 
     public void ShowCategory(string category)
@@ -214,7 +213,7 @@ public class UIController : Singleton<UIController>
 
         actionButtons[config.type] = btnRef;
 
-        StartCoroutine(RebuildNextFrame(parentPanel.gameObject));
+        RebuilLayoutPanels();
     }
 
     void OnActionOptionClicked(string id)
@@ -314,7 +313,7 @@ public class UIController : Singleton<UIController>
         RebuilLayoutPanels();
     }
 
-    public void UpdataAllCost()
+    public void UpdateAllCost()
     {
         UpdateActionCost();
         UpdateBuildCost();
@@ -328,7 +327,10 @@ public class UIController : Singleton<UIController>
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(panel.GetComponent<RectTransform>());
         }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(buildOptionsPanel.GetComponent<RectTransform>());
     }
+
     private void RefreshBuildButtonCosts(UIButtonReference btnRef, ConstructionConfig.ConfigData config)
     {
         foreach (Transform child in btnRef.costPanel)
@@ -350,7 +352,7 @@ public class UIController : Singleton<UIController>
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.costPanel.GetComponent<RectTransform>());
 
-        StartCoroutine(RebuildNextFrame(btnRef.costPanel.gameObject));
+        RebuilLayoutPanels();
     }
 
     private void RefreshActionButtonCosts(UIButtonReference btnRef, ActionConfig.ConfigData config)
@@ -376,14 +378,7 @@ public class UIController : Singleton<UIController>
         //Canvas.ForceUpdateCanvases();
         LayoutRebuilder.ForceRebuildLayoutImmediate(btnRef.costPanel.GetComponent<RectTransform>());
 
-        StartCoroutine(RebuildNextFrame(btnRef.costPanel.gameObject));
-    }
-
-    private System.Collections.IEnumerator RebuildNextFrame(GameObject panel)
-    {
-        yield return null;
-        Canvas.ForceUpdateCanvases();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(panel.GetComponent<RectTransform>());
+        UpdateBuildCost();
     }
 
     void SetPanelVisible(GameObject panel, bool visible)

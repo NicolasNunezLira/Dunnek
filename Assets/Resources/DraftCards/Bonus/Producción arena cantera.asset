@@ -10,20 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01c14892304d42e41af02e367393312c, type: 3}
-  m_Name: Carta 1
+  m_Name: "Producci\xF3n arena cantera"
   m_EditorClassIdentifier: 
-  cardName: Edad de arcilla
+  cardName: "Explotaci\xF3n"
   icon: {fileID: 0}
-  rarity: 0
-  description: Desbloquea Casa de arcilla
-  resource: 2
-  cost: 10
+  rarity: 1
+  description: "+10% producci\xF3n de trabajo en Casa"
   effects:
-  - rid: 6032320582811123792
+  - rid: 6032320582811123793
   references:
     version: 2
     RefIds:
-    - rid: 6032320582811123792
-      type: {class: UnlockConstructionEffect, ns: DraftSystem, asm: Assembly-CSharp}
+    - rid: 6032320582811123793
+      type: {class: GrantGlobalBonusEffect, ns: DraftSystem, asm: Assembly-CSharp}
       data:
-        constructionType: Casa arcilla
+        resource: 0
+        multiplier: 1.1
+        target: 0
+        affectedBuildTypes:
+        - Casa
+        - All

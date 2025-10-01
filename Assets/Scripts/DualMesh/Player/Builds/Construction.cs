@@ -229,7 +229,7 @@ namespace Building
 
                                 if (bonusDef.bonusType == "Global")
                                 {
-                                    var globalBonus = new GlobalBonus(resource, 1f + eff.pct, target, instance);
+                                    var globalBonus = new GlobalBonus(resource, 1f + eff.pct, target, bonusDef.affectedBuildType, instance);
                                     BonusSystem.BonusManager.AddBonus(globalBonus);
                                 }
                                 else if (bonusDef.bonusType == "Local")
@@ -241,7 +241,7 @@ namespace Building
 
                                     int radius = Mathf.RoundToInt(bonusDef.radius);
 
-                                    var localBonus = new LocalBonus(resource, 1f + eff.pct, target, instance, pos2D, radius);
+                                    var localBonus = new LocalBonus(resource, 1f + eff.pct, target, bonusDef.affectedBuildType, instance, pos2D, radius);
                                     BonusSystem.BonusManager.AddBonus(localBonus);
 
                                     // TODO: Revisar este cambio en caso de error
