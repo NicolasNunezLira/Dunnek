@@ -11,6 +11,9 @@ namespace DraftSystem
     public class DraftUI : Singleton<DraftUI>
     {
         #region - Variables
+        [Header("Visuals:")]
+        [SerializeField] private RarityColorConfig rarityColor;
+        
         [Header("Bonus button:")]
         [SerializeField] private Button bonusButton;
         [SerializeField] private ResourceDraftCost bonusCost;
@@ -98,6 +101,8 @@ namespace DraftSystem
                 cardUI.Setup(instance);
                 var outline = cardUI.GetComponent<Outline>();
                 if (outline) outline.enabled = false;
+                var bg = cardUI.GetComponent<Image>();
+                if (bg != null) bg.color = rarityColor.GetColor(instance.Rarity);
                 cardUI.gameObject.SetActive(true);
                 instantiatedCards.Add(cardUI);
             }

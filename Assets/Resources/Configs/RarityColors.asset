@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a283987ef905504b8d5f142a676d57f, type: 3}
+  m_Name: RarityColors
+  m_EditorClassIdentifier: 
+  rarityColors:
+  - rarity: 0
+    color: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  - rarity: 1
+    color: {r: 0.4980392, g: 1, b: 0, a: 1}
+  - rarity: 2
+    color: {r: 0, g: 0.8078432, b: 0.8196079, a: 1}
+  - rarity: 3
+    color: {r: 1, g: 0.8431373, b: 0, a: 1}

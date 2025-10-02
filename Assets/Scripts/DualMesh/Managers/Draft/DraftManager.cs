@@ -99,28 +99,6 @@ namespace DraftSystem
             return result;
         }
 
-        void ApplyDraftModeCost(CardInstance instance)
-        {
-            switch (currentMode)
-            {
-                case DraftMode.UnlockOnly:
-                    if (instance.cardData.effects.All(e => e is UnlockConstructionEffect))
-                        instance.ShowCost();
-                    else
-                        instance.HideCost();
-                    break;
-                case DraftMode.BonusOnly:
-                    if (instance.cardData.effects.Any(e => e is UnlockConstructionEffect))
-                        instance.ShowCost();
-                    else
-                        instance.HideCost();
-                    break;
-                case DraftMode.Mixed:
-                    instance.ShowCost();
-                    break;
-            }
-        }
-
         Rarity GetRarityFromRoll(float roll)
         {
             float curveVal = rarityDistribution.Evaluate(roll);

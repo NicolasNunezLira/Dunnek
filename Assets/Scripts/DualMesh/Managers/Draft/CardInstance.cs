@@ -1,5 +1,3 @@
-using System.Linq;
-using ResourceSystem;
 using UnityEngine;
 
 namespace DraftSystem
@@ -11,22 +9,10 @@ namespace DraftSystem
         public bool wasChosen = false;
         public int indexInDraft;
 
-        public bool showCost { get; private set; }
-
         public CardInstance(Card card, int index)
         {
             cardData = card;
             indexInDraft = index;
-        }
-
-        public void ShowCost()
-        {
-            showCost = true;
-        }
-
-        public void HideCost()
-        {
-            showCost = false;
         }
 
         public string Name => cardData.cardName;
