@@ -13,7 +13,7 @@ public class BonusVisualizerManager : Singleton<BonusVisualizerManager>
         if (!alreadyRegistered)
             highlightedObjects.Add((obj, obj.layer));
     }
-    
+
     public void RegisterRadius(BonusRadiusVisualizer radius) => activeRadii.Add(radius);
 
     public void ClearVisuals()
@@ -27,4 +27,6 @@ public class BonusVisualizerManager : Singleton<BonusVisualizerManager>
         highlightedObjects.Clear();
         activeRadii.Clear();
     }
+
+    public int GetHightlightedCount() => highlightedObjects.Count;
 }

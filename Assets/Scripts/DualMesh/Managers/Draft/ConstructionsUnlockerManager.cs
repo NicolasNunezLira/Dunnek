@@ -13,6 +13,7 @@ public static class ConstructionUnlockerManager
     {
         unlockedConstructions.Add("Casa");
         unlockedConstructions.Add("Plaza Central");
+        unlockedConstructions.Add("Recolector");
         unlockedConstructions.Add("initialTemple");
         unlockedConstructions.Add("wallSand");
     }

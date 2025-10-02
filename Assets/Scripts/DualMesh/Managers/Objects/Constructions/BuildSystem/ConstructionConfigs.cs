@@ -12,6 +12,7 @@ namespace ConstructionSystem
         Housing,
         Wall,
         Consumer,
+        Collector,
         BonusProvider
     }
     #endregion
@@ -32,6 +33,14 @@ namespace ConstructionSystem
         {
             public string type;
             public float value;
+        }
+
+        [System.Serializable]
+        public class CollectorSettings
+        {
+            public float radius;
+            public List<ResourceAmount> collectionRates;
+            //public bool consumeObjects;
         }
 
         [System.Serializable]
@@ -104,6 +113,7 @@ namespace ConstructionSystem
             public int duration;
             public List<PrefabData> prefabs;
             public List<BonusEntry> bonusList;
+            public CollectorSettings collectorSettings;
 
             // Diccionarios procesados
             [System.NonSerialized] public ResourceCost baseCost;

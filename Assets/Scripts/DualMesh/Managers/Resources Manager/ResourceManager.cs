@@ -3,6 +3,7 @@ using UnityEngine;
 using ConstructionSystem;
 using System.Linq;
 using BonusSystem;
+using System;
 
 namespace ResourceSystem
 {
@@ -89,6 +90,15 @@ namespace ResourceSystem
         {
             foreach (var res in resources.Values)
                 res.UpdateFromConsumers(buildings);
+
+            foreach (var building in buildings.Values.Where(b => b.isCollector && b.isOperative))
+            {
+                var behaviour = building.instance.Obj.GetComponent<CollectorBuilding>();
+                if (behaviour == null) continue;
+
+                AddResource(behaviour.targetResource, behaviour.Collect());
+            }
+
             foreach (var res in resources.Values)
                 res.UpdateAmount();
         }
@@ -104,12 +114,14 @@ namespace ResourceSystem
         {
             if (buildings.ContainsKey(id)) return false;
 
-            var rates = ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
+            var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
+            var rates = config.rate;
             if (rates.Values.All(v => v == 0)) return false;
 
             buildings[id] = new ResourceBuilding(id, codeName, false);
 
             BonusManager.RegisterConsumerInLocalBonuses(buildings[id]);
+
             return true;
         }
 
@@ -193,7 +205,12 @@ namespace ResourceSystem
             public ConstructionInstance instance;
             public bool isOperative;
             public bool isForceToStop;
-            public ConstructionConfig.ResourceCost rates => ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
+            public ConstructionConfig.ResourceCost rates
+                => ConstructionConfig.Instance.ConstructionConfigs[codeName].rate;
+
+            public bool isCollector;
+            public Dictionary<Resource, float> collectedRates;
+
             public Vector3 Position => instance.Position;
             public List<LocalBonus> Bonuses { get; private set; }
 
@@ -205,6 +222,20 @@ namespace ResourceSystem
                 isForceToStop = false;
                 DualMesh.Instance.builder.constructions.TryGetValue(id, out this.instance);
                 Bonuses = new();
+
+                var config = ConstructionConfig.Instance.ConstructionConfigs[codeName];
+                var collectorSettings = config.collectorSettings;
+                isCollector = config.category == ConstructionCategory.Collector;
+                collectedRates = new();
+                if (isCollector && config.collectorSettings != null && config.collectorSettings.collectionRates != null)
+                {
+                    foreach (ConstructionConfig.ResourceAmount rate in config.collectorSettings.collectionRates)
+                    {
+                        if (!Enum.TryParse(rate.type, out Resource res)) continue;
+
+                        collectedRates[res] = rate.value;
+                    }
+                }
             }
 
             public void AddLocalBonus(LocalBonus bonus)
@@ -219,6 +250,9 @@ namespace ResourceSystem
             }
 
         }
+        #endregion
+
+        #region - Collectors
         #endregion
     }
     #endregion

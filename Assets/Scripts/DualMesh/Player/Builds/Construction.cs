@@ -196,6 +196,7 @@ namespace Building
             {
                 case ConstructionCategory.Housing:
                 case ConstructionCategory.Consumer:
+                case ConstructionCategory.Collector:
                     bool wasAdded = ResourceManager.TryAddBuilding(
                         currentConstructionID,
                         codeName);

@@ -1,6 +1,8 @@
 using UnityEngine;
 using Utils;
 using UnityEngine.EventSystems;
+using ResourceSystem;
+using System.Text;
 
 public class ClickeableObject : MonoBehaviour
 {
@@ -12,63 +14,100 @@ public class ClickeableObject : MonoBehaviour
     {
         if (DualMesh.Instance.inMode != DualMesh.PlayingMode.Simulation) return;
 
-        ResourcesLink link = GetComponent<ResourcesLink>();
-
-        int? id = (link != null) ? (link.IsConsumer ? link.ConsumerId : null) : null;
-
-        //string info = (link != null) ? link.GetInfoString() : null;
-        string info = (link != null) ? link.GetInfoStringWithBonuses() : null;
-
-        string title = (link != null) ? link.Building.Config.displayName : tooltipInfo;       
-
-        TooltipManager.Instance.ShowTooltip(transform, title, info, id);
+        string title = tooltipInfo;
+        string info = "";
 
         BonusVisualizerManager.Instance.ClearVisuals();
 
-        if (link == null) return;
+        // --- Caso 1: Buildings normales (ResourcesLink) ---
+        ResourcesLink link = GetComponent<ResourcesLink>();
+        int? id = (link != null) ? (link.IsConsumer ? link.ConsumerId : null) : null;
 
-        if (link.Building.IsAffectingByAnyBonus() && !isClicked)
+        if (link != null)
         {
-            foreach (var (_, bonusesList) in link.Building.AffectingBonuses)
+            title = link.Building.Config.displayName;
+            info = link.GetInfoStringWithBonuses();
+
+            TooltipManager.Instance.ShowTooltip(transform, title, info, id);
+
+            // Visualizar bonuses
+            if (link.Building.IsAffectingByAnyBonus() && !isClicked)
             {
-                foreach (var bonus in bonusesList)
+                foreach (var (_, bonusesList) in link.Building.AffectingBonuses)
                 {
-                    GameObject obj = bonus.Building.Obj;
+                    foreach (var bonus in bonusesList)
+                    {
+                        GameObject obj = bonus.Building.Obj;
+                        if (obj == null) continue;
 
-                    if (obj == null) continue;
+                        BonusVisualizerManager.Instance.RegisterHighlightedObject(obj);
+                        RecursivelyFunctions.SetLayerRecursively(obj, 12);
+                    }
+                }
+            }
 
-                    BonusVisualizerManager.Instance.RegisterHighlightedObject(obj);
-
-                    RecursivelyFunctions.SetLayerRecursively(obj, 12);
+            // Visualizar radios de bonus
+            if (link.IsBonusProvider && link.LocalBonuses.Count > 0)
+            {
+                radiusVisualizer = GetComponentInChildren<BonusRadiusVisualizer>();
+                if (radiusVisualizer != null)
+                {
+                    foreach (var l in link.LocalBonuses)
+                    {
+                        radiusVisualizer.ShowRadius(l.radius);
+                        BonusVisualizerManager.Instance.RegisterRadius(radiusVisualizer);
+                    }
                 }
             }
         }
 
-        if (link.IsBonusProvider && link.LocalBonuses.Count > 0)
+        // --- Caso 2: ResourceNode ---
+        var node = GetComponent<ResourceNode>();
+        if (node != null)
         {
-            radiusVisualizer = GetComponentInChildren<BonusRadiusVisualizer>();
-            if (radiusVisualizer != null)
+            title = $"Resource Node";
+            info = $"{node.resourceType} disponible: {node.amount:F1}";
+            TooltipManager.Instance.ShowTooltip(transform, title, info, null);
+
+            // Highlight collectors que recolectan este nodo
+            foreach (var building in node.GetCollectors())
             {
-                foreach (var l in link.LocalBonuses)
-                {
-                    radiusVisualizer.ShowRadius(l.radius);
-                    BonusVisualizerManager.Instance.RegisterRadius(radiusVisualizer);
-                }
+                if (building == null) continue;
+                BonusVisualizerManager.Instance.RegisterHighlightedObject(building.gameObject);
+                RecursivelyFunctions.SetLayerRecursively(building.gameObject, 12);
+            }
+        }
+
+        // --- Caso 3: CollectorBuilding ---
+        var collector = GetComponent<CollectorBuilding>();
+        if (collector != null)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"Recolector de {collector.targetResource}");
+            sb.AppendLine($"Tasa por turno: {collector.collectRate * collector.GetNodeCount()}");
+            title = "Collector";
+            info = sb.ToString();
+            TooltipManager.Instance.ShowTooltip(transform, title, info, null);
+
+            // Highlight nodos que recolecta
+            foreach (var n in collector.GetNodes())
+            {
+                if (n == null) continue;
+                BonusVisualizerManager.Instance.RegisterHighlightedObject(n.gameObject);
+                RecursivelyFunctions.SetLayerRecursively(n.gameObject, 12);
             }
         }
 
         isInitialized = true;
         isClicked = true;
     }
-
+    
     private void Update()
     {
         if (Input.GetMouseButtonDown(0) && isInitialized)
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
                 return;
-            }
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -90,5 +129,5 @@ public class ClickeableObject : MonoBehaviour
                 isClicked = false;
             }
         }
-    } 
+    }
 }

@@ -18,13 +18,15 @@ public class UIController : Singleton<UIController>
 
     [Header("Build Category Panels")]
     [SerializeField] public GameObject housingPanel;
+    [SerializeField] public GameObject collectorPanel;
     [SerializeField] public GameObject wallPanel;
     [SerializeField] public GameObject consumerPanel;
     [SerializeField] public GameObject bonusPanel;
-    [SerializeField] public GameObject actionsPanel; // nueva pestaña para acciones
+    [SerializeField] public GameObject actionsPanel;
 
     [Header("Category Tabs")]
     [SerializeField] public Button housingTabButton;
+    [SerializeField] public Button collectorTabButton;
     [SerializeField] public Button wallTabButton;
     [SerializeField] public Button consumerTabButton;
     [SerializeField] public Button bonusTabButton;
@@ -60,18 +62,21 @@ public class UIController : Singleton<UIController>
         buildOutline = buildButton.GetComponent<Outline>();
 
         categoryPanels["Housing"] = housingPanel;
+        categoryPanels["Collector"] = collectorPanel;
         categoryPanels["Wall"] = wallPanel;
         categoryPanels["Consumer"] = consumerPanel;
         categoryPanels["BonusProvider"] = bonusPanel;
         categoryPanels["Actions"] = actionsPanel;
 
         housingTabButton.onClick.AddListener(() => ShowCategory("Housing"));
+        collectorTabButton.onClick.AddListener(() => ShowCategory("Collector"));
         wallTabButton.onClick.AddListener(() => ShowCategory("Wall"));
         consumerTabButton.onClick.AddListener(() => ShowCategory("Consumer"));
         bonusTabButton.onClick.AddListener(() => ShowCategory("BonusProvider"));
         actionsTabButton.onClick.AddListener(() => ShowCategory("Actions"));
 
         tabButtons["Housing"] = housingTabButton;
+        tabButtons["Collector"] = collectorTabButton;
         tabButtons["Wall"] = wallTabButton;
         tabButtons["Consumer"] = consumerTabButton;
         tabButtons["BonusProvider"] = bonusTabButton;

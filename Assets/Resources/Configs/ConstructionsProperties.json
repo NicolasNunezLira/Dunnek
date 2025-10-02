@@ -124,6 +124,29 @@
         ]
     },
     {
+        "codeName": "Recolector",
+        "displayName": "Recolector",
+        "constructionCategory": "Collector",
+        "iconPath": "Icons/recolectorIcon",
+        "costList": [
+            { "type": "Work", "value": 10}
+        ],
+        "rateList": [
+            {"type": "Work", "value": -1}
+        ],
+        "collectorSettings": {
+            "radius": 5,
+            "collentionRates": [
+                { "type": "Food", "value": 1}
+            ]
+        },
+        "recycleWorkCost": -4,
+        "duration": 1000,
+        "prefabs": [
+            {"part": "building", "path":"Prefabs/Dunek CasaGrande2"}
+        ]
+    },
+    {
         "codeName": "wallSand",
         "displayName": "Muralla básica",
         "constructionCategory": "Wall",
