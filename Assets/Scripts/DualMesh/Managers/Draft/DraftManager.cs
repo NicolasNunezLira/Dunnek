@@ -27,6 +27,13 @@ namespace DraftSystem
             base.Awake();
 
             ConstructionUnlockerManager.Awake();
+
+            LoadAllCards();
+        }
+
+        void LoadAllCards()
+        {
+            allCards = Resources.LoadAll<Card>("GeneratedCards").ToList();
         }
         #endregion
 
@@ -57,7 +64,9 @@ namespace DraftSystem
                 .Where(c => !unlockedCards.Contains(c))
                 .Where(c =>
                 {
-                    bool isUnlock = c.effects.All(e => e is UnlockConstructionEffect);
+                    bool isUnlock = c.effects.All(
+                        e => e is UnlockConstructionEffect unlocker
+                        && !ConstructionUnlockerManager.IsConstructionUnlocked(unlocker.constructionType));
                     bool isBonus = c.effects.All(e => e is GrantGlobalBonusEffect || e is GrantResourceBonusEffect);
 
                     return currentMode switch

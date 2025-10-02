@@ -8,6 +8,7 @@ namespace ResourceSystem
     [System.Serializable]
     public enum Resource
     {
+        None,
         Work,
         Food,
         Morlaks,

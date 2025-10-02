@@ -297,7 +297,7 @@ namespace Building
         #endregion
 
         #region - Verificate resources for constructions
-        private bool HasEnoughResourcesForBuild(Dictionary<string, int> amounts)
+        public bool HasEnoughResourcesForBuild(Dictionary<string, int> amounts)
         {
             Dictionary<Resource, float> necessaryResources = new Dictionary<Resource, float>();
             foreach (var (codeName, amount) in amounts)
@@ -319,7 +319,7 @@ namespace Building
             bool hasEnough = true;
             foreach ((Resource resource, float cost) in necessaryResources)
             {
-                if (ResourceManager.GetAmount(resource) < -cost)
+                if (ResourceManager.GetAmount(resource) < cost)
                 {
                     hasEnough = false;
                     break;
@@ -349,7 +349,7 @@ namespace Building
             bool hasEnough = true;
             foreach ((Resource resource, float cost) in necessaryResources)
             {
-                if (ResourceManager.GetAmount(resource) < -cost)
+                if (ResourceManager.GetAmount(resource) < cost)
                 {
                     hasEnough = false;
                     break;

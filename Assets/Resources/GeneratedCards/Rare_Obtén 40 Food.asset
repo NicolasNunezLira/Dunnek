@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c14892304d42e41af02e367393312c, type: 3}
+  m_Name: "Rare_Obt\xE9n 40 Food"
+  m_EditorClassIdentifier: 
+  cardName: "Obt\xE9n 40 Food"
+  icon: {fileID: 0}
+  rarity: 2
+  description: Recibes 40 Food inmediatamente
+  effects:
+  - rid: 1782836172748489391
+  references:
+    version: 2
+    RefIds:
+    - rid: 1782836172748489391
+      type: {class: GrantResourceBonusEffect, ns: DraftSystem, asm: Assembly-CSharp}
+      data:
+        resource: 2
+        amount: 40

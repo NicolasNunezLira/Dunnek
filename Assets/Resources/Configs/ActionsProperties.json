@@ -3,11 +3,9 @@
     {
         "type": "Dig",
         "costList": [
-            {"type": "Work", "value": -1},
-            {"type": "Sand", "value": 0}
+            {"type": "Work", "value": 1}
         ],
         "productionList": [
-            {"type": "Work", "value": 0},
             {"type": "Sand", "value": 1}
         ],
         "prefab": "Prefabs/PalaDunnek",
@@ -16,12 +14,7 @@
     {
         "type": "Flat",
         "costList": [
-            {"type": "Work", "value": -5},
-            {"type": "Sand", "value": 0}
-        ],
-        "productionList": [
-            {"type": "Work", "value": 0},
-            {"type": "Sand", "value": 0}
+            {"type": "Work", "value": 5}
         ],
         "prefab": "Prefabs/BuildPreview",
         "iconPath": "Icons/flatIcon"
@@ -29,12 +22,8 @@
     {
         "type": "AddSand",
         "costList": [
-            {"type": "Work", "value": -5},
-            {"type": "Sand", "value": -10}
-        ],
-        "productionList": [
-            {"type": "Work", "value": 0},
-            {"type": "Sand", "value": 0}
+            {"type": "Work", "value": 5},
+            {"type": "Sand", "value": 10}
         ],
         "prefab": "Prefabs/Balde",
         "iconPath": "Icons/addIcon"

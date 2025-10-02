@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 using ConstructionSystem;
 using System.Linq;
 using Utils;
@@ -45,6 +46,10 @@ public class UIController : Singleton<UIController>
 
     private Color selectedColor = Color.green;
     private Color defaultColor = new Color(0, 0, 0, 0);
+
+    private Dictionary<UIButtonReference, Coroutine> flashRoutines = new();
+    private float flashDuration = 1f;
+    private Dictionary<UIButtonReference, Color> originalColors = new();
 
     protected override void Awake()
     {
@@ -125,11 +130,12 @@ public class UIController : Singleton<UIController>
             btnRef.iconImage.sprite = config.icon;
 
         btnRef.label.text = config.displayName;
-        btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName));
+        btnRef.button.onClick.AddListener(() => OnConstructionClicked(config.codeName, btnRef));
 
         RefreshBuildButtonCosts(btnRef, config);
 
         constructionButtons[config.codeName] = btnRef;
+        originalColors[btnRef] = btnRef.button.GetComponent<Image>().color;
 
         RebuilLayoutPanels();
     }
@@ -152,7 +158,7 @@ public class UIController : Singleton<UIController>
         return ConstructionUnlockerManager.UnlockedConstructions.Contains(codeName);
     }
 
-    void OnConstructionClicked(string codeName)
+    void OnConstructionClicked(string codeName, UIButtonReference btnRef)
     {
         if (!constructionButtons.ContainsKey(codeName)) return;
 
@@ -162,9 +168,17 @@ public class UIController : Singleton<UIController>
         currentBuilding = codeName;
         currentCategory = config.category.ToString();
 
-        DualMesh.Instance.SetBuildType(codeName);
+        if (DualMesh.Instance.builder.HasEnoughResourcesForBuild(new Dictionary<string, int> { { codeName, 1 } })
+            || config.category == ConstructionCategory.Wall)
+        {
+            DualMesh.Instance.SetBuildType(codeName);
 
-        UpdateSelectedVisual(codeName);
+            UpdateSelectedVisual(codeName);
+        }
+        else
+        {
+            FlashRed(btnRef);
+        }
     }
 
     public void UpdateSelectedVisual(string selectedID)
@@ -207,7 +221,7 @@ public class UIController : Singleton<UIController>
 
         btnRef.label.text = config.type;
 
-        btnRef.button.onClick.AddListener(() => OnActionOptionClicked(config.type));
+        btnRef.button.onClick.AddListener(() => OnActionOptionClicked(config.type, btnRef));
 
         RefreshActionButtonCosts(btnRef, config);
 
@@ -216,15 +230,23 @@ public class UIController : Singleton<UIController>
         RebuilLayoutPanels();
     }
 
-    void OnActionOptionClicked(string id)
+    void OnActionOptionClicked(string id, UIButtonReference btnRef)
     {
         currentAction = id;
 
         if (!actionButtons.ContainsKey(id)) return;
+        if (!MapAction(id, out var parsed)) return;
 
-        SetActionType(id);
+        if (id == "Recycle" || DualMesh.Instance.builder.HasEnoughtResourcesForAction(parsed.Value))
+        {
+            SetActionType(id);
 
-        UpdateActionsButtonVisual(id);
+            UpdateActionsButtonVisual(id);
+        }
+        else
+        {
+            FlashRed(btnRef);
+        }
     }
 
     void SetActionType(string id)
@@ -398,6 +420,35 @@ public class UIController : Singleton<UIController>
         {
             SetPanelVisible(panel, false);
         }
+    }
+    #endregion
+
+    #region - Flash red routine
+    public void FlashRed(UIButtonReference btnRef)
+    {
+        if (flashRoutines.TryGetValue(btnRef, out Coroutine running))
+            StopCoroutine(running);
+
+        flashRoutines[btnRef] = StartCoroutine(FlashRoutine(btnRef));
+    }
+
+
+    private IEnumerator FlashRoutine(UIButtonReference btnRef)
+    {
+        Button button = btnRef.button;
+        Image buttonImage = button.GetComponent<Image>();
+        buttonImage.color = Color.red;
+
+        float t = 0f;
+        while (t < flashDuration)
+        {
+            t += Time.deltaTime;
+            buttonImage.color = Color.Lerp(Color.red, originalColors[btnRef], t / flashDuration);
+            yield return null;
+        }
+
+        buttonImage.color = originalColors[btnRef];
+        flashRoutines.Remove(btnRef);
     }
     #endregion
 }
