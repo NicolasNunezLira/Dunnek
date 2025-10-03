@@ -7,11 +7,16 @@ using System.Linq;
 using Utils;
 using ResourceSystem;
 using System;
+using TMPro;
 
 public class UIController : Singleton<UIController>
 {
+    #region - Parameters
     [Header("Main Buttons")]
     [SerializeField] public Button buildButton; // único botón principal
+
+    [Header("Selected Panel")]
+    [SerializeField] public GameObject selectedPanel;
 
     [Header("Options Panels")]
     [SerializeField] public GameObject buildOptionsPanel;
@@ -42,6 +47,14 @@ public class UIController : Singleton<UIController>
     private Dictionary<string, GameObject> categoryPanels = new();
     private Dictionary<string, Button> tabButtons = new();
 
+    public enum BuildingModeState
+    {
+        Idle,
+        Building
+    }
+
+    public BuildingModeState currentState { get; private set; } = BuildingModeState.Idle;
+    public string MainButtonText { get; private set; } = "Build/Action";
     public string currentCategory { get; private set; } = "Housing";
     public string currentBuilding { get; private set; }
     public string currentAction { get; private set; }
@@ -52,7 +65,9 @@ public class UIController : Singleton<UIController>
     private Dictionary<UIButtonReference, Coroutine> flashRoutines = new();
     private float flashDuration = 1f;
     private Dictionary<UIButtonReference, Color> originalColors = new();
+    #endregion
 
+    #region - Awake
     protected override void Awake()
     {
         base.Awake();
@@ -87,10 +102,17 @@ public class UIController : Singleton<UIController>
 
         HideAllPanels();
     }
+    #endregion
 
     #region --- Main Button ---
     void OnBuildClicked()
     {
+        if (currentState == BuildingModeState.Building)
+        {
+            CancelBuildMode();
+            return;
+        }
+
         ShowCategory(currentCategory);
         DualMesh.Instance.SetMode(DualMesh.PlayingMode.Build);
         UpdateMainButtonVisuals(DualMesh.Instance.inMode);
@@ -98,11 +120,136 @@ public class UIController : Singleton<UIController>
         TooltipManager.Instance.HideTooltip();
     }
 
+
     public void UpdateMainButtonVisuals(DualMesh.PlayingMode mode)
     {
         buildOutline.effectColor = (mode == DualMesh.PlayingMode.Build) ? selectedColor : defaultColor;
         SetPanelVisible(buildOptionsPanel, mode == DualMesh.PlayingMode.Build);
     }
+
+    void ChangeTextMainButton()
+    {
+        switch (currentState)
+        {
+            case BuildingModeState.Idle:
+                buildButton.GetComponentInChildren<TextMeshProUGUI>().text = "Build/Action";
+                break;
+            case BuildingModeState.Building:
+                buildButton.GetComponentInChildren<TextMeshProUGUI>().text = "Cancel";
+                break;
+        }
+    }
+
+    public void CancelBuildMode()
+    {
+        currentState = BuildingModeState.Idle;
+        ChangeTextMainButton();
+
+        DualMesh.Instance.SetMode(DualMesh.PlayingMode.Simulation);
+
+        HideAllPanels();
+        SetPanelVisible(buildOptionsPanel, true); // vuelves a mostrar categorías
+    }
+    #endregion
+
+    #region - Selected Panel
+    void SetSelectPanel(string selectedID, UIButtonReference btnRef)
+    {
+        SetPanelVisible(selectedPanel, true);
+        
+        foreach (Transform child in selectedPanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        
+        GameObject btnCopy = Instantiate(constructionButtonPrefab, selectedPanel.transform);
+
+        RectTransform panelRT = selectedPanel.GetComponent<RectTransform>();
+        RectTransform btnRT   = btnCopy.GetComponent<RectTransform>();
+
+        btnRT.anchorMin = new Vector2(0.5f, 0.5f);
+        btnRT.anchorMax = new Vector2(0.5f, 0.5f);
+        btnRT.pivot     = new Vector2(0.5f, 0.5f);
+        btnRT.anchoredPosition = Vector2.zero;
+
+        Vector2 panelSize = panelRT.rect.size;
+        Vector2 originalSize = btnRT.sizeDelta;
+        float scale = Mathf.Min(panelSize.x / originalSize.x, panelSize.y / originalSize.y) * 0.7f; 
+        btnRT.localScale = new Vector3(scale, scale, 1);
+
+        UIButtonReference btnCopyRef = btnCopy.GetComponent<UIButtonReference>();
+
+        btnCopyRef.buttonID = btnRef.buttonID;
+        btnCopyRef.label.text = btnRef.label.text;
+        btnCopyRef.iconImage.sprite = btnRef.iconImage.sprite;
+
+        var config = ConstructionConfig.Instance.ConstructionConfigs[selectedID];
+        RefreshBuildButtonCosts(btnCopyRef, config);
+
+        btnCopyRef.button.onClick.RemoveAllListeners();
+        btnCopyRef.button.onClick.AddListener(() =>
+        {
+            Debug.Log($"Botón seleccionado clickeado de nuevo: {selectedID}");
+            
+            CancelBuildMode();
+        });
+    }
+
+    void SetSelectActionPanel(string actionID, UIButtonReference btnRef)
+    {
+        SetPanelVisible(selectedPanel, true);
+
+        foreach (Transform child in selectedPanel.transform)
+            Destroy(child.gameObject);
+
+        GameObject btnCopy = Instantiate(constructionButtonPrefab, selectedPanel.transform);
+
+        RectTransform panelRT = selectedPanel.GetComponent<RectTransform>();
+        RectTransform btnRT = btnCopy.GetComponent<RectTransform>();
+
+        // Centrado
+        btnRT.anchorMin = new Vector2(0.5f, 0.5f);
+        btnRT.anchorMax = new Vector2(0.5f, 0.5f);
+        btnRT.pivot = new Vector2(0.5f, 0.5f);
+        btnRT.anchoredPosition = Vector2.zero;
+
+        // Escala proporcional al panel
+        Vector2 panelSize = panelRT.rect.size;
+        Vector2 originalSize = btnRT.sizeDelta;
+        float scale = Mathf.Min(panelSize.x / originalSize.x, panelSize.y / originalSize.y) * 0.7f;
+        btnRT.localScale = new Vector3(scale, scale, 1);
+
+        UIButtonReference btnCopyRef = btnCopy.GetComponent<UIButtonReference>();
+
+        // Copiar datos visuales
+        btnCopyRef.buttonID = btnRef.buttonID;
+        btnCopyRef.label.text = btnRef.label.text;
+        btnCopyRef.iconImage.sprite = btnRef.iconImage.sprite;
+
+        if (ActionConfig.Instance.actionsConfig.TryGetValue(MapToActionMode(actionID), out var config))
+            RefreshActionButtonCosts(btnCopyRef, config);
+
+        // El botón del SelectedPanel solo sirve como preview
+        btnCopyRef.button.onClick.RemoveAllListeners();
+        btnCopyRef.button.onClick.AddListener(() =>
+        {
+            Debug.Log($"Botón de acción seleccionado clickeado de nuevo: {actionID}");
+            CancelBuildMode();
+        });
+    }
+
+    DualMesh.ActionMode MapToActionMode(string id)
+    {
+        return id switch
+        {
+            "Dig" => DualMesh.ActionMode.Dig,
+            "AddSand" => DualMesh.ActionMode.AddSand,
+            "Flat" => DualMesh.ActionMode.Flat,
+            "Recycle" => DualMesh.ActionMode.Recycle,
+            _ => DualMesh.ActionMode.Dig
+        };
+    }
+
     #endregion
 
     #region --- Constructions ---
@@ -188,11 +335,20 @@ public class UIController : Singleton<UIController>
 
     public void UpdateSelectedVisual(string selectedID)
     {
-        currentBuilding = selectedID;
+        if (selectedID == null || selectedID == "")
+        {
+            CancelBuildMode();
+            return;
+        }
+        if (!constructionButtons.TryGetValue(selectedID, out var btnRef)) return;
 
-        foreach (var kvp in constructionButtons)
-            kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
+        currentState = BuildingModeState.Building;
+        ChangeTextMainButton();
+        HideAllPanels();
+
+        SetSelectPanel(selectedID, btnRef);
     }
+
 
     public void OnConstructionUnlocked(string codeName)
     {
@@ -245,7 +401,6 @@ public class UIController : Singleton<UIController>
         if (id == "Recycle" || DualMesh.Instance.builder.HasEnoughtResourcesForAction(parsed.Value))
         {
             SetActionType(id);
-
             UpdateActionsButtonVisual(id);
         }
         else
@@ -296,10 +451,18 @@ public class UIController : Singleton<UIController>
 
     public void UpdateActionsButtonVisual(string selectedID)
     {
-        currentAction = selectedID;
+        if (selectedID == null || selectedID == "")
+        {
+            CancelBuildMode();
+            return;
+        }
+        if (!actionButtons.TryGetValue(selectedID, out var btnRef)) return;
 
-        foreach (var kvp in actionButtons)
-            kvp.Value.outline.effectColor = (kvp.Key == selectedID) ? selectedColor : defaultColor;
+        currentState = BuildingModeState.Building;
+        ChangeTextMainButton();
+        HideAllPanels();
+
+        SetSelectActionPanel(selectedID, btnRef);
     }
     #endregion
 
@@ -420,6 +583,7 @@ public class UIController : Singleton<UIController>
 
     public void HideAllPanels()
     {
+        SetPanelVisible(selectedPanel, false);
         SetPanelVisible(buildOptionsPanel, false);
         foreach (GameObject panel in categoryPanels.Values)
         {
